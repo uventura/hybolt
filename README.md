@@ -87,6 +87,7 @@ diagnostic logs under `logs/`. Debug instrumentation is disabled by default.
 make format
 make test
 make lorem_example
+make binary_example
 ```
 
 `make test` runs the `hybolt-test` command. The tests use the shipped
@@ -97,3 +98,7 @@ redirecting storage to temporary directories.
 decode it into `output/lorem_ipsum_decoded.txt`, and verify the decoded bytes
 against the original file. They print `Passed` on an exact match and exit with
 a failure status if the files differ.
+
+`make binary_example` compiles [examples/hello_world.c](examples/hello_world.c),
+encodes and decodes the generated executable, compares the binary bytes, then
+runs the decoded executable. A C compiler is required.
