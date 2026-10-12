@@ -92,3 +92,8 @@ make lorem_example
 `make test` runs the `hybolt-test` command. The tests use the shipped
 `examples/hello.txt` and `examples/server_list_example.json` fixtures while
 redirecting storage to temporary directories.
+
+`make lorem_example` and `make lorem_example_debug` encode the lorem example,
+decode it into `output/lorem_ipsum_decoded.txt`, and verify the decoded bytes
+against the original file. They print `Passed` on an exact match and exit with
+a failure status if the files differ.
