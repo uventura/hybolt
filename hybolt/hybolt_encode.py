@@ -7,9 +7,13 @@ from hybolt.constant import DEFAULT_BLOCK_SIZE_PERCENTAGE, MAX_MAC_THREADS
 from hybolt.encryption.encode import Encode
 from hybolt.encryption.encoding_metadata import (
     BlockMetadata,
+    ChunkMetadata,
     EncodingMetadata,
     PacketMetadata,
 )
+from hybolt.encryption.digest import Digest
+from hybolt.logger.logger import execution_logger
+from hybolt.logger.progress import advance_progress, create_progress_task, get_progress
 from hybolt.server.packet_saver import PacketSaver
 from hybolt.utils.decorators import stop_record_timeit
 
@@ -32,20 +36,48 @@ class HyboltEncode:
     @stop_record_timeit
     def encode(self) -> int:
         input_path = Path(self.input_file)
-        with open(input_path, "rb") as file:
-            data = file.read()
+        execution_logger.debug(
+            "Encoding input: "
+            f"path={input_path}, bytes={input_path.stat().st_size}, "
+            f"chunk_size={Digest(input_path).chunk_size}, "
+            f"chunks={Digest(input_path).chunk_count}, "
+            f"servers={len(self.server_list or [])}, max_threads={self.max_threads}"
+        )
+        digest = Digest(input_path)
+        chunks = []
+        packet_count = 0
+        progress = get_progress()
+        chunk_task_id = create_progress_task(
+            progress,
+            "Encoding chunks",
+            total=digest.chunk_count,
+        )
 
-        block_size = self._determine_block_size(len(data))
-        encoded = Encode(data, block_size, self.max_threads)
-        packets = encoded.packets
+        for chunk_index, chunk_data in digest.chunks():
+            block_size = self._determine_block_size(len(chunk_data))
+            execution_logger.debug(
+                f"Encoding chunk {chunk_index + 1}/{digest.chunk_count}: "
+                f"bytes={len(chunk_data)}, block_size={block_size}"
+            )
+            encoded = Encode(chunk_data, block_size, self.max_threads)
+            saver = PacketSaver(
+                encoded.packets, input_path, self.server_list, chunk_index
+            )
+            saver.save()
+            chunks.append(
+                self._collect_chunk_metadata(
+                    encoded, saver, chunk_index, len(chunk_data)
+                )
+            )
+            packet_count += len(encoded.packets)
+            advance_progress(progress, chunk_task_id)
 
-        saver = PacketSaver(packets, input_path, self.server_list)
-        saver.save()
+        execution_logger.debug("Starting metadata write")
+        self._save_packet_metadata(input_path, chunks)
+        execution_logger.debug("Encoding completed successfully")
+        return packet_count
 
-        self._save_packet_metadata(encoded, saver, input_path, data)
-        return len(packets)
-
-    def _collect_metadata(self, encoded, input_path: Path, data: bytes = b""):
+    def _collect_chunk_metadata(self, encoded, saver, chunk_index, byte_size):
         blocks = []
         for block_index, mac_list in encoded.mac_blocks.items():
             for local_mac in mac_list:
@@ -57,12 +89,16 @@ class HyboltEncode:
                     )
                 )
 
-        return EncodingMetadata(
+        packets = []
+        for packet in saver.packet_metadata:
+            packets.append(packet)
+
+        return ChunkMetadata(
+            chunk_index=chunk_index,
+            byte_size=byte_size,
             polynomials=encoded.polynomials,
             blocks=blocks,
-            packets=[],
-            original_filename=input_path.name,
-            original_file_hash=self._sha256_hex(data) if data else "",
+            packets=packets,
         )
 
     def _determine_block_size(self, file_size: int) -> int:
@@ -74,23 +110,27 @@ class HyboltEncode:
 
         return self.block_size
 
-    def _save_packet_metadata(self, encoded, saver, input_path: Path, data: bytes):
-        metadata = self._collect_metadata(encoded, input_path, data)
-
-        for packet in saver.packet_metadata:
-            metadata.add_packet(
-                server=packet.server,
-                packet_index=packet.packet_index,
-                degree=packet.degree,
-                indices=packet.indices,
-            )
-
-        metadata.packet_root_hash = self._compute_packet_root(metadata.packets)
-
+    def _save_packet_metadata(self, input_path: Path, chunks: list[ChunkMetadata]):
+        metadata = EncodingMetadata(
+            polynomials=[],
+            blocks=[],
+            packets=[],
+            original_filename=input_path.name,
+            original_file_hash=self._sha256_file(input_path),
+            chunks=chunks,
+        )
+        metadata.packet_root_hash = self._compute_packet_root(
+            [packet for chunk in chunks for packet in chunk.packets]
+        )
         metadata_file = (
             Path(self.metadata_output) / f"{Path(self.input_file).stem}_metadata.pkl"
         )
+        metadata_file.parent.mkdir(parents=True, exist_ok=True)
         metadata.save(metadata_file)
+        execution_logger.debug(
+            f"Metadata written: path={metadata_file}, "
+            f"blocks={len(metadata.blocks)}, packets={len(metadata.packets)}"
+        )
 
     def _compute_packet_root(self, packets: list[PacketMetadata]) -> str:
         serialized_packets = [
@@ -99,11 +139,21 @@ class HyboltEncode:
                 "packet_index": packet.packet_index,
                 "degree": packet.degree,
                 "indices": packet.indices,
+                "packet_file": packet.packet_file,
             }
-            for packet in sorted(packets, key=lambda item: item.packet_index)
+            for packet in sorted(
+                packets, key=lambda item: (item.server, item.packet_file)
+            )
         ]
         payload = json.dumps(serialized_packets, sort_keys=True).encode("utf-8")
         return self._sha256_hex(payload)
 
     def _sha256_hex(self, payload: bytes) -> str:
         return hashlib.sha256(payload).hexdigest()
+
+    def _sha256_file(self, input_path: Path) -> str:
+        digest = hashlib.sha256()
+        with input_path.open("rb") as source:
+            for block in iter(lambda: source.read(1024 * 1024), b""):
+                digest.update(block)
+        return digest.hexdigest()

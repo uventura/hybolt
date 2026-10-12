@@ -1,6 +1,7 @@
 import numpy as np
 
 from hybolt.utils.galois import (
+    _poly_coeffs_to_int,
     bytes_to_poly_coeffs,
     gf2_poly_mod,
     generate_challenge_polynomial,
@@ -37,6 +38,10 @@ def test_gf2_poly_mod_preserves_remainder_width_for_zero_dividend():
     mac = gf2_poly_mod(m_x, p_x)
 
     np.testing.assert_array_equal(mac, np.array([0], dtype=np.uint8))
+
+
+def test_poly_coeffs_to_int_treats_first_coefficient_as_low_bit():
+    assert _poly_coeffs_to_int(np.array([1, 0, 1, 1], dtype=np.uint8)) == 13
 
 
 def test_when_degree_is_provided_then_output_length_is_correct():

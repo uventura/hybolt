@@ -19,6 +19,16 @@ class PacketMetadata:
     packet_index: int
     degree: int
     indices: List[int]
+    packet_file: str = ""
+
+
+@dataclass
+class ChunkMetadata:
+    chunk_index: int
+    byte_size: int
+    polynomials: List[np.ndarray]
+    blocks: List[BlockMetadata]
+    packets: List[PacketMetadata]
 
 
 @dataclass
@@ -29,6 +39,7 @@ class EncodingMetadata:
     original_filename: str = ""
     original_file_hash: str = ""
     packet_root_hash: str = ""
+    chunks: List[ChunkMetadata] | None = None
 
     def add_packet(
         self, server: str, packet_index: int, degree: int, indices: List[int]
@@ -50,5 +61,7 @@ class EncodingMetadata:
             metadata.original_file_hash = ""
         if not hasattr(metadata, "packet_root_hash"):
             metadata.packet_root_hash = ""
+        if not hasattr(metadata, "chunks"):
+            metadata.chunks = None
 
         return metadata

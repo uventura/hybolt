@@ -8,6 +8,7 @@ from hybolt.encryption.block import Block, LocalBlock
 from hybolt.encryption.encoding_metadata import EncodingMetadata
 from hybolt.encryption.local_mac import LocalMac
 from hybolt.logger.logger import execution_logger
+from hybolt.logger.progress import advance_progress, create_progress_task, get_progress
 from hybolt.server.server import Server
 from hybolt.utils.operators import xor_bytes
 from hybolt.utils.padding import remove_padding
@@ -19,10 +20,34 @@ class Decode:
         self._polynomials = []
         self._local_blocks = {}
         self._local_mac = []
+        self._chunks = None
 
         self._load_from_metadata(metadata_file)
 
     def decode(self):
+        if getattr(self, "_chunks", None) is not None:
+            decoded_chunks = []
+            sorted_chunks = sorted(self._chunks, key=lambda item: item.chunk_index)
+            progress = get_progress()
+            chunk_task_id = create_progress_task(
+                progress,
+                "Reconstructing chunks",
+                total=len(sorted_chunks),
+            )
+            for chunk in sorted_chunks:
+                execution_logger.debug(
+                    f"Reconstructing chunk {chunk.chunk_index + 1}/{len(self._chunks)}"
+                )
+                self._load_metadata_values(chunk)
+                decoded_chunks.append(
+                    self._decode_current_metadata()[: chunk.byte_size]
+                )
+                advance_progress(progress, chunk_task_id)
+            return b"".join(decoded_chunks)
+
+        return self._decode_current_metadata()
+
+    def _decode_current_metadata(self):
         data = self._retrieve_blocks()
         result = b""
         for msg_i in sorted(data.keys()):
@@ -89,7 +114,10 @@ class Decode:
     def _solve_partial_block(self, block, retrieved_data):
         if not isinstance(block, Block):
             self._challenge_server(block.server, block)
-            data = block.server.download_block(block.index)
+            if block.packet_file:
+                data = block.server.download_block(block.index, block.packet_file)
+            else:
+                data = block.server.download_block(block.index)
         else:
             data = block.data
 
@@ -107,7 +135,12 @@ class Decode:
         random_polynomial_index = random.randint(0, len(self._polynomials) - 1)
         polynomial = self._polynomials[random_polynomial_index]
 
-        answer = server.receive_challenge(polynomial, block.index)
+        if block.packet_file:
+            answer = server.receive_challenge(
+                polynomial, block.index, block.packet_file
+            )
+        else:
+            answer = server.receive_challenge(polynomial, block.index)
         macs = [self._local_mac[i][random_polynomial_index] for i in block.indices]
         result = macs[0].mac
         for mac in macs[1:]:
@@ -139,14 +172,26 @@ class Decode:
     def _load_from_metadata(self, metadata_file):
         metadata = EncodingMetadata.load(Path(metadata_file))
         server_cache = {server._storage_location: server for server in self._servers}
+        self._server_cache = server_cache
+        self._chunks = metadata.chunks
+        if self._chunks is not None:
+            execution_logger.debug(
+                f"Loaded chunked metadata from {metadata_file}: "
+                f"{len(self._chunks)} chunks"
+            )
+            return
+
+        self._load_metadata_values(metadata)
+
+    def _load_metadata_values(self, metadata):
         execution_logger.debug(
-            f"Loaded metadata from {metadata_file}: "
+            "Loading encoding metadata: "
             f"{len(metadata.polynomials)} polynomials, "
             f"{len(metadata.blocks)} block MACs, "
             f"{len(metadata.packets)} packets"
         )
         self._polynomials = metadata.polynomials
-        self._local_blocks = self._build_local_blocks(metadata, server_cache)
+        self._local_blocks = self._build_local_blocks(metadata, self._server_cache)
         self._local_mac = self._build_local_mac(metadata)
 
     def _build_local_blocks(self, metadata, server_cache):
@@ -164,6 +209,7 @@ class Decode:
                 degree=packet.degree,
                 indices=list(packet.indices),
                 server=server,
+                packet_file=getattr(packet, "packet_file", ""),
             )
             local_blocks.setdefault(packet.degree, []).append(local_block)
             execution_logger.debug(

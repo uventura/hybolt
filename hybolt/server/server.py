@@ -16,22 +16,26 @@ class Server:
         destination_path = Path(self._storage_location) / source_path.name
         shutil.copyfile(source_path, destination_path)
 
-    def download_block(self, block_index):
-        block_path = self._find_check_block(block_index)
+    def download_block(self, block_index, packet_file=""):
+        block_path = self._find_check_block(block_index, packet_file)
         if block_path is None:
             raise ValueError("Check block not found")
 
         return self._read_block_data(block_path)
 
-    def receive_challenge(self, polynomial, check_block_index):
-        block_path = self._find_check_block(check_block_index)
+    def receive_challenge(self, polynomial, check_block_index, packet_file=""):
+        block_path = self._find_check_block(check_block_index, packet_file)
         if block_path is None:
             raise ValueError("Check block not found")
 
         response = self._compute_response(polynomial, block_path)
         return response
 
-    def _find_check_block(self, check_block_index):
+    def _find_check_block(self, check_block_index, packet_file=""):
+        if packet_file:
+            packet_path = Path(self._storage_location) / packet_file
+            return str(packet_path) if packet_path.is_file() else None
+
         pattern = str(
             Path(self._storage_location) / f"*_packet_{check_block_index}.pkl"
         )

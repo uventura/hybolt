@@ -1,4 +1,4 @@
-.PHONY: environment build format test clean server_storage lorem_example lorem_example_debug binary_example
+.PHONY: environment build format test clean server_storage lorem_example lorem_example_debug big_lorem_example big_lorem_example_debug binary_example
 
 environment:
 	. ./scripts/start.sh && ./scripts/build.sh
@@ -43,6 +43,28 @@ lorem_example_debug:
 	hybolt encode --debug --server-list examples/server_list_example.json --metadata-output output/ examples/lorem_ipsum.txt
 	hybolt decode --debug --server-file examples/server_list_example.json --output-file output/lorem_ipsum_decoded.txt output/lorem_ipsum_metadata.pkl
 	python scripts/compare_files.py examples/lorem_ipsum.txt output/lorem_ipsum_decoded.txt
+
+big_lorem_example:
+	rm -rf output/*
+	rm -rf logs/*
+	./scripts/build.sh
+	mkdir -p output/server_storage/server_1
+	mkdir -p output/server_storage/server_2
+	mkdir -p output/server_storage/server_3
+	hybolt encode --server-list examples/server_list_example.json --metadata-output output/ examples/lorem_ipsum_1mib.txt
+	hybolt decode --server-file examples/server_list_example.json --output-file output/lorem_ipsum_1mib_decoded.txt output/lorem_ipsum_1mib_metadata.pkl
+	python scripts/compare_files.py examples/lorem_ipsum_1mib.txt output/lorem_ipsum_1mib_decoded.txt
+
+big_lorem_example_debug:
+	rm -rf output/*
+	rm -rf logs/*
+	./scripts/build.sh
+	mkdir -p output/server_storage/server_1
+	mkdir -p output/server_storage/server_2
+	mkdir -p output/server_storage/server_3
+	hybolt encode --debug --server-list examples/server_list_example.json --metadata-output output/ examples/lorem_ipsum_1mib.txt
+	hybolt decode --debug --server-file examples/server_list_example.json --output-file output/lorem_ipsum_1mib_decoded.txt output/lorem_ipsum_1mib_metadata.pkl
+	python scripts/compare_files.py examples/lorem_ipsum_1mib.txt output/lorem_ipsum_1mib_decoded.txt
 
 binary_example:
 	rm -rf output/*

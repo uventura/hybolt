@@ -2,6 +2,8 @@ def add_padding(data: bytes, block_size: int) -> bytes:
     padding_size = block_size - (len(data) % block_size)
     if padding_size == 0:
         padding_size = block_size
+    if padding_size > 255:
+        return data + bytes(padding_size)
     return data + bytes([padding_size]) * padding_size
 
 

@@ -67,9 +67,13 @@ hybolt decode \
   output/hello_metadata.pkl
 ```
 
-Use `--block-size` on `encode` to select a block size in bytes. If it is
-omitted, HyBolt chooses a size equal to 10% of the input file, with a minimum
-of one byte.
+HyBolt reads a source file in independent chunks sized from the MAC security
+parameter (`POLYNOMIAL_LAMBDA × 512` bytes; 65,024 bytes with the default
+lambda). Each chunk is encoded, distributed, and represented separately in
+metadata, allowing reconstruction to decode each chunk before joining them in
+their original order. Use `--block-size` on `encode` to select the block size
+inside each chunk. If omitted, HyBolt chooses a size equal to 10% of that
+chunk, with a minimum of one byte.
 
 MAC calculation uses up to eight worker threads by default. Use
 `--max-threads` to select a lower limit between 1 and 8, for example:
@@ -79,7 +83,10 @@ hybolt encode --max-threads 4 --server-list examples/server_list_example.json ex
 ```
 
 Pass `--debug` to either command to collect detailed execution timing and
-diagnostic logs under `logs/`. Debug instrumentation is disabled by default.
+diagnostic logs under `logs/`. For long encodes, the `logs/execution.log` file
+records the input size, block and packet counts, the MAC-calculation progress
+for each block, packet distribution, and metadata output. Debug instrumentation
+is disabled by default.
 
 ## Development
 
@@ -87,6 +94,7 @@ diagnostic logs under `logs/`. Debug instrumentation is disabled by default.
 make format
 make test
 make lorem_example
+make big_lorem_example
 make binary_example
 ```
 
@@ -98,6 +106,10 @@ redirecting storage to temporary directories.
 decode it into `output/lorem_ipsum_decoded.txt`, and verify the decoded bytes
 against the original file. They print `Passed` on an exact match and exit with
 a failure status if the files differ.
+
+`make big_lorem_example` and `make big_lorem_example_debug` run the same
+round-trip verification for the 1 MiB
+[`examples/lorem_ipsum_1mib.txt`](examples/lorem_ipsum_1mib.txt) fixture.
 
 `make binary_example` compiles [examples/hello_world.c](examples/hello_world.c),
 encodes and decodes the generated executable, compares the binary bytes, then

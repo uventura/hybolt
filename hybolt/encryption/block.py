@@ -9,6 +9,7 @@ class LocalBlock:
     degree: int
     indices: list[int]
     server: Server
+    packet_file: str = ""
 
 
 class Block:

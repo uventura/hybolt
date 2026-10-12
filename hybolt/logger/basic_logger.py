@@ -1,6 +1,8 @@
 import logging
 import os
 
+from hybolt.utils.debug import is_debugging
+
 
 class BasicLogger:
     """
@@ -51,7 +53,8 @@ class BasicLogger:
 
     def debug(self, message: str) -> None:
         """Log a debug message."""
-        self.logger.debug(message)
+        if is_debugging():
+            self.logger.debug(message)
 
     def info(self, message: str) -> None:
         """Log an info message."""
