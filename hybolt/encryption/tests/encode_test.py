@@ -16,7 +16,7 @@ def compute_num_blocks(data, block_size):
     return (len(data) + pad) // block_size
 
 
-def test_when_encoding_then_generates_expected_packet_count():
+def test_given_input_data_when_encoding_then_generates_expected_packet_count():
     data = b"HelloWorld"
     block_size = 2
 
@@ -25,7 +25,7 @@ def test_when_encoding_then_generates_expected_packet_count():
     assert len(enc.packets) == enc.num_blocks * 6
 
 
-def test_when_encoding_then_degree_within_valid_range():
+def test_given_input_data_when_encoding_then_generates_degrees_within_valid_range():
     data = b"HelloWorld"
     block_size = 2
 
@@ -36,7 +36,7 @@ def test_when_encoding_then_degree_within_valid_range():
         assert 1 <= pkt.degree <= num_blocks
 
 
-def test_when_encoding_then_indices_count_matches_degree():
+def test_given_input_data_when_encoding_then_generates_indices_count_matching_degree():
     data = b"HelloWorld"
     block_size = 2
 
@@ -46,7 +46,7 @@ def test_when_encoding_then_indices_count_matches_degree():
         assert len(pkt.indices) == pkt.degree
 
 
-def test_when_encoding_then_indices_are_within_valid_range():
+def test_given_input_data_when_encoding_then_generates_indices_within_valid_range():
     data = b"HelloWorld"
     block_size = 2
 
@@ -58,7 +58,7 @@ def test_when_encoding_then_indices_are_within_valid_range():
             assert 0 <= idx < num_blocks
 
 
-def test_when_encoding_then_packet_data_is_bytes():
+def test_given_input_data_when_encoding_then_generates_packet_data_as_bytes():
     data = b"HelloWorld"
 
     enc = Encode(data, 2)
@@ -67,7 +67,7 @@ def test_when_encoding_then_packet_data_is_bytes():
         assert isinstance(pkt.data, bytes)
 
 
-def test_when_single_small_block_then_packet_reflects_padding():
+def test_given_single_small_block_when_encoding_then_packet_reflects_padding():
     data = b"A"
     block_size = 10
 
@@ -85,7 +85,7 @@ def test_when_single_small_block_then_packet_reflects_padding():
         assert pkt.data == expected
 
 
-def test_when_splitting_data_then_blocks_include_padding():
+def test_given_input_data_when_encoding_then_blocks_include_padding():
     data = b"ABCDEFGH"
     block_size = 2
 
@@ -96,7 +96,7 @@ def test_when_splitting_data_then_blocks_include_padding():
     assert blocks[-1] == b"\x02\x02"
 
 
-def test_when_xoring_blocks_then_packet_matches_manual_xor():
+def test_given_selected_blocks_when_encoding_then_packet_matches_manual_xor():
     data = b"\x01\x02\x03\x04"
     block_size = 1
 
@@ -115,7 +115,7 @@ def test_when_xoring_blocks_then_packet_matches_manual_xor():
         assert pkt.data == result
 
 
-def test_when_seeding_rng_then_encoding_is_deterministic():
+def test_given_seeded_rng_when_encoding_then_result_is_deterministic():
     data = b"HelloWorld"
     block_size = 2
 
@@ -133,20 +133,20 @@ def test_when_seeding_rng_then_encoding_is_deterministic():
         assert p1.data == p2.data
 
 
-def test_when_data_empty_then_encoding_raises_value_error():
+def test_given_empty_data_when_encoding_then_raises_value_error():
     with pytest.raises(ValueError):
         Encode(b"", block_size=2)
 
 
 @pytest.mark.parametrize("max_threads", [0, MAX_MAC_THREADS + 1])
-def test_when_max_threads_is_outside_the_supported_range_then_encoding_raises_value_error(
+def test_given_out_of_range_max_threads_when_encoding_then_raises_value_error(
     max_threads,
 ):
     with pytest.raises(ValueError, match="max_threads"):
         Encode(b"HelloWorld", block_size=2, max_threads=max_threads)
 
 
-def test_when_encoding_then_mac_blocks_are_calculated_with_configured_workers(
+def test_given_configured_workers_when_encoding_then_calculates_mac_blocks_with_them(
     monkeypatch,
 ):
     class RecordingExecutor:
@@ -177,7 +177,7 @@ def test_when_encoding_then_mac_blocks_are_calculated_with_configured_workers(
     )
 
 
-def test_when_calculating_mac_blocks_then_progress_reports_each_mac(
+def test_given_mac_block_calculation_when_encoding_then_progress_reports_each_mac(
     monkeypatch,
 ):
     class RecordingProgress:
@@ -215,7 +215,7 @@ def test_when_calculating_mac_blocks_then_progress_reports_each_mac(
     }
 
 
-def test_when_mocking_random_then_indices_order_is_respected():
+def test_given_mocked_random_indices_when_encoding_then_preserves_indices_order():
     data = b"ABCDEFGH"
     block_size = 2
 
@@ -230,7 +230,7 @@ def test_when_mocking_random_then_indices_order_is_respected():
         assert pkt.indices == [2, 0, 1]
 
 
-def test_when_indices_order_forced_then_packet_respects_that_order():
+def test_given_forced_indices_order_when_encoding_then_packet_respects_that_order():
     data = b"ABCDEFGH"
     block_size = 2
 

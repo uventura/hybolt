@@ -12,7 +12,7 @@ from hybolt.logger.progress import set_progress
 EXAMPLES_DIRECTORY = Path(__file__).parents[2] / "examples"
 
 
-def test_hello_example_encodes_using_the_example_server_list(tmp_path):
+def test_given_hello_example_when_encoding_then_uses_example_server_list(tmp_path):
     example_servers = json.loads(
         (EXAMPLES_DIRECTORY / "server_list_example.json").read_text(encoding="utf-8")
     )
@@ -27,8 +27,8 @@ def test_hello_example_encodes_using_the_example_server_list(tmp_path):
         server_list=example_servers["servers"],
         metadata_output=str(metadata_directory),
     )
-    packet_count = hybolt_encode.encode()
 
+    packet_count = hybolt_encode.encode()
     metadata = EncodingMetadata.load(metadata_directory / "hello_metadata.pkl")
 
     assert packet_count > 0
@@ -39,7 +39,9 @@ def test_hello_example_encodes_using_the_example_server_list(tmp_path):
     assert hybolt_encode.average_chunk_encode_seconds > 0
 
 
-def test_encode_logs_phase_and_block_progress(tmp_path, monkeypatch):
+def test_given_encoding_when_logging_then_records_phase_and_block_progress(
+    tmp_path, monkeypatch
+):
     input_file = tmp_path / "input.txt"
     input_file.write_text("HyBolt", encoding="utf-8")
     messages = []
@@ -67,7 +69,9 @@ def test_encode_logs_phase_and_block_progress(tmp_path, monkeypatch):
     assert "Encoding completed successfully" in messages
 
 
-def test_chunk_progress_reports_completed_chunks_for_encode_and_decode(tmp_path):
+def test_given_chunked_file_when_encoding_and_decoding_then_reports_chunk_progress(
+    tmp_path,
+):
     class ProgressRecorder:
         def __init__(self):
             self.tasks = {}
@@ -120,7 +124,7 @@ def test_chunk_progress_reports_completed_chunks_for_encode_and_decode(tmp_path)
     }
 
 
-def test_one_mebib_lorem_round_trip_uses_chunked_metadata_within_runtime(
+def test_given_one_mebib_lorem_when_round_tripping_then_uses_chunked_metadata_within_runtime(
     tmp_path,
 ):
     input_file = EXAMPLES_DIRECTORY / "lorem_ipsum_1mib.txt"

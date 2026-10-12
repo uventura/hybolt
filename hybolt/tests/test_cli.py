@@ -5,7 +5,9 @@ from click.testing import CliRunner
 from hybolt.hybolt import main
 
 
-def test_encode_command_forwards_max_threads(tmp_path, monkeypatch):
+def test_given_max_threads_option_when_encoding_then_forwards_max_threads(
+    tmp_path, monkeypatch
+):
     input_file = tmp_path / "input.txt"
     input_file.write_text("HyBolt", encoding="utf-8")
     server_list = tmp_path / "servers.json"
@@ -50,7 +52,9 @@ def test_encode_command_forwards_max_threads(tmp_path, monkeypatch):
     assert "Average chunk encoding time: 0.250s" in result.output
 
 
-def test_encode_command_forwards_chunk_count(tmp_path, monkeypatch):
+def test_given_chunk_count_option_when_encoding_then_forwards_chunk_count(
+    tmp_path, monkeypatch
+):
     input_file = tmp_path / "input.txt"
     input_file.write_text("HyBolt", encoding="utf-8")
     server_list = tmp_path / "servers.json"
@@ -87,7 +91,9 @@ def test_encode_command_forwards_chunk_count(tmp_path, monkeypatch):
     assert captured["chunk_count"] == 2
 
 
-def test_decode_command_forwards_log_directory(tmp_path, monkeypatch):
+def test_given_log_directory_option_when_decoding_then_forwards_log_directory(
+    tmp_path, monkeypatch
+):
     metadata_file = tmp_path / "metadata.pkl"
     metadata_file.write_bytes(b"metadata")
     server_file = tmp_path / "servers.json"

@@ -11,7 +11,9 @@ from hybolt.utils.decorators import (
 )
 
 
-def test_stop_record_timeit_creates_graph_in_execution_log_directory(tmp_path):
+def test_given_debugging_enabled_when_recording_time_then_creates_graph_in_log_directory(
+    tmp_path,
+):
     set_debugging(True)
     original_log_file = execution_logger.log_file
     execution_logger.log_file = str(tmp_path / "execution.log")
@@ -38,7 +40,9 @@ def test_stop_record_timeit_creates_graph_in_execution_log_directory(tmp_path):
         execution_logger.log_file = original_log_file
 
 
-def test_stop_record_timeit_plots_accumulated_average_times(monkeypatch):
+def test_given_recorded_runs_when_stopping_time_recording_then_plots_accumulated_averages(
+    monkeypatch,
+):
     set_debugging(True)
     captured_average_times = []
     perf_counter_values = iter([0.0, 1.0, 2.0, 3.0, 10.0, 12.0, 20.0, 22.0])
@@ -71,7 +75,7 @@ def test_stop_record_timeit_plots_accumulated_average_times(monkeypatch):
     ]
 
 
-def test_start_record_timeit_skips_instrumentation_when_debugging_is_disabled(
+def test_given_debugging_disabled_when_recording_time_then_skips_instrumentation(
     monkeypatch,
 ):
     graph_calls = []
@@ -92,7 +96,7 @@ def test_start_record_timeit_skips_instrumentation_when_debugging_is_disabled(
     assert graph_calls == []
 
 
-def test_stop_record_timeit_plots_parallel_calls_with_consistent_graph_data(
+def test_given_parallel_calls_when_stopping_time_recording_then_plots_consistent_graph_data(
     monkeypatch,
 ):
     set_debugging(True)

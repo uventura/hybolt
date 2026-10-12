@@ -8,7 +8,7 @@ COMPARE_FILES_SCRIPT = (
 )
 
 
-def test_compare_files_reports_passed_for_identical_files(tmp_path):
+def test_given_identical_files_when_comparing_then_reports_passed(tmp_path):
     first_file = tmp_path / "first.bin"
     second_file = tmp_path / "second.bin"
     first_file.write_bytes(b"\x00HyBolt\xff")
@@ -25,7 +25,7 @@ def test_compare_files_reports_passed_for_identical_files(tmp_path):
     assert result.stdout == "Passed: files are identical\n"
 
 
-def test_compare_files_reports_failed_for_different_files(tmp_path):
+def test_given_different_files_when_comparing_then_reports_failed(tmp_path):
     first_file = tmp_path / "first.bin"
     second_file = tmp_path / "second.bin"
     first_file.write_bytes(b"first")

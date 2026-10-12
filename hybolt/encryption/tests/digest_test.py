@@ -3,7 +3,9 @@ import pytest
 from hybolt.encryption.digest import Digest
 
 
-def test_digest_splits_input_into_requested_number_of_balanced_chunks(tmp_path):
+def test_given_requested_chunk_count_when_splitting_then_creates_balanced_chunks(
+    tmp_path,
+):
     input_file = tmp_path / "input.bin"
     input_file.write_bytes(b"0123456789")
 
@@ -14,7 +16,9 @@ def test_digest_splits_input_into_requested_number_of_balanced_chunks(tmp_path):
     assert b"".join(chunk for _, chunk in chunks) == b"0123456789"
 
 
-def test_digest_rejects_more_chunks_than_input_bytes(tmp_path):
+def test_given_chunk_count_exceeding_input_bytes_when_splitting_then_raises(
+    tmp_path,
+):
     input_file = tmp_path / "input.bin"
     input_file.write_bytes(b"abc")
 

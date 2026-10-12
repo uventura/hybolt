@@ -4,12 +4,13 @@ from hybolt.server.packet_saver import PacketSaver
 from hybolt.encryption.block import Block
 
 
-def test_when_saving_to_servers_then_packets_distributed(tmp_path):
+def test_given_packets_and_servers_when_saving_then_distributes_packets(tmp_path):
     packets = [Block(0, 1, [0], b"data1")]
     input_path = Path("test.txt")
     server_list = [{"id": 1, "storage_location": str(tmp_path / "server1")}]
 
     saver = PacketSaver(packets, input_path, server_list=server_list)
+
     saver.save()
 
     server_dir = tmp_path / "server1"
@@ -18,7 +19,9 @@ def test_when_saving_to_servers_then_packets_distributed(tmp_path):
     assert packets[0].server._storage_location == str(server_dir)
 
 
-def test_when_saving_multiple_packets_then_each_block_has_server(tmp_path):
+def test_given_multiple_packets_and_servers_when_saving_then_assigns_each_block_a_server(
+    tmp_path,
+):
     packets = [
         Block(0, 1, [0], b"data1"),
         Block(1, 1, [1], b"data2"),
@@ -30,6 +33,7 @@ def test_when_saving_multiple_packets_then_each_block_has_server(tmp_path):
     ]
 
     saver = PacketSaver(packets, input_path, server_list=server_list)
+
     saver.save()
 
     assert packets[0].server is not None

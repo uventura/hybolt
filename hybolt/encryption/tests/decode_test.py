@@ -29,7 +29,7 @@ def _build_decoder(local_blocks=None, polynomials=None, local_mac=None):
     return decoder
 
 
-def test_when_finding_num_blocks_to_retrieve_then_returns_total_block_count():
+def test_given_local_blocks_when_finding_required_blocks_then_returns_total_count():
     local_blocks = {
         1: [Block(0, 1, [0], b"A")],
         2: [Block(1, 2, [0, 1], b"\x03")],
@@ -37,19 +37,25 @@ def test_when_finding_num_blocks_to_retrieve_then_returns_total_block_count():
 
     decoder = _build_decoder(local_blocks=local_blocks)
 
-    assert decoder._find_num_blocks_to_retrieve() == 2
+    result = decoder._find_num_blocks_to_retrieve()
+
+    assert result == 2
 
 
-def test_when_counting_solvable_parts_then_returns_remaining_indices():
+def test_given_partially_solved_block_when_counting_solvable_parts_then_returns_remaining_indices():
     block = Block(1, 2, [0, 1], b"\x03")
     decoder = _build_decoder()
 
-    assert decoder._count_solvable_parts(block, set()) == 2
-    assert decoder._count_solvable_parts(block, {0}) == 1
-    assert decoder._count_solvable_parts(block, {0, 1}) == 0
+    unsolved_count = decoder._count_solvable_parts(block, set())
+    partially_solved_count = decoder._count_solvable_parts(block, {0})
+    solved_count = decoder._count_solvable_parts(block, {0, 1})
+
+    assert unsolved_count == 2
+    assert partially_solved_count == 1
+    assert solved_count == 0
 
 
-def test_when_solving_partial_block_then_reduces_packet_with_retrieved_block():
+def test_given_retrieved_block_when_solving_partial_block_then_reduces_packet():
     original = Block(1, 2, [0, 1], xor_bytes(b"A", b"B"))
     retrieved_data = {0: Block(0, 1, [0], b"A")}
     decoder = _build_decoder()
@@ -61,7 +67,7 @@ def test_when_solving_partial_block_then_reduces_packet_with_retrieved_block():
     assert partial.index == 1
 
 
-def test_when_solving_partial_block_then_downloads_server_block_for_non_block_entry():
+def test_given_server_block_when_solving_partial_block_then_downloads_server_block():
     server = DummyServer(b"C")
     local_block = LocalBlock(index=3, degree=1, indices=[0], server=server)
 
@@ -88,27 +94,31 @@ def test_when_solving_partial_block_then_downloads_server_block_for_non_block_en
     assert partial.indices == [0]
 
 
-def test_when_decoding_then_retrieves_blocks_in_index_order():
+def test_given_indexed_blocks_when_decoding_then_retrieves_blocks_in_index_order():
     local_blocks = {
         1: [Block(0, 1, [0], b"A")],
         2: [Block(1, 2, [0, 1], xor_bytes(b"A", b"B"))],
     }
     decoder = _build_decoder(local_blocks=local_blocks)
 
-    assert decoder.decode() == b"AB"
+    result = decoder.decode()
+
+    assert result == b"AB"
 
 
-def test_when_decoding_then_removes_valid_padding_from_reconstructed_payload():
+def test_given_padded_payload_when_decoding_then_removes_valid_padding():
     local_blocks = {
         1: [Block(0, 1, [0], b"DATA\x04\x04\x04\x04")],
     }
 
     decoder = _build_decoder(local_blocks=local_blocks)
 
-    assert decoder.decode() == b"DATA"
+    result = decoder.decode()
+
+    assert result == b"DATA"
 
 
-def test_when_metadata_is_loaded_then_decode_reconstructs_runtime_objects(
+def test_given_metadata_when_loading_decoder_then_reconstructs_runtime_objects(
     tmp_path,
 ):
     server_dir = tmp_path / "server1"

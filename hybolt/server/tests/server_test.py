@@ -8,15 +8,16 @@ from hybolt.encryption.block import Block
 from hybolt.server.server import Server
 
 
-def test_when_server_initialized_then_storage_location_created(tmp_path):
+def test_given_storage_location_when_initializing_server_then_creates_location(tmp_path):
     storage_location = tmp_path / "storage"
+
     Server(str(storage_location))
 
     assert storage_location.exists()
     assert storage_location.is_dir()
 
 
-def test_when_storage_check_block_then_file_is_copied(tmp_path):
+def test_given_block_file_when_storing_then_copies_file(tmp_path):
     storage_location = tmp_path / "storage"
     server = Server(str(storage_location))
 
@@ -31,7 +32,7 @@ def test_when_storage_check_block_then_file_is_copied(tmp_path):
     assert saved_file.read_bytes() == block_data
 
 
-def test_when_download_block_then_returns_block_bytes(tmp_path):
+def test_given_stored_block_when_downloading_then_returns_block_bytes(tmp_path):
     server = Server(str(tmp_path / "storage"))
     block_file = tmp_path / "input_packet_1.pkl"
     block_data = b"\x01\x02"
@@ -39,10 +40,12 @@ def test_when_download_block_then_returns_block_bytes(tmp_path):
 
     server.storage_check_block(block_file)
 
-    assert server.download_block(1) == block_data
+    result = server.download_block(1)
+
+    assert result == block_data
 
 
-def test_server_reads_pickled_packet_data(tmp_path):
+def test_given_pickled_packet_when_downloading_then_returns_packet_data(tmp_path):
     server = Server(str(tmp_path / "storage"))
     block_file = tmp_path / "input_packet_7.pkl"
 
@@ -51,17 +54,21 @@ def test_server_reads_pickled_packet_data(tmp_path):
 
     server.storage_check_block(block_file)
 
-    assert server.download_block(7) == b"\x03\x04"
+    result = server.download_block(7)
+
+    assert result == b"\x03\x04"
 
 
-def test_when_download_block_missing_then_raises(tmp_path):
+def test_given_missing_block_when_downloading_then_raises(tmp_path):
     server = Server(str(tmp_path / "storage"))
 
     with pytest.raises(ValueError, match="Check block not found"):
         server.download_block(5)
 
 
-def test_when_receive_challenge_then_returns_expected_response(tmp_path):
+def test_given_stored_block_when_receiving_challenge_then_returns_expected_response(
+    tmp_path,
+):
     server = Server(str(tmp_path / "storage"))
     block_file = tmp_path / "input_packet_2.pkl"
     block_data = b"\x01"
@@ -77,7 +84,7 @@ def test_when_receive_challenge_then_returns_expected_response(tmp_path):
     assert np.array_equal(result, expected)
 
 
-def test_when_receive_challenge_missing_then_raises(tmp_path):
+def test_given_missing_block_when_receiving_challenge_then_raises(tmp_path):
     server = Server(str(tmp_path / "storage"))
 
     with pytest.raises(ValueError, match="Check block not found"):
