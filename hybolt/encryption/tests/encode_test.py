@@ -1,4 +1,5 @@
 import random
+from concurrent.futures import Future
 from unittest.mock import patch
 
 import numpy as np
@@ -161,8 +162,13 @@ def test_when_encoding_then_mac_blocks_are_calculated_with_configured_workers(
         def __exit__(self, exc_type, exc_value, traceback):
             return False
 
-        def map(self, function, values):
-            return map(function, values)
+        def submit(self, function, value):
+            future = Future()
+            try:
+                future.set_result(function(value))
+            except BaseException as error:
+                future.set_exception(error)
+            return future
 
     monkeypatch.setattr(encode_module, "ThreadPoolExecutor", RecordingExecutor)
 

@@ -1,5 +1,6 @@
 import random
-from concurrent.futures import ThreadPoolExecutor
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import reduce
 import numpy as np
 
@@ -99,30 +100,38 @@ class Encode:
         return [data[i : i + block_size] for i in range(0, len(data), block_size)]
 
     def _calculate_mac_for_each_block(self):
-        task_id = create_progress_task(
-            self._progress,
-            "Calculating MAC blocks",
-            total=len(self._blocks) * len(self._polynomials),
-        )
-
         mac_blocks = {}
+        worker_tasks = {}
         with ThreadPoolExecutor(max_workers=self._max_threads) as executor:
-            for block_index, block_macs in enumerate(
-                executor.map(
-                    self._calculate_mac_for_block,
-                    enumerate(self._blocks),
+            futures = {
+                executor.submit(self._calculate_mac_for_block, (block_index, block)): (
+                    block_index
                 )
-            ):
+                for block_index, block in enumerate(self._blocks)
+            }
+            for future in as_completed(futures):
+                block_index = futures[future]
+                worker_name, block_macs = future.result()
                 mac_blocks[block_index] = block_macs
-                for _ in self._polynomials:
-                    advance_progress(self._progress, task_id)
+                task_id = worker_tasks.get(worker_name)
+                if task_id is None:
+                    task_id = create_progress_task(
+                        self._progress,
+                        f"MAC worker {worker_name}",
+                        total=None,
+                    )
+                    worker_tasks[worker_name] = task_id
+                advance_progress(self._progress, task_id)
 
-        return mac_blocks
+        return {
+            block_index: mac_blocks[block_index]
+            for block_index in range(len(self._blocks))
+        }
 
     def _calculate_mac_for_block(self, indexed_block):
         block_index, block = indexed_block
         representation = ga.bytes_to_poly_coeffs(block)
-        return [
+        return threading.current_thread().name, [
             LocalMac(
                 mac=ga.gf2_poly_mod(representation, polynomial),
                 polynomial_index=polynomial_index,
