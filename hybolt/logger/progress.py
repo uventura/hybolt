@@ -28,11 +28,8 @@ def create_progress_task(
 def advance_progress(
     progress: Progress | None,
     task_id: TaskID | None,
-    description: str | None = None,
 ) -> None:
     if progress is None or task_id is None:
         return
 
-    if description is not None:
-        progress.update(task_id, description=description)
     progress.advance(task_id)

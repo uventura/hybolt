@@ -1,5 +1,4 @@
 import random
-from concurrent.futures import Future
 from unittest.mock import patch
 
 import numpy as np
@@ -162,13 +161,8 @@ def test_when_encoding_then_mac_blocks_are_calculated_with_configured_workers(
         def __exit__(self, exc_type, exc_value, traceback):
             return False
 
-        def submit(self, function, value):
-            future = Future()
-            try:
-                future.set_result(function(value))
-            except BaseException as error:
-                future.set_exception(error)
-            return future
+        def map(self, function, values):
+            return map(function, values)
 
     monkeypatch.setattr(encode_module, "ThreadPoolExecutor", RecordingExecutor)
 
@@ -183,7 +177,7 @@ def test_when_encoding_then_mac_blocks_are_calculated_with_configured_workers(
     )
 
 
-def test_when_calculating_mac_blocks_then_progress_reports_completed_blocks(
+def test_when_calculating_mac_blocks_then_progress_reports_each_mac(
     monkeypatch,
 ):
     class RecordingProgress:
@@ -204,9 +198,6 @@ def test_when_calculating_mac_blocks_then_progress_reports_completed_blocks(
         def advance(self, task_id):
             self.tasks[task_id]["advances"] += 1
 
-        def update(self, task_id, description):
-            self.tasks[task_id]["description"] = description
-
     progress = RecordingProgress()
     monkeypatch.setattr(encode_module, "get_progress", lambda: progress)
 
@@ -218,11 +209,9 @@ def test_when_calculating_mac_blocks_then_progress_reports_completed_blocks(
     )
 
     assert mac_task == {
-        "advances": encoded.num_blocks,
-        "description": (
-            f"Calculating MAC blocks ({encoded.num_blocks}/{encoded.num_blocks})"
-        ),
-        "total": encoded.num_blocks,
+        "advances": encoded.num_blocks * len(encoded.polynomials),
+        "description": "Calculating MAC blocks",
+        "total": encoded.num_blocks * len(encoded.polynomials),
     }
 
 

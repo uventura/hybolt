@@ -1,8 +1,19 @@
 import numpy as np
 
+from hybolt.encryption.local_mac import LocalMac
+import hybolt.utils.galois as ga
+
 
 def xor_bytes(a, b):
     return bytes(x ^ y for x, y in zip(a, b))
+
+
+def calculate_mac_for_block(representation, polynomial, polynomial_index, block_index):
+    return LocalMac(
+        mac=ga.gf2_poly_mod(representation, polynomial),
+        polynomial_index=polynomial_index,
+        block_index=block_index,
+    )
 
 
 def robust_soliton_distribution(K, c=0.2, delta=0.01):
