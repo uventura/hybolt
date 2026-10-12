@@ -1,6 +1,7 @@
 import hashlib
 import json
 import math
+import time
 from pathlib import Path
 
 from hybolt.constant import DEFAULT_BLOCK_SIZE_PERCENTAGE, MAX_MAC_THREADS
@@ -13,7 +14,11 @@ from hybolt.encryption.encoding_metadata import (
 )
 from hybolt.encryption.digest import Digest
 from hybolt.logger.logger import execution_logger
-from hybolt.logger.progress import advance_progress, create_progress_task, get_progress
+from hybolt.logger.progress import (
+    advance_progress,
+    create_progress_task,
+    get_progress,
+)
 from hybolt.server.packet_saver import PacketSaver
 from hybolt.utils.decorators import stop_record_timeit
 
@@ -26,12 +31,15 @@ class HyboltEncode:
         server_list: list = None,
         metadata_output: str = "./",
         max_threads: int = MAX_MAC_THREADS,
+        chunk_count: int | None = None,
     ):
         self.input_file = input_file
         self.block_size = block_size
         self.server_list = server_list
         self.metadata_output = metadata_output
         self.max_threads = max_threads
+        self.chunk_count = chunk_count
+        self.average_chunk_encode_seconds = 0.0
 
     @stop_record_timeit
     def encode(self) -> int:
@@ -39,13 +47,14 @@ class HyboltEncode:
         execution_logger.debug(
             "Encoding input: "
             f"path={input_path}, bytes={input_path.stat().st_size}, "
-            f"chunk_size={Digest(input_path).chunk_size}, "
-            f"chunks={Digest(input_path).chunk_count}, "
+            f"chunk_size={Digest(input_path, chunk_count=self.chunk_count).chunk_size}, "
+            f"chunks={Digest(input_path, chunk_count=self.chunk_count).chunk_count}, "
             f"servers={len(self.server_list or [])}, max_threads={self.max_threads}"
         )
-        digest = Digest(input_path)
+        digest = Digest(input_path, chunk_count=self.chunk_count)
         chunks = []
         packet_count = 0
+        chunk_encode_durations = []
         progress = get_progress()
         chunk_task_id = create_progress_task(
             progress,
@@ -59,7 +68,9 @@ class HyboltEncode:
                 f"Encoding chunk {chunk_index + 1}/{digest.chunk_count}: "
                 f"bytes={len(chunk_data)}, block_size={block_size}"
             )
+            encode_started_at = time.perf_counter()
             encoded = Encode(chunk_data, block_size, self.max_threads)
+            chunk_encode_durations.append(time.perf_counter() - encode_started_at)
             saver = PacketSaver(
                 encoded.packets, input_path, self.server_list, chunk_index
             )
@@ -72,6 +83,10 @@ class HyboltEncode:
             packet_count += len(encoded.packets)
             advance_progress(progress, chunk_task_id)
 
+        if chunk_encode_durations:
+            self.average_chunk_encode_seconds = sum(chunk_encode_durations) / len(
+                chunk_encode_durations
+            )
         execution_logger.debug("Starting metadata write")
         self._save_packet_metadata(input_path, chunks)
         execution_logger.debug("Encoding completed successfully")

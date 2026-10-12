@@ -75,6 +75,10 @@ their original order. Use `--block-size` on `encode` to select the block size
 inside each chunk. If omitted, HyBolt chooses a size equal to 10% of that
 chunk, with a minimum of one byte.
 
+Use `--chunk-count` to divide a file into an exact number of balanced chunks,
+for example `hybolt encode --chunk-count 8 ...`. The command prints the
+average MAC-and-packet-generation time per chunk after encoding completes.
+
 MAC calculation uses up to eight worker threads by default. Use
 `--max-threads` to select a lower limit between 1 and 8, for example:
 
@@ -83,10 +87,12 @@ hybolt encode --max-threads 4 --server-list examples/server_list_example.json ex
 ```
 
 Pass `--debug` to either command to collect detailed execution timing and
-diagnostic logs under `logs/`. For long encodes, the `logs/execution.log` file
-records the input size, block and packet counts, the MAC-calculation progress
-for each block, packet distribution, and metadata output. Debug instrumentation
-is disabled by default.
+diagnostic logs under `logs/`. Use `--log-dir <directory>` to write
+`execution.log` to a different directory, for example
+`hybolt encode --debug --log-dir output/logs ...`. For long encodes, the
+`logs/execution.log` file records the input size, block and packet counts, the
+MAC-calculation progress for each block, packet distribution, and metadata
+output. Debug instrumentation is disabled by default.
 
 ## Development
 

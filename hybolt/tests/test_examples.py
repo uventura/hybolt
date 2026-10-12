@@ -21,12 +21,13 @@ def test_hello_example_encodes_using_the_example_server_list(tmp_path):
 
     metadata_directory = tmp_path / "metadata"
     metadata_directory.mkdir()
-    packet_count = HyboltEncode(
+    hybolt_encode = HyboltEncode(
         str(EXAMPLES_DIRECTORY / "hello.txt"),
         block_size=4,
         server_list=example_servers["servers"],
         metadata_output=str(metadata_directory),
-    ).encode()
+    )
+    packet_count = hybolt_encode.encode()
 
     metadata = EncodingMetadata.load(metadata_directory / "hello_metadata.pkl")
 
@@ -35,6 +36,7 @@ def test_hello_example_encodes_using_the_example_server_list(tmp_path):
     assert sum(len(chunk.packets) for chunk in metadata.chunks) == packet_count
     assert metadata.original_filename == "hello.txt"
     assert metadata.original_file_hash
+    assert hybolt_encode.average_chunk_encode_seconds > 0
 
 
 def test_encode_logs_phase_and_block_progress(tmp_path, monkeypatch):

@@ -8,7 +8,11 @@ from hybolt.encryption.block import Block, LocalBlock
 from hybolt.encryption.encoding_metadata import EncodingMetadata
 from hybolt.encryption.local_mac import LocalMac
 from hybolt.logger.logger import execution_logger
-from hybolt.logger.progress import advance_progress, create_progress_task, get_progress
+from hybolt.logger.progress import (
+    advance_progress,
+    create_progress_task,
+    get_progress,
+)
 from hybolt.server.server import Server
 from hybolt.utils.operators import xor_bytes
 from hybolt.utils.padding import remove_padding

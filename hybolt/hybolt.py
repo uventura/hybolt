@@ -13,6 +13,8 @@ from rich.progress import (
 from hybolt.hybolt_decode import HyboltDecode
 from hybolt.hybolt_encode import HyboltEncode
 from hybolt.constant import MAX_MAC_THREADS
+from hybolt.encryption.digest import Digest
+from hybolt.logger.logger import execution_logger
 from hybolt.logger.progress import set_progress
 from hybolt.utils.debug import set_debugging
 
@@ -67,17 +69,43 @@ def main():
     help="Maximum worker threads used to calculate MAC blocks",
 )
 @click.option(
+    "--chunk-count",
+    type=click.IntRange(1),
+    default=None,
+    help="Split the input into exactly this many chunks",
+)
+@click.option(
     "--debug",
     is_flag=True,
     help="Enable debug mode with detailed execution logs and timing instrumentation",
 )
+@click.option(
+    "--log-dir",
+    type=click.Path(file_okay=False, dir_okay=True),
+    default="logs",
+    show_default=True,
+    help="Directory where execution.log is written",
+)
 def encode_command(
-    input_file, block_size, server_list, metadata_output, max_threads, debug
+    input_file,
+    block_size,
+    server_list,
+    metadata_output,
+    max_threads,
+    chunk_count,
+    debug,
+    log_dir,
 ):
     with open(server_list, "r") as f:
         data = json.load(f)
     servers = data["servers"]
+    if chunk_count is not None:
+        try:
+            Digest(input_file, chunk_count=chunk_count)
+        except ValueError as error:
+            raise click.BadParameter(str(error), param_hint="--chunk-count") from error
 
+    execution_logger.set_log_directory(log_dir)
     _enable_debug_mode(debug)
 
     with _create_progress() as progress:
@@ -88,11 +116,16 @@ def encode_command(
             servers,
             metadata_output,
             max_threads,
+            chunk_count,
         )
         packet_count = hybolt_encode.encode()
         set_progress(None)
 
-    click.echo(f"Encoded {packet_count} packets distributed to {len(servers)} servers")
+    click.echo(
+        f"Encoded {packet_count} packets distributed to {len(servers)} servers. "
+        f"Average chunk encoding time: "
+        f"{hybolt_encode.average_chunk_encode_seconds:.3f}s"
+    )
 
 
 @main.command("decode")
@@ -115,7 +148,15 @@ def encode_command(
     is_flag=True,
     help="Enable debug mode with detailed execution logs and timing instrumentation",
 )
-def decode_command(metadata_file, server_file, output_file, debug):
+@click.option(
+    "--log-dir",
+    type=click.Path(file_okay=False, dir_okay=True),
+    default="logs",
+    show_default=True,
+    help="Directory where execution.log is written",
+)
+def decode_command(metadata_file, server_file, output_file, debug, log_dir):
+    execution_logger.set_log_directory(log_dir)
     _enable_debug_mode(debug)
 
     with _create_progress() as progress:
