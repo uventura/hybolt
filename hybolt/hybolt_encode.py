@@ -11,6 +11,7 @@ from hybolt.encryption.encoding_metadata import (
     PacketMetadata,
 )
 from hybolt.server.packet_saver import PacketSaver
+from hybolt.utils.decorators import stop_record_timeit
 
 
 class HyboltEncode:
@@ -28,6 +29,7 @@ class HyboltEncode:
         self.metadata_output = metadata_output
         self.max_threads = max_threads
 
+    @stop_record_timeit
     def encode(self) -> int:
         input_path = Path(self.input_file)
         with open(input_path, "rb") as file:

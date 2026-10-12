@@ -11,6 +11,9 @@ import matplotlib.pyplot as plt
 from hybolt.logger.logger import execution_logger
 from hybolt.utils.debug import is_debugging
 
+_RECORDED_AVERAGE_TIMES = {}
+_RECORDING_LOCK = threading.Lock()
+
 
 def _graph_file_name(func):
     qualified_name = f"{func.__module__}.{func.__qualname__}"
@@ -35,11 +38,8 @@ def _save_timeit_graph(func, average_times):
     plt.close(figure)
 
 
-def timeit(runs=1, detailed=False):
+def start_record_timeit(runs=1, detailed=False):
     def decorator(func):
-        average_times = []
-        timing_lock = threading.Lock()
-
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             if not is_debugging():
@@ -52,9 +52,9 @@ def timeit(runs=1, detailed=False):
                 times.append(time.perf_counter() - start)
 
             avg = sum(times) / runs
-            with timing_lock:
+            with _RECORDING_LOCK:
+                average_times = _RECORDED_AVERAGE_TIMES.setdefault(func, [])
                 average_times.append(avg)
-                _save_timeit_graph(func, list(average_times))
                 if detailed:
                     for run_index, elapsed in enumerate(times, start=1):
                         execution_logger.debug(
@@ -68,3 +68,30 @@ def timeit(runs=1, detailed=False):
         return wrapper
 
     return decorator
+
+
+def stop_record_timeit(func=None):
+    def decorator(target):
+        @functools.wraps(target)
+        def wrapper(*args, **kwargs):
+            result = target(*args, **kwargs)
+            if not is_debugging():
+                return result
+
+            with _RECORDING_LOCK:
+                recorded_times = {
+                    recorded_func: list(average_times)
+                    for recorded_func, average_times in _RECORDED_AVERAGE_TIMES.items()
+                }
+                _RECORDED_AVERAGE_TIMES.clear()
+
+            for recorded_func, average_times in recorded_times.items():
+                _save_timeit_graph(recorded_func, average_times)
+            return result
+
+        return wrapper
+
+    return decorator if func is None else decorator(func)
+
+
+timeit = start_record_timeit
