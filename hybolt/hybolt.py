@@ -4,14 +4,11 @@ import click
 from rich.progress import (
     BarColumn,
     Progress,
-    ProgressColumn,
     SpinnerColumn,
-    Task,
     TextColumn,
     TimeElapsedColumn,
     TimeRemainingColumn,
 )
-from rich.text import Text
 
 from hybolt.hybolt_decode import HyboltDecode
 from hybolt.hybolt_encode import HyboltEncode
@@ -20,18 +17,12 @@ from hybolt.logger.progress import set_progress
 from hybolt.utils.debug import set_debugging
 
 
-class _TaskProgressColumn(ProgressColumn):
-    def render(self, task: Task) -> Text:
-        total = "?" if task.total is None else str(int(task.total))
-        return Text(f"{int(task.completed)}/{total}")
-
-
 def _create_progress() -> Progress:
     return Progress(
         SpinnerColumn(),
         "[progress.description]{task.description}",
         BarColumn(),
-        _TaskProgressColumn(),
+        TextColumn("{task.completed}/{task.total}"),
         TimeElapsedColumn(),
         TimeRemainingColumn(),
     )

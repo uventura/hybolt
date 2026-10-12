@@ -17,7 +17,7 @@ def set_progress(progress: Progress | None) -> None:
 def create_progress_task(
     progress: Progress | None,
     description: str,
-    total: int | None,
+    total: int,
 ) -> TaskID | None:
     if progress is None:
         return None

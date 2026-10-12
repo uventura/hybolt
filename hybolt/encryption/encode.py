@@ -1,5 +1,4 @@
 import random
-import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import reduce
 import numpy as np
@@ -101,7 +100,12 @@ class Encode:
 
     def _calculate_mac_for_each_block(self):
         mac_blocks = {}
-        worker_tasks = {}
+        task_id = create_progress_task(
+            self._progress,
+            "Calculating MAC blocks",
+            total=len(self._blocks) * len(self._polynomials),
+        )
+
         with ThreadPoolExecutor(max_workers=self._max_threads) as executor:
             futures = {
                 executor.submit(self._calculate_mac_for_block, (block_index, block)): (
@@ -111,17 +115,10 @@ class Encode:
             }
             for future in as_completed(futures):
                 block_index = futures[future]
-                worker_name, block_macs = future.result()
+                block_macs = future.result()
                 mac_blocks[block_index] = block_macs
-                task_id = worker_tasks.get(worker_name)
-                if task_id is None:
-                    task_id = create_progress_task(
-                        self._progress,
-                        f"MAC worker {worker_name}",
-                        total=None,
-                    )
-                    worker_tasks[worker_name] = task_id
-                advance_progress(self._progress, task_id)
+                for _ in block_macs:
+                    advance_progress(self._progress, task_id)
 
         return {
             block_index: mac_blocks[block_index]
@@ -131,7 +128,7 @@ class Encode:
     def _calculate_mac_for_block(self, indexed_block):
         block_index, block = indexed_block
         representation = ga.bytes_to_poly_coeffs(block)
-        return threading.current_thread().name, [
+        return [
             LocalMac(
                 mac=ga.gf2_poly_mod(representation, polynomial),
                 polynomial_index=polynomial_index,
