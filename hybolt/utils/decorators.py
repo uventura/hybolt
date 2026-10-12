@@ -1,6 +1,7 @@
 import os
 import time
 import functools
+import threading
 
 import matplotlib
 
@@ -37,6 +38,7 @@ def _save_timeit_graph(func, average_times):
 def timeit(runs=1, detailed=False):
     def decorator(func):
         average_times = []
+        timing_lock = threading.Lock()
 
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -50,16 +52,17 @@ def timeit(runs=1, detailed=False):
                 times.append(time.perf_counter() - start)
 
             avg = sum(times) / runs
-            average_times.append(avg)
-            _save_timeit_graph(func, average_times)
-            if detailed:
-                for run_index, elapsed in enumerate(times, start=1):
-                    execution_logger.debug(
-                        f"[{func.__name__}] Run {run_index}: {elapsed:.6f}s"
-                    )
-            execution_logger.debug(
-                f"[{func.__name__}] Call {len(average_times)} Avg: {avg:.6f}s ({runs} runs)"
-            )
+            with timing_lock:
+                average_times.append(avg)
+                _save_timeit_graph(func, list(average_times))
+                if detailed:
+                    for run_index, elapsed in enumerate(times, start=1):
+                        execution_logger.debug(
+                            f"[{func.__name__}] Run {run_index}: {elapsed:.6f}s"
+                        )
+                execution_logger.debug(
+                    f"[{func.__name__}] Call {len(average_times)} Avg: {avg:.6f}s ({runs} runs)"
+                )
             return result
 
         return wrapper

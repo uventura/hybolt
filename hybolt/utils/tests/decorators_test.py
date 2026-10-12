@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from hybolt.logger.logger import execution_logger
@@ -71,3 +72,22 @@ def test_timeit_skips_instrumentation_when_debugging_is_disabled(monkeypatch):
 
     assert decorated_sum() == 10
     assert graph_calls == []
+
+
+def test_timeit_records_parallel_calls_with_consistent_graph_data(monkeypatch):
+    set_debugging(True)
+    recorded_lengths = []
+
+    def record_graph(_, average_times):
+        recorded_lengths.append(len(average_times))
+
+    monkeypatch.setattr(decorators, "_save_timeit_graph", record_graph)
+
+    @timeit()
+    def decorated_identity(value):
+        return value
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        assert list(executor.map(decorated_identity, range(8))) == list(range(8))
+
+    assert sorted(recorded_lengths) == list(range(1, 9))
