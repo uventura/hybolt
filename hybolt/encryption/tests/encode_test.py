@@ -183,6 +183,49 @@ def test_when_encoding_then_mac_blocks_are_calculated_with_configured_workers(
     )
 
 
+def test_when_calculating_mac_blocks_then_progress_reports_completed_blocks(
+    monkeypatch,
+):
+    class RecordingProgress:
+        def __init__(self):
+            self.tasks = {}
+            self.next_task_id = 0
+
+        def add_task(self, description, total):
+            task_id = self.next_task_id
+            self.next_task_id += 1
+            self.tasks[task_id] = {
+                "advances": 0,
+                "description": description,
+                "total": total,
+            }
+            return task_id
+
+        def advance(self, task_id):
+            self.tasks[task_id]["advances"] += 1
+
+        def update(self, task_id, description):
+            self.tasks[task_id]["description"] = description
+
+    progress = RecordingProgress()
+    monkeypatch.setattr(encode_module, "get_progress", lambda: progress)
+
+    encoded = Encode(b"HelloWorld", block_size=2, max_threads=2)
+    mac_task = next(
+        task
+        for task in progress.tasks.values()
+        if task["description"].startswith("Calculating MAC blocks")
+    )
+
+    assert mac_task == {
+        "advances": encoded.num_blocks,
+        "description": (
+            f"Calculating MAC blocks ({encoded.num_blocks}/{encoded.num_blocks})"
+        ),
+        "total": encoded.num_blocks,
+    }
+
+
 def test_when_mocking_random_then_indices_order_is_respected():
     data = b"ABCDEFGH"
     block_size = 2

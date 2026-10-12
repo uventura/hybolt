@@ -100,12 +100,14 @@ class Encode:
 
     def _calculate_mac_for_each_block(self):
         mac_blocks = {}
+        total_blocks = len(self._blocks)
         task_id = create_progress_task(
             self._progress,
-            "Calculating MAC blocks",
-            total=len(self._blocks) * len(self._polynomials),
+            f"Calculating MAC blocks (0/{total_blocks})",
+            total=total_blocks,
         )
 
+        completed_blocks = 0
         with ThreadPoolExecutor(max_workers=self._max_threads) as executor:
             futures = {
                 executor.submit(self._calculate_mac_for_block, (block_index, block)): (
@@ -117,8 +119,14 @@ class Encode:
                 block_index = futures[future]
                 block_macs = future.result()
                 mac_blocks[block_index] = block_macs
-                for _ in block_macs:
-                    advance_progress(self._progress, task_id)
+                completed_blocks += 1
+                advance_progress(
+                    self._progress,
+                    task_id,
+                    description=(
+                        f"Calculating MAC blocks ({completed_blocks}/{total_blocks})"
+                    ),
+                )
 
         return {
             block_index: mac_blocks[block_index]
