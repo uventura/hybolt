@@ -1,6 +1,6 @@
-# HyBoat
+# HyBolt
 
-HyBoat is a Python implementation of the cryptographic core of the HySAIL
+HyBolt is a Python implementation of the cryptographic core of the HySAIL
 storage protocol. It encodes a file into redundant packets, distributes those
 packets across storage locations, and reconstructs the original data from the
 packet metadata.
@@ -18,18 +18,18 @@ finite fields, and local MACs for packet integrity challenges.
 Create and activate the project environment:
 
 ```sh
-python3 -m venv hyboat-env
-source hyboat-env/bin/activate
+python3 -m venv hybolt-env
+source hybolt-env/bin/activate
 ```
 
 On Windows PowerShell:
 
 ```powershell
-python -m venv hyboat-env
-.\hyboat-env\Scripts\Activate.ps1
+python -m venv hybolt-env
+.\hybolt-env\Scripts\Activate.ps1
 ```
 
-Install HyBoat in editable mode:
+Install HyBolt in editable mode:
 
 ```sh
 python -m pip install -e .
@@ -47,7 +47,7 @@ The supplied server-list example describes three local packet-storage
 directories. Encode one of the supplied example files with:
 
 ```sh
-hyboat encode \
+hybolt encode \
   --server-list examples/server_list_example.json \
   --metadata-output output \
   examples/hello.txt
@@ -61,14 +61,14 @@ recovery.
 Recover the original file using that metadata and the same server list:
 
 ```sh
-hyboat decode \
+hybolt decode \
   --server-file examples/server_list_example.json \
   --output-file output/hello_decoded.txt \
   output/hello_metadata.pkl
 ```
 
 Use `--block-size` on `encode` to select a block size in bytes. If it is
-omitted, HyBoat chooses a size equal to 10% of the input file, with a minimum
+omitted, HyBolt chooses a size equal to 10% of the input file, with a minimum
 of one byte.
 
 Pass `--debug` to either command to collect detailed execution timing and
@@ -82,6 +82,6 @@ make test
 make lorem_example
 ```
 
-`make test` runs the `hyboat-test` command. The tests use the shipped
+`make test` runs the `hybolt-test` command. The tests use the shipped
 `examples/hello.txt` and `examples/server_list_example.json` fixtures while
 redirecting storage to temporary directories.

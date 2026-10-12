@@ -1,1 +1,1 @@
-.\hyboat-env\Scripts\Activate.ps1
+.\hybolt-env\Scripts\Activate.ps1

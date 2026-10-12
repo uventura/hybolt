@@ -3,20 +3,20 @@ requires = ["hatchling==1.2.0"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["hyboat"]
+packages = ["hybolt"]
 
 [tool.hatch.build]
-include = ["hyboat/**/*.py"]
+include = ["hybolt/**/*.py"]
 
 [tool.pytest.ini_options]
-testpaths = ["hyboat/**/tests"]
+testpaths = ["hybolt/**/tests"]
 
 [project]
-name = "hyboat"
+name = "hybolt"
 version = "1.0.0"
 authors = [{name = "ualivent", email = "ualivent@gmail.com"}]
 maintainers = [{name = "ualivent", email = "ualivent@gmail.com"}]
-description = "HyBoat cryptographic file encoding and recoverability toolkit"
+description = "HyBolt cryptographic file encoding and recoverability toolkit"
 readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.10"
@@ -35,5 +35,5 @@ dependencies = [
 ]
 
 [project.scripts]
-hyboat = "hyboat.hyboat:main"
-hyboat-test = "hyboat.test:main"
+hybolt = "hybolt.hybolt:main"
+hybolt-test = "hybolt.test:main"

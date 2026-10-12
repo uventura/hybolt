@@ -29,7 +29,7 @@ lorem_example:
 	mkdir -p output/server_storage/server_1
 	mkdir -p output/server_storage/server_2
 	mkdir -p output/server_storage/server_3
-	hyboat encode --server-list examples/server_list_example.json --metadata-output output/ examples/lorem_ipsum.txt
+	hybolt encode --server-list examples/server_list_example.json --metadata-output output/ examples/lorem_ipsum.txt
 
 lorem_example_debug:
 	rm -rf output/*
@@ -38,4 +38,4 @@ lorem_example_debug:
 	mkdir -p output/server_storage/server_1
 	mkdir -p output/server_storage/server_2
 	mkdir -p output/server_storage/server_3
-	hyboat encode --debug --server-list examples/server_list_example.json --metadata-output output/ examples/lorem_ipsum.txt
+	hybolt encode --debug --server-list examples/server_list_example.json --metadata-output output/ examples/lorem_ipsum.txt

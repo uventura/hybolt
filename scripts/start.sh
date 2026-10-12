@@ -1,1 +1,1 @@
-source hyboat-env/bin/activate
+source hybolt-env/bin/activate
