@@ -1,4 +1,5 @@
 import random
+from concurrent.futures import ThreadPoolExecutor
 from functools import reduce
 import numpy as np
 
@@ -8,17 +9,22 @@ from hybolt.logger.progress import advance_progress, create_progress_task, get_p
 import hybolt.utils.galois as ga
 import hybolt.utils.operators as op
 from hybolt.utils.padding import add_padding
-from hybolt.constant import POLYNOMIAL_SET_SIZE
+from hybolt.constant import MAX_MAC_THREADS, POLYNOMIAL_SET_SIZE
 
 
 # It uses LtCode
 class Encode:
-    def __init__(self, data, block_size):
+    def __init__(self, data, block_size, max_threads=MAX_MAC_THREADS):
         if not data:
             raise ValueError("Data cannot be empty")
+        if not 1 <= max_threads <= MAX_MAC_THREADS:
+            raise ValueError(
+                f"max_threads must be between 1 and {MAX_MAC_THREADS}"
+            )
 
         self._progress = get_progress()
         self._block_size = block_size
+        self._max_threads = max_threads
 
         prepare_task_id = create_progress_task(
             self._progress,
@@ -93,27 +99,37 @@ class Encode:
         return [data[i : i + block_size] for i in range(0, len(data), block_size)]
 
     def _calculate_mac_for_each_block(self):
-        mac_blocks = {}
         task_id = create_progress_task(
             self._progress,
             "Calculating MAC blocks",
             total=len(self._blocks) * len(self._polynomials),
         )
 
-        for index, block in enumerate(self._blocks):
-            representation = ga.bytes_to_poly_coeffs(block)
-            mac_blocks[index] = []
-
-            for p_index, polynomial in enumerate(self._polynomials):
-                mac = LocalMac(
-                    mac=ga.gf2_poly_mod(representation, polynomial),
-                    polynomial_index=p_index,
-                    block_index=index,
+        with ThreadPoolExecutor(max_workers=self._max_threads) as executor:
+            block_mac_lists = list(
+                executor.map(
+                    self._calculate_mac_for_block,
+                    enumerate(self._blocks),
                 )
-                mac_blocks[index].append(mac)
+            )
+
+        for _ in block_mac_lists:
+            for _ in self._polynomials:
                 advance_progress(self._progress, task_id)
 
-        return mac_blocks
+        return dict(enumerate(block_mac_lists))
+
+    def _calculate_mac_for_block(self, indexed_block):
+        block_index, block = indexed_block
+        representation = ga.bytes_to_poly_coeffs(block)
+        return [
+            LocalMac(
+                mac=ga.gf2_poly_mod(representation, polynomial),
+                polynomial_index=polynomial_index,
+                block_index=block_index,
+            )
+            for polynomial_index, polynomial in enumerate(self._polynomials)
+        ]
 
     def _polynomial_set_generation(self):
         polynomials = []

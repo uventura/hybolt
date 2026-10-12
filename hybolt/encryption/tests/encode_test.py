@@ -4,6 +4,8 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
+from hybolt.constant import MAX_MAC_THREADS
+from hybolt.encryption import encode as encode_module
 from hybolt.encryption.encode import Encode
 
 
@@ -134,6 +136,45 @@ def test_when_seeding_rng_then_encoding_is_deterministic():
 def test_when_data_empty_then_encoding_raises_value_error():
     with pytest.raises(ValueError):
         Encode(b"", block_size=2)
+
+
+@pytest.mark.parametrize("max_threads", [0, MAX_MAC_THREADS + 1])
+def test_when_max_threads_is_outside_the_supported_range_then_encoding_raises_value_error(
+    max_threads,
+):
+    with pytest.raises(ValueError, match="max_threads"):
+        Encode(b"HelloWorld", block_size=2, max_threads=max_threads)
+
+
+def test_when_encoding_then_mac_blocks_are_calculated_with_configured_workers(
+    monkeypatch,
+):
+    class RecordingExecutor:
+        max_workers = None
+
+        def __init__(self, max_workers):
+            RecordingExecutor.max_workers = max_workers
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc_value, traceback):
+            return False
+
+        def map(self, function, values):
+            return map(function, values)
+
+    monkeypatch.setattr(encode_module, "ThreadPoolExecutor", RecordingExecutor)
+
+    encoded = Encode(b"HelloWorld", block_size=2, max_threads=2)
+
+    assert RecordingExecutor.max_workers == 2
+    assert list(encoded.mac_blocks) == list(range(encoded.num_blocks))
+    assert all(
+        mac.block_index == block_index
+        for block_index, macs in encoded.mac_blocks.items()
+        for mac in macs
+    )
 
 
 def test_when_mocking_random_then_indices_order_is_respected():

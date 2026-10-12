@@ -1,5 +1,4 @@
 import json
-from pathlib import Path
 
 import click
 from rich.progress import (
@@ -13,6 +12,7 @@ from rich.progress import (
 
 from hybolt.hybolt_decode import HyboltDecode
 from hybolt.hybolt_encode import HyboltEncode
+from hybolt.constant import MAX_MAC_THREADS
 from hybolt.logger.progress import set_progress
 from hybolt.utils.debug import set_debugging
 
@@ -60,11 +60,20 @@ def main():
     help="Path where the metadata file will be written",
 )
 @click.option(
+    "--max-threads",
+    type=click.IntRange(1, MAX_MAC_THREADS),
+    default=MAX_MAC_THREADS,
+    show_default=True,
+    help="Maximum worker threads used to calculate MAC blocks",
+)
+@click.option(
     "--debug",
     is_flag=True,
     help="Enable debug mode with detailed execution logs and timing instrumentation",
 )
-def encode_command(input_file, block_size, server_list, metadata_output, debug):
+def encode_command(
+    input_file, block_size, server_list, metadata_output, max_threads, debug
+):
     with open(server_list, "r") as f:
         data = json.load(f)
     servers = data["servers"]
@@ -73,7 +82,13 @@ def encode_command(input_file, block_size, server_list, metadata_output, debug):
 
     with _create_progress() as progress:
         set_progress(progress)
-        hybolt_encode = HyboltEncode(input_file, block_size, servers, metadata_output)
+        hybolt_encode = HyboltEncode(
+            input_file,
+            block_size,
+            servers,
+            metadata_output,
+            max_threads,
+        )
         packet_count = hybolt_encode.encode()
         set_progress(None)
 

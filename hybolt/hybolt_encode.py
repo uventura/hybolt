@@ -3,7 +3,7 @@ import json
 import math
 from pathlib import Path
 
-from hybolt.constant import DEFAULT_BLOCK_SIZE_PERCENTAGE
+from hybolt.constant import DEFAULT_BLOCK_SIZE_PERCENTAGE, MAX_MAC_THREADS
 from hybolt.encryption.encode import Encode
 from hybolt.encryption.encoding_metadata import (
     BlockMetadata,
@@ -20,11 +20,13 @@ class HyboltEncode:
         block_size: int | None = None,
         server_list: list = None,
         metadata_output: str = "./",
+        max_threads: int = MAX_MAC_THREADS,
     ):
         self.input_file = input_file
         self.block_size = block_size
         self.server_list = server_list
         self.metadata_output = metadata_output
+        self.max_threads = max_threads
 
     def encode(self) -> int:
         input_path = Path(self.input_file)
@@ -32,7 +34,7 @@ class HyboltEncode:
             data = file.read()
 
         block_size = self._determine_block_size(len(data))
-        encoded = Encode(data, block_size)
+        encoded = Encode(data, block_size, self.max_threads)
         packets = encoded.packets
 
         saver = PacketSaver(packets, input_path, self.server_list)

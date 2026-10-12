@@ -71,6 +71,13 @@ Use `--block-size` on `encode` to select a block size in bytes. If it is
 omitted, HyBolt chooses a size equal to 10% of the input file, with a minimum
 of one byte.
 
+MAC calculation uses up to eight worker threads by default. Use
+`--max-threads` to select a lower limit between 1 and 8, for example:
+
+```sh
+hybolt encode --max-threads 4 --server-list examples/server_list_example.json examples/hello.txt
+```
+
 Pass `--debug` to either command to collect detailed execution timing and
 diagnostic logs under `logs/`. Debug instrumentation is disabled by default.
 
