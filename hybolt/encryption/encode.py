@@ -105,19 +105,19 @@ class Encode:
             total=len(self._blocks) * len(self._polynomials),
         )
 
+        mac_blocks = {}
         with ThreadPoolExecutor(max_workers=self._max_threads) as executor:
-            block_mac_lists = list(
+            for block_index, block_macs in enumerate(
                 executor.map(
                     self._calculate_mac_for_block,
                     enumerate(self._blocks),
                 )
-            )
+            ):
+                mac_blocks[block_index] = block_macs
+                for _ in self._polynomials:
+                    advance_progress(self._progress, task_id)
 
-        for _ in block_mac_lists:
-            for _ in self._polynomials:
-                advance_progress(self._progress, task_id)
-
-        return dict(enumerate(block_mac_lists))
+        return mac_blocks
 
     def _calculate_mac_for_block(self, indexed_block):
         block_index, block = indexed_block
