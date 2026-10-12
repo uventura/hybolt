@@ -6,9 +6,7 @@ packets across storage locations, and reconstructs the original data from the
 packet metadata.
 
 The implementation uses fountain-style packet encoding, XOR operations over
-finite fields, and local MACs for packet integrity challenges. It is a
-cryptographic storage toolkit only: it has no blockchain, smart-contract, or
-DApp components.
+finite fields, and local MACs for packet integrity challenges.
 
 ## Requirements
 
