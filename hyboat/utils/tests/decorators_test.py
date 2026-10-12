@@ -2,10 +2,12 @@ from pathlib import Path
 
 from hyboat.logger.logger import execution_logger
 from hyboat.utils import decorators
+from hyboat.utils.debug import set_debugging
 from hyboat.utils.decorators import _graph_file_name, timeit
 
 
 def test_timeit_creates_graph_in_execution_log_directory(tmp_path):
+    set_debugging(True)
     original_log_file = execution_logger.log_file
     execution_logger.log_file = str(tmp_path / "execution.log")
 
@@ -27,6 +29,7 @@ def test_timeit_creates_graph_in_execution_log_directory(tmp_path):
 
 
 def test_timeit_accumulates_average_per_function_call(monkeypatch):
+    set_debugging(True)
     captured_average_times = []
     perf_counter_values = iter([0.0, 1.0, 2.0, 3.0, 10.0, 12.0, 20.0, 22.0])
 
@@ -54,3 +57,17 @@ def test_timeit_accumulates_average_per_function_call(monkeypatch):
         ),
         ("decorated_sum", [1.0, 2.0]),
     ]
+
+
+def test_timeit_skips_instrumentation_when_debugging_is_disabled(monkeypatch):
+    graph_calls = []
+    monkeypatch.setattr(
+        decorators, "_save_timeit_graph", lambda *args: graph_calls.append(args)
+    )
+
+    @timeit()
+    def decorated_sum():
+        return sum(range(5))
+
+    assert decorated_sum() == 10
+    assert graph_calls == []

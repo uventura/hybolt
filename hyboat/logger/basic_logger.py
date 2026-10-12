@@ -29,9 +29,10 @@ class BasicLogger:
     def _prepare_log_file(self, log_file: str = None) -> str:
         if log_file is None:
             log_dir = "logs"
-            if not os.path.exists(log_dir):
-                os.makedirs(log_dir)
             log_file = os.path.join(log_dir, "hyboat.log")
+        log_dir = os.path.dirname(log_file)
+        if log_dir:
+            os.makedirs(log_dir, exist_ok=True)
         return log_file
 
     def _setup_file_handler(self, log_file: str, level: int) -> None:
