@@ -1,0 +1,47 @@
+Desde a proposta do HySAIL, em 2013, o cenário tecnológico passou por transformações significativas. A expansão da computação em nuvem, dos dispositivos móveis, da Internet das Coisas e dos serviços digitais alterou a forma como os dados são produzidos, armazenados, processados e compartilhados. Nesse contexto, abordagens concebidas naquele período precisam ser analisadas à luz das novas demandas tecnológicas, dos diferentes ambientes de processamento e das expectativas atuais de segurança e privacidade.
+
+O crescimento da produção de dados está ligado à digitalização de atividades cotidianas e científicas. Interações em redes sociais, transações comerciais, sensores conectados, serviços de streaming e experimentos científicos geram registros em diferentes formatos e de forma contínua. Para dimensionar essa produção, é importante distinguir entre dados publicados ou coletados, tráfego transmitido e dados acumulados em armazenamento: são métricas relacionadas, mas não equivalentes.
+
+O repositório *Amazon Simple Storage Service* (S3) registrava mais de 100 trilhões de objetos acumulados até 2021, somando cerca de **500 EB** armazenados. O tráfego de consumo de vídeos da Netflix gerou aproximadamente **51,1 EB** em 2021[21], enquanto as trocas globais de e-mail e spam movimentaram cerca de **5,7 EB** no mesmo período[22]. A criação de conteúdos diários no YouTube atinge cerca de **263 PB** por ano[23], ao passo que o compartilhamento de imagens no Facebook e Instagram representa **252 PB** e **68 PB** anuais, respectivamente.
+
+Nos experimentos de física de altas energias do CERN, os eletrônicos de leitura do *Large Hadron Collider* (LHC) geraram cerca de **40 Zettabytes (ZB)** de dados brutos de colisão em 2018[14]. Como é inviável armazenar esse volume total, sistemas de seleção (*triggers*) filtram o fluxo para gravar cerca de **160 Petabytes (PB)** por ano (\~240 PB incluindo simulações de Monte Carlo)[15][16]. Com o projeto *High-Luminosity LHC* (HL-LHC), prevê-se o registro de **800 PB** de novos dados por ano a partir de 2026[17]. Adicionalmente, a rede de distribuição *Worldwide LHC Computing Grid* (WLCG) atingiu uma vazão de 60 GB/s, movimentando cerca de **1,9 Exabytes (EB)** anuais[18][19].
+
+O crescimento desses fluxos também favorece a expansão de sistemas de inteligência artificial (IA), que dependem de dados para treinamento, validação e operação. Segundo o *AI Index Report 2025*, a proporção de organizações que declararam utilizar IA em ao menos uma função empresarial passou de 55% em 2023 para 78% em 2024 (STANFORD INSTITUTE FOR HUMAN-CENTERED ARTIFICIAL INTELLIGENCE, 2025). A adoção dessas tecnologias amplia as possibilidades de análise e automação, mas torna indispensáveis mecanismos de governança, controle de acesso e proteção de dados pessoais, a fim de reduzir riscos à privacidade, à segurança e à confiabilidade dos resultados.
+
+A quantidade de dados utilizada para treinar os modelos de IA de ponta aumentou cerca de **30.000 vezes desde 2008**[1], acompanhada por um crescimento de 350.000 vezes no volume de processamento computacional desde 2014[2]. Como exemplo, o modelo GPT-4 exigiu cerca de **4,9 trilhões de pontos de dados** para o seu treinamento. Projeta-se que até 2035 o tráfego de inferência de IA passe a responder por **25% de todo o tráfego de rede mundial**
+
+Ainda neste cenário de grande consumo e produção de dados, soluções apresentadas anteriormente ainda são a base para as atuais. Dentre estas soluções, temos o armazenamento em nuvem que é um modelo de computação que permite guardar, gerenciar e acessar dados remotamente por meio da internet, em vez de mantê-los exclusivamente em dispositivos físicos ou servidores locais (EnergyandAI.pdf), pois dentro de suas vantagens existem:
+
+**Escalabilidade e Elasticidade**: Permite expandir ou reduzir a capacidade de armazenamento de forma dinâmica à medida que o volume de dados cresce, sem a necessidade de gerenciar diretamente o hardware subjacente (EnergyandAI.pdf).
+
+**Redução de Custos**: Minimiza despesas com infraestrutura local, manutenção física e aquisição de servidores próprios .
+
+**Capacidade de Acesso Global**: Os dados armazenados em centros de dados distribuídos podem ser acessados de qualquer localidade com suporte a conexões de alta velocidade[2][5].
+
+**Suporte a Múltiplas Arquiteturas de Dados**: Abrange desde o **armazenamento de objetos** (como Amazon S3) até **sistemas de arquivos distribuídos** (como o Hadoop Distributed File System - HDFS) e **Data Lakes**, capazes de armazenar grandes volumes de dados brutos e estruturados (EnergyandAI.pdf).
+
+Diante deste cenário onde há um massivo volume de dados, ainda existem diversos problemas relativos a sua segurança, como:
+
+**Falhas de Anonimização e Ataques de Reidentificação**: Dados aparentemente anonimizados por remoção de identificadores diretos permanecem vulneráveis a **ataques de vinculação (** **linkage attacks** **)**[3]. Estudos demonstram que apenas quatro pontos espaço-temporais em bases de mobilidade ou histórico de compras são suficientes para reidentificar entre 90% e 95% dos indivíduos quando cruzados com outras fontes ().
+
+**Ameaça do Aprendizado de Máquina e Mineração de Dados**: O avanço dos algoritmos de *data mining* e *machine learning* permite inferir e extrair conhecimentos sensíveis não autorizados a partir da correlação de bases de dados aparentemente inofensivas.
+
+**Limitações das Técnicas Tradicionais de Agrupamento**: Modelos clássicos de privacidade em bancos de dados, como **k-anonymity**, são suscetíveis a ataques de homogeneidade e de conhecimento prévio (*background knowledge attacks*)[7]. Extensões como **l-diversity** e **t-closeness** foram criadas para mitigar essas falhas, aumentando a variação de atributos sensíveis e limitando o ganho de informação por invasores[8][9].
+
+**Gargalos Criptográficos e Ataques de Informação Lateral**: A criptografia convencional enfrenta barreiras de escalabilidade e alto custo computacional em ambientes de Big Data e dispositivos móveis[10]. Soluções como **Criptografia Baseada em Atributos (ABE)** e **criptografia pesquisável** buscam integrar controle de acesso e busca em dados cifrados[11][12]. Além disso, a criptografia do conteúdo não impede **ataques de análise de tráfego (** **side information attacks** **)**, que identificam padrões e "pegadas" (*fingerprints*) de navegação[13].
+
+**Vulnerabilidades em Fluxo (** **Streaming** **) e Armazenamento**: Dados em transmissão contínua (*streaming*) estão sujeitos a vazamentos na origem antes de serem cifrados, interceptação e adulteração durante a transferência de rede, e perda de integridade ou confiabilidade nos repositórios de armazenamento[14][15].
+
+**Ameaças Cibernéticas a Infraestruturas Críticas**: Redes de sensores IoT, ambientes industriais e *Data Lakes* tornaram-se alvos diretos de softwares maliciosos, intrusões, *phishing*, e-mails enganosos e ataques de negação de serviço (DDoS)[16].
+
+**Dilemas Éticos, Legais e de Perfilamento**: A coleta massiva levanta questionamentos sobre consentimento implícito versus explícito[19][20]. O uso de analítica preditiva para perfilamento (*profiling*) traz riscos de discriminação e decisões injustas[20], exigindo conformidade com regulamentações (como a GDPR) e salvaguardas como o "direito ao esquecimento"[21][22].
+
+Portanto, o cenário onde estes dados devem ser tratados e protegidos não mudou, ainda é necessário ferramentas que mitigam o fácil acesso a dados que devem ser protegidos.
+
+\section{Objetivos}
+
+HySAIL é um algoritmo que propõe resolver problemas de segurança relativo a dados estáticos. Considerando este fato, o objetivo do presente trabalho é um novo olhar sob o algoritmo e realizar otimizações internas considerando o trabalho anterior.
+
+Após a resolução deste problema, será feita comporações em relação a soluções adotadas anteriormente e quais os ganhos neste novo modelo.
+
+
