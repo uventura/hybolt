@@ -1,0 +1,95 @@
+\begin{thebibliography}{1}
+  \providebibliographyfont{name}{}%
+  \providebibliographyfont{lastname}{}%
+  \providebibliographyfont{title}{\emph}%
+  \providebibliographyfont{jtitle}{\btxtitlefont}%
+  \providebibliographyfont{etal}{\emph}%
+  \providebibliographyfont{journal}{}%
+  \providebibliographyfont{volume}{}%
+  \providebibliographyfont{ISBN}{\MakeUppercase}%
+  \providebibliographyfont{ISSN}{\MakeUppercase}%
+  \providebibliographyfont{url}{\url}%
+  \providebibliographyfont{numeral}{}%
+  \expandafter\btxselectlanguage\expandafter {\btxfallbacklanguage}
+
+\btxselectlanguage {english}
+\bibitem {frontiersbigdata}
+\btxnamefont {\btxlastnamefont {Luca~Clissa},~Mario~Lassnig,
+  Lorenzo\btxfnamespacelong Rinaldi}\btxauthorcolon\ \btxjtitlefont
+  {\btxifchangecase {How big is big data? a comprehensive survey of data
+  production, storage, and streaming in science and industry}{How big is Big
+  Data? A comprehensive survey of data production, storage, and streaming in
+  Science and industry}}.
+\newblock \btxjournalfont {Big Data and AI in High Energy Physics}, 6(9), 2023.
+\newblock {\latintext
+  \btxurlfont{https://www.frontiersin.org/journals/big-data/articles/10.3389/fdata.2023.1271639/full}}.
+
+\bibitem {energyandai}
+\btxnamefont {\btxlastnamefont {Begen}, Ali\btxfnamespacelong C.}, \btxnamefont
+  {Thomas \btxlastnamefont {Stockhammer}}\btxandcomma {} \btxandlong {}\
+  \btxnamefont {Colin \btxlastnamefont {Perkins}}\btxauthorcolon\ \btxtitlefont
+  {\btxifchangecase {Energy and ai}{Energy and AI}}.
+\newblock \btxtechreplong {}, INTERNATIONAL ENERGY AGENCY, 2025.
+\newblock {\latintext \btxurlfont{https://www.iea.org/}}.
+
+\btxselectlanguage {portuguese}
+\bibitem {amaral2013hysail}
+\btxnamefont {\btxlastnamefont {Amaral}, Dino\btxfnamespacelong
+  Macedo}\btxauthorcolon\ \btxtitlefont {Hy-SAIL: Uma nova abordagem para
+  distribuição e armazenamento de informações em ambientes de computação
+  em nuvem}.
+\newblock \btxphdthesis {}, Universidade de Brasília, 2013.
+
+\expandafter\btxselectlanguage\expandafter {\btxfallbacklanguage}
+\bibitem {7485855}
+\btxnamefont {\btxlastnamefont {Yu}, Shui}\btxauthorcolon\ \btxjtitlefont
+  {\btxifchangecase {Big privacy: Challenges and opportunities of privacy study
+  in the age of big data}{Big Privacy: Challenges and Opportunities of Privacy
+  Study in the Age of Big Data}}.
+\newblock \btxjournalfont {IEEE Access}, 4:2751--2763, 2016.
+
+\bibitem {Zhao2024}
+\btxnamefont {\btxlastnamefont {Zhao}, Xiaoyan}, \btxnamefont {Conghui
+  \btxlastnamefont {Zhang}}\btxandcomma {} \btxandlong {}\ \btxnamefont
+  {Shaopeng \btxlastnamefont {Guan}}\btxauthorcolon\ \btxjtitlefont
+  {\btxifchangecase {A data lake-based security transmission and storage scheme
+  for streaming big data}{A data lake-based security transmission and storage
+  scheme for streaming big data}}.
+\newblock \btxjournalfont {Cluster Computing}, 27(4):4741--4755,
+  \btxprintmonthyear{.}{Jul}{2024}{long}\ifbtxprintISSN {,
+  \mbox{\btxISSN~\btxISSNfont {1573-7543}}}.
+\newblock {\latintext \btxurlfont{https://doi.org/10.1007/s10586-023-04201-9}}.
+
+\bibitem {fi17090427}
+\btxnamefont {\btxlastnamefont {Hakami}, Tahani\btxfnamespacelong Ali},
+  \btxnamefont {Yasser\btxfnamespacelong M. \btxlastnamefont
+  {Alginahi}}\btxandcomma {} \btxandlong {}\ \btxnamefont {Omar
+  \btxlastnamefont {Sabri}}\btxauthorcolon\ \btxjtitlefont {\btxifchangecase
+  {Exploring the evolution of big data technologies: A systematic literature
+  review of trends, challenges, and future directions}{Exploring the Evolution
+  of Big Data Technologies: A Systematic Literature Review of Trends,
+  Challenges, and Future Directions}}.
+\newblock \btxjournalfont {Future Internet}, 17(9), 2025\ifbtxprintISSN {,
+  \mbox{\btxISSN~\btxISSNfont {1999-5903}}}.
+\newblock {\latintext \btxurlfont{https://www.mdpi.com/1999-5903/17/9/427}}.
+
+\bibitem {ronald2025}
+\btxnamefont {\btxlastnamefont {Villamar-Torres}, Ronald\btxfnamespacelong
+  Oswaldo}, \btxnamefont {Verónica\btxfnamespacelong
+  Cristina\btxfnamespacelong Andrade \btxlastnamefont {Yucailla}}, \btxnamefont
+  {Karen\btxfnamespacelong Rafaela\btxfnamespacelong Mayorga \btxlastnamefont
+  {Morejon}}, \btxnamefont {Héctor\btxfnamespacelong Adonis\btxfnamespacelong
+  Almeida \btxlastnamefont {Reyes}}\btxandcomma {} \btxandlong {}\ \btxnamefont
+  {Seyed\btxfnamespacelong Mehdi \btxlastnamefont {Jazayeri}}\btxauthorcolon\
+  \btxjtitlefont {\btxifchangecase {An overview to the new era in efficient
+  crop management: Artificial intelligence, machine learning, big data,
+  bioinformatics, metagenomics and precision agriculture}{AN OVERVIEW TO THE
+  NEW ERA IN EFFICIENT CROP MANAGEMENT: ARTIFICIAL INTELLIGENCE, MACHINE
+  LEARNING, BIG DATA, BIOINFORMATICS, METAGENOMICS AND PRECISION AGRICULTURE}}.
+\newblock \btxjournalfont {Journal of Animal and Plant Sciences},
+  35(3):638--659, \btxprintmonthyear{.}{June}{2025}{long}\ifbtxprintISSN {,
+  \mbox{\btxISSN~\btxISSNfont {1018-7081}}}.
+\newblock {\latintext
+  \btxurlfont{https://thejaps.org.pk/AbstractView.aspx?mid=2024-japs-1928}}.
+
+\end{thebibliography}

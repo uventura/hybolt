@@ -1,0 +1,49 @@
+This is BibTeX, Version 0.99d (TeX Live 2023/Debian)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: monografia.aux
+The style file: babunsrt.bst
+Database file #1: bibliografia.bib
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Warning--empty language in 7485855
+You've used 7 entries,
+            2465 wiz_defined-function locations,
+            634 strings with 7164 characters,
+and the built_in function-call counts, 1994 in all, are:
+= -- 150
+> -- 62
+< -- 0
++ -- 24
+- -- 17
+* -- 272
+:= -- 276
+add.period$ -- 19
+call.type$ -- 7
+change.case$ -- 6
+chr.to.int$ -- 0
+cite$ -- 8
+duplicate$ -- 110
+empty$ -- 216
+format.name$ -- 48
+if$ -- 417
+int.to.chr$ -- 0
+int.to.str$ -- 7
+missing$ -- 10
+newline$ -- 51
+num.names$ -- 7
+pop$ -- 15
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 31
+stack$ -- 0
+substring$ -- 75
+swap$ -- 46
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 1
+while$ -- 10
+width$ -- 8
+write$ -- 100
+(There was 1 warning)

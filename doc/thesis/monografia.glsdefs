@@ -1,0 +1,84 @@
+\glsdefs@newdocentry{PB}%
+{%
+name={\acronymfont {\glsentryshort {PB}}},%
+sort={PB},%
+type={acronym},%
+first={PB},%
+firstplural={PBs},%
+text={PB},%
+plural={PBs},%
+description={Petabyte},%
+descriptionplural={Petabyte},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Petabyte},%
+longplural={Petabytes},%
+short={PB},%
+shortplural={PBs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{EB}%
+{%
+name={\acronymfont {\glsentryshort {EB}}},%
+sort={EB},%
+type={acronym},%
+first={EB},%
+firstplural={EBs},%
+text={EB},%
+plural={EBs},%
+description={Exabyte},%
+descriptionplural={Exabyte},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Exabyte},%
+longplural={Exabytes},%
+short={EB},%
+shortplural={EBs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{ZB}%
+{%
+name={\acronymfont {\glsentryshort {ZB}}},%
+sort={ZB},%
+type={acronym},%
+first={ZB},%
+firstplural={ZBs},%
+text={ZB},%
+plural={ZBs},%
+description={Zettabyte},%
+descriptionplural={Zettabyte},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Zettabyte},%
+longplural={Zettabytes},%
+short={ZB},%
+shortplural={ZBs},%
+counter={page},%
+parent={},%
+%
+}%
+

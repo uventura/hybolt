@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.6.14)  14 OCT 2026 12:46
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.6.14)  14 OCT 2026 16:53
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -587,7 +587,18 @@ File: l3backend-pdftex.def 2024-01-04 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count326
 \l__pdf_internal_box=\box61
 )
-(./monografia.aux)
+(./monografia.aux
+(/usr/share/texlive/texmf-dist/tex/generic/babel/locale/en/babel-english.tex
+Package babel Info: Importing basic data for english
+(babel)             from babel-en.ini. Reported on input line 11.
+)
+(/usr/share/texlive/texmf-dist/tex/generic/babel/locale/pt/babel-portuguese.tex
+Package babel Info: Importing basic data for portuguese
+(babel)             from babel-pt.ini. Reported on input line 11.
+)
+Package babel Info: Hyphen rules for 'portuguese' set to \l@english
+(babel)             (\language0). Reported on input line 100.
+)
 \openout1 = `monografia.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 26.
@@ -683,7 +694,7 @@ Package hyperref Info: Link coloring OFF on input line 26.
 \@outlinefile=\write6
 \openout6 = `monografia.out'.
 
-
+ (./monografia.glsdefs)
 (/usr/share/texlive/texmf-dist/tex/latex/oberdiek/hypcap.sty
 Package: hypcap 2016/05/16 v1.12 Adjusting the anchors of captions (HO)
 
@@ -709,7 +720,7 @@ LaTeX Font Warning: Font shape `T1/cmr/m/n' in size <20> not available
 LaTeX Font Warning: Font shape `T1/ua1/b/n' in size <20> not available
 (Font)              size <20.74> substituted on input line 26.
 
-<img/positivo_cor.pdf, id=36, 119.44624pt x 60.225pt>
+<img/positivo_cor.pdf, id=40, 119.44624pt x 60.225pt>
 File: img/positivo_cor.pdf Graphic file (type pdf)
 <use img/positivo_cor.pdf>
 Package pdftex.def Info: img/positivo_cor.pdf  used on input line 26.
@@ -769,10 +780,6 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 
 
 ]
-(/usr/share/texlive/texmf-dist/tex/generic/babel/locale/en/babel-english.tex
-Package babel Info: Importing basic data for english
-(babel)             from babel-en.ini. Reported on input line 11.
-)
 (./tex/abstract.tex)
 babelbib: Set language for keywords in the bibliography fixed to american
 [4
@@ -782,20 +789,27 @@ babelbib: Set language for keywords in the bibliography fixed to american
 \tf@toc=\write7
 \openout7 = `monografia.toc'.
 
- (./tex/siglas.tex) (./monografia.acr) [5
+ (./tex/siglas.tex
+\@gls@deffile=\write8
+\openout8 = `monografia.glsdefs'.
+
+) (./monografia.acr [5
+
+]) [6
+
 
 ]
 Chapter 1.
 (./tex/1_Introducao.tex [1
 
 
-]
-Overfull \hbox (0.1904pt too wide) in paragraph at lines 21--22
-\T1/lmr/m/n/12 de ob-je-tos** (como Ama-zon S3) até **sis-temas de ar-quivos di
-s-tribuí-dos** (como o Hadoop
- []
+{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathsy.enc}]
+LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 1
+6.
 
-[2]) [3] [4]
+(/usr/share/texmf/tex/latex/lm/ts1lmr.fd
+File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+) [2{/usr/share/texmf/fonts/enc/dvips/lm/lm-ts1.enc}] [3]) [4]
 Chapter 2.
 (./tex/3_Hysail.tex) [5
 
@@ -811,9 +825,30 @@ Chapter 4.
 Chapter 5.
 (./tex/5_Resultados.tex) [8
 
-]
-No file monografia.bbl.
-(./monografia.aux)
+] (./monografia.bbl (./monografia.brf)
+\tf@brf=\write9
+\openout9 = `monografia.brf'.
+
+
+babelbib: Using the BibTeX style's default font for `name'.
+babelbib: Using the BibTeX style's default font for `lastname'.
+babelbib: Using the BibTeX style's default font for `title'.
+babelbib: Using the BibTeX style's default font for `jtitle'.
+babelbib: Using the BibTeX style's default font for `etal'.
+babelbib: Using the BibTeX style's default font for `journal'.
+babelbib: Using the BibTeX style's default font for `volume'.
+babelbib: Using the BibTeX style's default font for `ISBN'.
+babelbib: Using the BibTeX style's default font for `ISSN'.
+babelbib: Using the BibTeX style's default font for `url'.
+babelbib: Using the BibTeX style's default font for `numeral'.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 2
+6.
+(/usr/share/texmf/tex/latex/lm/t1lmtt.fd
+File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)) [9
+
+
+] (./monografia.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -827,23 +862,27 @@ LaTeX Font Warning: Size substitutions with differences
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
 Package rerunfilecheck Info: File `monografia.out' has not changed.
-(rerunfilecheck)             Checksum: 17F39D09CC8CEBAF67CD39B3A193B41E;784.
+(rerunfilecheck)             Checksum: CB81EE2BA163353E8597FF5D62357753;886.
+Package rerunfilecheck Info: File `monografia.brf' has not changed.
+(rerunfilecheck)             Checksum: 0FB0DD3E3CBF5F53173B5BB8D28FE066;992.
  ) 
 Here is how much of TeX's memory you used:
- 18918 strings out of 476182
- 322000 string characters out of 5795595
- 1930975 words of memory out of 5000000
- 40556 multiletter control sequences out of 15000+600000
- 592713 words of font info for 57 fonts, out of 8000000 for 9000
+ 19244 strings out of 476182
+ 327965 string characters out of 5795595
+ 1931975 words of memory out of 5000000
+ 40841 multiletter control sequences out of 15000+600000
+ 597668 words of font info for 60 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 109i,6n,107p,2346b,555s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 109i,6n,107p,2346b,598s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf/fonts/type1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/ty
-pe1/public/lm/lmr12.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1000.
-pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm2074.pfb>
-Output written on monografia.pdf (13 pages, 105158 bytes).
+pe1/public/lm/lmr12.pfb></usr/share/texmf/fonts/type1/public/lm/lmri12.pfb></us
+r/share/texmf/fonts/type1/public/lm/lmsy10.pfb></usr/share/texmf/fonts/type1/pu
+blic/lm/lmtt12.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1000.pfb><
+/usr/share/texmf/fonts/type1/public/cm-super/sfrm2074.pfb>
+Output written on monografia.pdf (15 pages, 169436 bytes).
 PDF statistics:
- 137 PDF objects out of 1000 (max. 8388607)
- 111 compressed objects within 2 object streams
- 25 named destinations out of 1000 (max. 500000)
- 70 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 237 PDF objects out of 1000 (max. 8388607)
+ 201 compressed objects within 3 object streams
+ 41 named destinations out of 1000 (max. 500000)
+ 78 words of extra memory for PDF output out of 10000 (max. 10000000)
 
