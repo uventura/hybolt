@@ -92,4 +92,17 @@
 \newblock {\latintext
   \btxurlfont{https://thejaps.org.pk/AbstractView.aspx?mid=2024-japs-1928}}.
 
+\btxselectlanguage {english}
+\bibitem {WOS:000381844400033}
+\btxnamefont {\btxlastnamefont {Ko}, Dongyub}, \btxnamefont {Kijong
+  \btxlastnamefont {Koo}}\btxandcomma {} \btxandlong {}\ \btxnamefont
+  {Do\btxfnamespacelong Young \btxlastnamefont {Kim}}\btxauthorcolon\
+  \btxjtitlefont {\btxifchangecase {Reducing the decoding complexity of raptorq
+  codes for delay sensitive applications using a simplified and scaled-down
+  matrix}{Reducing the decoding complexity of RaptorQ codes for delay sensitive
+  applications using a simplified and scaled-down matrix}}.
+\newblock \btxjournalfont {AEU-INTERNATIONAL JOURNAL OF ELECTRONICS AND
+  COMMUNICATIONS}, 70(9):1356--1360, 2016\ifbtxprintISSN {,
+  \mbox{\btxISSN~\btxISSNfont {1434-8411}}}.
+
 \end{thebibliography}

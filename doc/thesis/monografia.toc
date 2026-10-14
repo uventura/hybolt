@@ -3,14 +3,18 @@
 \babel@toc {american}{}\relax 
 \contentsline {chapter}{\numberline {1}Apresentação}{1}{chapter.1}%
 \contentsline {section}{\numberline {1.1}Objetivos}{4}{section.1.1}%
-\contentsline {chapter}{\numberline {2}HySAIL}{5}{chapter.2}%
-\contentsline {chapter}{\numberline {3}Trabalhos Relacionados}{6}{chapter.3}%
-\contentsline {chapter}{\numberline {4}Metodologia}{7}{chapter.4}%
-\contentsline {chapter}{\numberline {5}Resultados}{8}{chapter.5}%
-\contentsline {chapter}{Refer\^encias}{9}{section*.6}%
+\contentsline {chapter}{\numberline {2}Fundamentação Teórica e Trabalhos Relacionados}{5}{chapter.2}%
+\contentsline {chapter}{\numberline {3}Metodologia de Pesquisa}{6}{chapter.3}%
+\contentsline {chapter}{\numberline {4}Proposta}{7}{chapter.4}%
+\contentsline {chapter}{\numberline {5}Implementação}{8}{chapter.5}%
+\contentsline {chapter}{\numberline {6}Resultados}{9}{chapter.6}%
+\contentsline {chapter}{\numberline {7}Conclusão}{10}{chapter.7}%
+\contentsline {chapter}{Refer\^encias}{11}{section*.6}%
 \babel@toc {american}{}\relax 
 \babel@toc {english}{}\relax 
 \babel@toc {portuguese}{}\relax 
+\babel@toc {american}{}\relax 
+\babel@toc {english}{}\relax 
 \babel@toc {american}{}\relax 
 \babel@toc {portuguese}{}\relax 
 \babel@toc {english}{}\relax 
