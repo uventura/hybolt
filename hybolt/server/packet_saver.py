@@ -1,5 +1,6 @@
 import pickle
 import random
+import hashlib
 from pathlib import Path
 
 from hybolt.logger.progress import advance_progress, create_progress_task, get_progress
@@ -55,9 +56,7 @@ class PacketSaver:
         packet.set_server(server)
         server_storage = Path(server._storage_location)
         server_storage.mkdir(parents=True, exist_ok=True)
-        packet_file = (
-            server_storage / self._packet_file_name(packet.index)
-        )
+        packet_file = server_storage / self._packet_file_name(packet.index)
 
         with open(packet_file, "wb") as f:
             pickle.dump(packet, f)
@@ -69,6 +68,7 @@ class PacketSaver:
                 degree=packet.degree,
                 indices=packet.indices,
                 packet_file=packet_file.name,
+                packet_sha256=hashlib.sha256(packet.data).hexdigest(),
             )
         )
 
@@ -77,4 +77,6 @@ class PacketSaver:
     def _packet_file_name(self, packet_index):
         if self.chunk_index is None:
             return f"{self.input_path.stem}_packet_{packet_index}.pkl"
-        return f"{self.input_path.stem}_chunk_{self.chunk_index}_packet_{packet_index}.pkl"
+        return (
+            f"{self.input_path.stem}_chunk_{self.chunk_index}_packet_{packet_index}.pkl"
+        )

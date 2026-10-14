@@ -45,9 +45,7 @@ def test_given_encoding_when_logging_then_records_phase_and_block_progress(
     input_file = tmp_path / "input.txt"
     input_file.write_text("HyBolt", encoding="utf-8")
     messages = []
-    monkeypatch.setattr(
-        "hybolt.hybolt_encode.execution_logger.debug", messages.append
-    )
+    monkeypatch.setattr("hybolt.hybolt_encode.execution_logger.debug", messages.append)
     monkeypatch.setattr(
         "hybolt.encryption.encode.execution_logger.debug", messages.append
     )
@@ -63,8 +61,10 @@ def test_given_encoding_when_logging_then_records_phase_and_block_progress(
     ).encode()
 
     assert any(message.startswith("Encoding input:") for message in messages)
-    assert any(message.startswith("Starting MACs for block") for message in messages)
-    assert "MAC calculation completed" in messages
+    assert any(
+        message.startswith("Generating ") and "RaptorQ packets" in message
+        for message in messages
+    )
     assert "Packet distribution completed" in messages
     assert "Encoding completed successfully" in messages
 
@@ -113,11 +113,12 @@ def test_given_chunked_file_when_encoding_and_decoding_then_reports_chunk_progre
         set_progress(None)
 
     chunk_tasks = [
-        task for task in progress.tasks.values() if task["description"].endswith("chunks")
+        task
+        for task in progress.tasks.values()
+        if task["description"].endswith("chunks")
     ]
     assert {
-        (task["description"], task["completed"], task["total"])
-        for task in chunk_tasks
+        (task["description"], task["completed"], task["total"]) for task in chunk_tasks
     } == {
         ("Encoding chunks", 1, 1),
         ("Reconstructing chunks", 1, 1),

@@ -1,8 +1,10 @@
 import json
 import random
+import hashlib
 from pathlib import Path
 
 import numpy as np
+from raptorq import Decoder as RaptorQDecoder
 
 from hybolt.encryption.block import Block, LocalBlock
 from hybolt.encryption.encoding_metadata import EncodingMetadata
@@ -52,11 +54,45 @@ class Decode:
         return self._decode_current_metadata()
 
     def _decode_current_metadata(self):
+        if getattr(self, "_codec", "lt") == "raptorq":
+            return self._retrieve_raptorq_data()
+
         data = self._retrieve_blocks()
         result = b""
         for msg_i in sorted(data.keys()):
             result += data[msg_i].data
         return remove_padding(result)
+
+    def _retrieve_raptorq_data(self):
+        if self._transfer_length <= 0 or self._symbol_size <= 0:
+            raise ValueError("RaptorQ metadata is missing transfer parameters")
+
+        decoder = RaptorQDecoder.with_defaults(self._transfer_length, self._symbol_size)
+        for packet in self._packets:
+            server = self._server_cache.get(packet.server)
+            if server is None:
+                raise ValueError(
+                    f"Server not found for storage location: {packet.server}"
+                )
+
+            packet_data = server.download_block(packet.packet_index, packet.packet_file)
+            expected_hash = getattr(packet, "packet_sha256", "")
+            if not expected_hash:
+                raise ValueError(
+                    f"RaptorQ packet {packet.packet_index} has no integrity hash"
+                )
+            actual_hash = hashlib.sha256(packet_data).hexdigest()
+            if actual_hash != expected_hash:
+                raise ValueError(
+                    f"Integrity verification failed for RaptorQ packet "
+                    f"{packet.packet_index}"
+                )
+
+            decoded = decoder.decode(packet_data)
+            if decoded is not None:
+                return decoded
+
+        raise ValueError("Insufficient valid RaptorQ packets to reconstruct data")
 
     def _retrieve_blocks(self):
         retrieved_data = {}
@@ -195,6 +231,12 @@ class Decode:
             f"{len(metadata.packets)} packets"
         )
         self._polynomials = metadata.polynomials
+        self._codec = getattr(metadata, "codec", "lt")
+        self._transfer_length = getattr(metadata, "transfer_length", 0)
+        self._symbol_size = getattr(metadata, "symbol_size", 0)
+        self._packets = metadata.packets
+        if self._codec == "raptorq":
+            return
         self._local_blocks = self._build_local_blocks(metadata, self._server_cache)
         self._local_mac = self._build_local_mac(metadata)
 

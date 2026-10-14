@@ -1,136 +1,61 @@
-import random
-from unittest.mock import patch
-
-import numpy as np
 import pytest
+from raptorq import Decoder
 
 from hybolt.constant import MAX_MAC_THREADS
-from hybolt.encryption import encode as encode_module
 from hybolt.encryption.encode import Encode
 
 
-def compute_num_blocks(data, block_size):
-    pad = block_size - (len(data) % block_size)
-    if pad == 0:
-        pad = block_size
-    return (len(data) + pad) // block_size
+def test_given_input_data_when_encoding_then_generates_source_and_repair_packets():
+    encoded = Encode(b"HelloWorld", block_size=2)
+
+    assert len(encoded.packets) > encoded.num_blocks
+    assert [packet.index for packet in encoded.packets] == list(
+        range(len(encoded.packets))
+    )
 
 
-def test_given_input_data_when_encoding_then_generates_expected_packet_count():
-    data = b"HelloWorld"
+def test_given_input_data_when_encoding_then_generates_raptorq_packets():
     block_size = 2
+    encoded = Encode(b"HelloWorld", block_size)
 
-    enc = Encode(data, block_size)
-
-    assert len(enc.packets) == enc.num_blocks * 6
-
-
-def test_given_input_data_when_encoding_then_generates_degrees_within_valid_range():
-    data = b"HelloWorld"
-    block_size = 2
-
-    enc = Encode(data, block_size)
-    num_blocks = compute_num_blocks(data, block_size)
-
-    for pkt in enc.packets:
-        assert 1 <= pkt.degree <= num_blocks
+    for packet in encoded.packets:
+        assert packet.degree == 0
+        assert packet.indices == []
+        assert len(packet.data) == block_size + 4
 
 
-def test_given_input_data_when_encoding_then_generates_indices_count_matching_degree():
-    data = b"HelloWorld"
-    block_size = 2
+def test_given_missing_source_packets_when_decoding_then_recovers_with_repair_packets():
+    original = b"RaptorQ recovers data after packet loss."
+    encoded = Encode(original, block_size=8)
+    decoder = Decoder.with_defaults(encoded.total_block_bytes, encoded.symbol_size)
 
-    enc = Encode(data, block_size)
+    decoded = None
+    for packet in encoded.packets[2:]:
+        decoded = decoder.decode(packet.data)
+        if decoded is not None:
+            break
 
-    for pkt in enc.packets:
-        assert len(pkt.indices) == pkt.degree
-
-
-def test_given_input_data_when_encoding_then_generates_indices_within_valid_range():
-    data = b"HelloWorld"
-    block_size = 2
-
-    enc = Encode(data, block_size)
-    num_blocks = compute_num_blocks(data, block_size)
-
-    for pkt in enc.packets:
-        for idx in pkt.indices:
-            assert 0 <= idx < num_blocks
+    assert decoded is not None
+    assert decoded == original
 
 
 def test_given_input_data_when_encoding_then_generates_packet_data_as_bytes():
-    data = b"HelloWorld"
+    encoded = Encode(b"HelloWorld", 2)
 
-    enc = Encode(data, 2)
-
-    for pkt in enc.packets:
-        assert isinstance(pkt.data, bytes)
+    assert all(isinstance(packet.data, bytes) for packet in encoded.packets)
 
 
-def test_given_single_small_block_when_encoding_then_packet_reflects_padding():
-    data = b"A"
-    block_size = 10
+def test_given_single_small_block_when_encoding_then_preserves_transfer_length():
+    encoded = Encode(b"A", block_size=10)
 
-    with (
-        patch("hybolt.encryption.encode.np.random.choice", return_value=1),
-        patch("hybolt.encryption.encode.random.sample", return_value=[0]),
-    ):
-        enc = Encode(data, block_size)
-        pkt = enc.packets[0]
-
-        expected = b"A" + bytes([9]) * 9
-
-        assert pkt.degree == 1
-        assert pkt.indices == [0]
-        assert pkt.data == expected
+    assert encoded.total_block_bytes == 1
+    assert all(len(packet.data) == 14 for packet in encoded.packets)
 
 
-def test_given_input_data_when_encoding_then_blocks_include_padding():
-    data = b"ABCDEFGH"
-    block_size = 2
+def test_given_input_data_when_encoding_then_blocks_preserve_source_bytes():
+    encoded = Encode(b"ABCDEFGH", block_size=2)
 
-    enc = Encode(data, block_size)
-    blocks = enc._blocks
-
-    assert blocks[:-1] == [b"AB", b"CD", b"EF", b"GH"]
-    assert blocks[-1] == b"\x02\x02"
-
-
-def test_given_selected_blocks_when_encoding_then_packet_matches_manual_xor():
-    data = b"\x01\x02\x03\x04"
-    block_size = 1
-
-    with (
-        patch("hybolt.encryption.encode.np.random.choice", return_value=3),
-        patch("hybolt.encryption.encode.random.sample", return_value=[2, 0, 1]),
-    ):
-        enc = Encode(data, block_size)
-        pkt = enc.packets[0]
-        blocks = enc._blocks
-
-        result = blocks[pkt.indices[0]]
-        for i in pkt.indices[1:]:
-            result = bytes(x ^ y for x, y in zip(result, blocks[i]))
-
-        assert pkt.data == result
-
-
-def test_given_seeded_rng_when_encoding_then_result_is_deterministic():
-    data = b"HelloWorld"
-    block_size = 2
-
-    random.seed(42)
-    np.random.seed(42)
-    enc1 = Encode(data, block_size)
-
-    random.seed(42)
-    np.random.seed(42)
-    enc2 = Encode(data, block_size)
-
-    for p1, p2 in zip(enc1.packets, enc2.packets):
-        assert p1.degree == p2.degree
-        assert p1.indices == p2.indices
-        assert p1.data == p2.data
+    assert encoded._blocks == [b"AB", b"CD", b"EF", b"GH"]
 
 
 def test_given_empty_data_when_encoding_then_raises_value_error():
@@ -146,104 +71,8 @@ def test_given_out_of_range_max_threads_when_encoding_then_raises_value_error(
         Encode(b"HelloWorld", block_size=2, max_threads=max_threads)
 
 
-def test_given_configured_workers_when_encoding_then_calculates_mac_blocks_with_them(
-    monkeypatch,
-):
-    class RecordingExecutor:
-        max_workers = None
+def test_given_raptorq_encoding_then_omits_incompatible_source_mac_metadata():
+    encoded = Encode(b"HelloWorld", block_size=2)
 
-        def __init__(self, max_workers):
-            RecordingExecutor.max_workers = max_workers
-
-        def __enter__(self):
-            return self
-
-        def __exit__(self, exc_type, exc_value, traceback):
-            return False
-
-        def map(self, function, values):
-            return map(function, values)
-
-    monkeypatch.setattr(encode_module, "ThreadPoolExecutor", RecordingExecutor)
-
-    encoded = Encode(b"HelloWorld", block_size=2, max_threads=2)
-
-    assert RecordingExecutor.max_workers == 2
-    assert list(encoded.mac_blocks) == list(range(encoded.num_blocks))
-    assert all(
-        mac.block_index == block_index
-        for block_index, macs in encoded.mac_blocks.items()
-        for mac in macs
-    )
-
-
-def test_given_mac_block_calculation_when_encoding_then_progress_reports_each_mac(
-    monkeypatch,
-):
-    class RecordingProgress:
-        def __init__(self):
-            self.tasks = {}
-            self.next_task_id = 0
-
-        def add_task(self, description, total):
-            task_id = self.next_task_id
-            self.next_task_id += 1
-            self.tasks[task_id] = {
-                "advances": 0,
-                "description": description,
-                "total": total,
-            }
-            return task_id
-
-        def advance(self, task_id):
-            self.tasks[task_id]["advances"] += 1
-
-    progress = RecordingProgress()
-    monkeypatch.setattr(encode_module, "get_progress", lambda: progress)
-
-    encoded = Encode(b"HelloWorld", block_size=2, max_threads=2)
-    mac_task = next(
-        task
-        for task in progress.tasks.values()
-        if task["description"].startswith("Calculating MAC blocks")
-    )
-
-    assert mac_task == {
-        "advances": encoded.num_blocks * len(encoded.polynomials),
-        "description": "Calculating MAC blocks",
-        "total": encoded.num_blocks * len(encoded.polynomials),
-    }
-
-
-def test_given_mocked_random_indices_when_encoding_then_preserves_indices_order():
-    data = b"ABCDEFGH"
-    block_size = 2
-
-    with (
-        patch("hybolt.encryption.encode.np.random.choice", return_value=3),
-        patch("hybolt.encryption.encode.random.sample", return_value=[2, 0, 1]),
-    ):
-        enc = Encode(data, block_size)
-        pkt = enc.packets[0]
-
-        assert pkt.degree == 3
-        assert pkt.indices == [2, 0, 1]
-
-
-def test_given_forced_indices_order_when_encoding_then_packet_respects_that_order():
-    data = b"ABCDEFGH"
-    block_size = 2
-
-    with (
-        patch("hybolt.encryption.encode.np.random.choice", return_value=3),
-        patch("hybolt.encryption.encode.random.sample", return_value=[2, 0, 1]),
-    ):
-        enc = Encode(data, block_size)
-        pkt = enc.packets[0]
-        blocks = enc._blocks
-
-        expected = blocks[2]
-        expected = bytes(x ^ y for x, y in zip(expected, blocks[0]))
-        expected = bytes(x ^ y for x, y in zip(expected, blocks[1]))
-
-        assert pkt.data == expected
+    assert encoded.polynomials == []
+    assert encoded.mac_blocks == {}

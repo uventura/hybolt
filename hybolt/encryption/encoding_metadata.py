@@ -20,6 +20,7 @@ class PacketMetadata:
     degree: int
     indices: List[int]
     packet_file: str = ""
+    packet_sha256: str = ""
 
 
 @dataclass
@@ -29,6 +30,9 @@ class ChunkMetadata:
     polynomials: List[np.ndarray]
     blocks: List[BlockMetadata]
     packets: List[PacketMetadata]
+    codec: str = "raptorq"
+    transfer_length: int = 0
+    symbol_size: int = 0
 
 
 @dataclass
@@ -63,5 +67,16 @@ class EncodingMetadata:
             metadata.packet_root_hash = ""
         if not hasattr(metadata, "chunks"):
             metadata.chunks = None
+        if metadata.chunks is not None:
+            for chunk in metadata.chunks:
+                if not hasattr(chunk, "codec"):
+                    chunk.codec = "lt"
+                if not hasattr(chunk, "transfer_length"):
+                    chunk.transfer_length = 0
+                if not hasattr(chunk, "symbol_size"):
+                    chunk.symbol_size = 0
+                for packet in chunk.packets:
+                    if not hasattr(packet, "packet_sha256"):
+                        packet.packet_sha256 = ""
 
         return metadata

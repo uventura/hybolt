@@ -132,6 +132,9 @@ class HyboltEncode:
             polynomials=encoded.polynomials,
             blocks=blocks,
             packets=packets,
+            codec="raptorq",
+            transfer_length=encoded.total_block_bytes,
+            symbol_size=encoded.symbol_size,
         )
 
     def _determine_block_size(self, file_size: int) -> int:
@@ -173,6 +176,7 @@ class HyboltEncode:
                 "degree": packet.degree,
                 "indices": packet.indices,
                 "packet_file": packet.packet_file,
+                "packet_sha256": packet.packet_sha256,
             }
             for packet in sorted(
                 packets, key=lambda item: (item.server, item.packet_file)

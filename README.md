@@ -5,8 +5,8 @@ storage protocol. It encodes a file into redundant packets, distributes those
 packets across storage locations, and reconstructs the original data from the
 packet metadata.
 
-The implementation uses fountain-style packet encoding, XOR operations over
-finite fields, and local MACs for packet integrity challenges.
+The implementation uses RaptorQ (RFC 6330) fountain coding and stores a
+SHA-256 integrity hash for every encoded packet.
 
 ## Requirements
 
@@ -67,30 +67,21 @@ hybolt decode \
   output/hello_metadata.pkl
 ```
 
-HyBolt reads a source file in independent chunks sized from the MAC security
+HyBolt reads a source file in independent chunks sized from the security
 parameter (`POLYNOMIAL_LAMBDA × 512` bytes; 65,024 bytes with the default
 lambda). Each chunk is encoded, distributed, and represented separately in
 metadata, allowing reconstruction to decode each chunk before joining them in
-their original order. Use `--block-size` on `encode` to select the block size
-inside each chunk. If omitted, HyBolt chooses a size equal to 10% of that
-chunk, with a minimum of one byte.
+their original order. Use `--block-size` on `encode` to select the RaptorQ
+symbol size inside each chunk. If omitted, HyBolt chooses a size equal to 10%
+of that chunk, with a minimum of one byte.
 
 Use `--chunk-count` to divide a file into an exact number of balanced chunks,
 for example `hybolt encode --chunk-count 8 ...`. The command prints the
 average MAC-and-packet-generation time per chunk after encoding completes.
 
-MAC calculation uses up to eight worker threads by default. Use
-`--max-threads` to select a lower limit between 1 and 8, for example:
-
-```sh
-hybolt encode --max-threads 4 --server-list examples/server_list_example.json examples/hello.txt
-```
-
 Each `encode` appends `file_path`, `file_size` (bytes), total `runtime`
-(seconds), average `block_size` (bytes), and average
-`polynomial_division_runtime` (seconds per division) to `encode_runtime.json`
-in the log directory (`logs/` by default). Plot runtime against file size and
-polynomial-division runtime against block size with:
+(seconds) and average `block_size` (bytes) to `encode_runtime.json` in the log
+directory (`logs/` by default). Plot runtime against file size with:
 
 ```sh
 hybolt plot logs/encode_runtime.json \
@@ -136,3 +127,12 @@ file-size/runtime and block-size/polynomial-division plots under `logs/`.
 `make binary_example` compiles [examples/hello_world.c](examples/hello_world.c),
 encodes and decodes the generated executable, compares the binary bytes, then
 runs the decoded executable. A C compiler is required.
+
+Benchmark RaptorQ encoding and recovery after packet loss with:
+
+```sh
+python scripts/fountain_codes_tests.py
+```
+
+The script writes `logs/fountain_codes_runtime.png`. Use `--sizes`,
+`--samples`, and `--loss-count` to change its workload.
