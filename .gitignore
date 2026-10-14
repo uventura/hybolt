@@ -6,3 +6,7 @@ output/
 logs/
 *.py[cod]
 .vscode/
+
+# LaTeX thesis build artifacts
+doc/thesis/monografia.{acn,acr,alg,aux,bbl,blg,glg,glo,gls,glsdefs,ist,lof,log,out,pdf,toc}
+doc/thesis/monografia.pdflatex.*.log
