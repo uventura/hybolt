@@ -1,0 +1,67 @@
+\section{Conceitos Fundamentais}
+Antes de detalhar o modelo proposto, é importante compreender alguns conceitos matemáticos relacionados à codificação de blocos. Por fim, para que possamos compreender a nova abordagem adotada, é necessário revisar o funcionamento de HySAIL, LT Codes e RaptorQ Codes.
+
+\section{Corpos finitos e corpo de Galois}%
+O corpo de Galois é uma estrutura algébrica que define operações e suas propriedades sobre um conjunto finito de elementos. No contexto do HySail, destacam-se o corpo $GF(2)$ e suas extensões $GF(2^n)$, que permitem representar e manipular dados binários por meio de operações matematicamente bem definidas.
+
+Em $GF(2)$, os únicos elementos são 0 e 1, e a soma segue a mesma lógica da operação XOR, ou seja, o resultado é 0 quando os operandos são iguais e 1 quando são diferentes. Assim, $1+1=0$ e $1+0=1$. As extensões $GF(2^n)$, por sua vez, permitem operar sob elementos representados por combinações de $n$ coeficientes binários.
+
+\subsection{Exemplo de representação polinomial}%
+Considere o vetor binário 1011. Adotando a convenção usada pelo projeto, em que a primeira posição do vetor representa o termo constante, o bloco é lido em três passos:
+
+\begin{enumerate}
+	\item o primeiro coeficiente vale 1 e representa $1$;
+	\item o segundo coeficiente vale 0 e representa $0x$;
+	\item os coeficientes seguintes valem 1 e 1, representando $x^2$ e $x^3$.
+\end{enumerate}
+
+Assim, o bloco passa a ser escrito como $1 + x^2 + x^3$.
+
+\section[Divisão polinomial em GF(2)]{Divisão polinomial em $GF(2)$}%
+A divisão polinomial em $GF(2)$ segue a mesma lógica estrutural da divisão entre inteiros, mas com uma diferença importante: como os coeficientes pertencem a um corpo binário, subtração e soma são equivalentes a XOR. Portanto, ao somar dois termos iguais, eles se anulam: $x^k + x^k = 0$.
+
+Dado um dividendo $m(x)$ e um divisor $p(x)$, procura-se obter um quociente $q(x)$ e um resto $r(x)$ tais que
+
+$$
+m(x) = q(x) \cdot p(x) + r(x),
+$$
+
+com $\deg(r) < \deg(p)$.
+
+O procedimento é repetido enquanto o resto parcial tiver grau maior ou igual ao grau do divisor. Em cada iteração, divide-se o termo de maior grau do resto parcial pelo termo de maior grau do divisor. O resultado é o próximo termo do quociente. Em seguida, esse termo multiplica o divisor, e aplica-se XOR entre o produto e o resto parcial. Essa operação elimina o termo de maior grau, reduzindo o grau do novo resto.
+
+\subsection{Exemplo de divisão passo a passo}%
+Seja $m(x) = x^3 + x + 1$ o dividendo e $p(x) = x^2 + 1$ o divisor. Inicialmente, o resto parcial é o próprio dividendo:
+
+$$
+r_0(x) = x^3 + x + 1.
+$$
+
+\begin{enumerate}
+	\item O termo de maior grau de $r_0(x)$ é $x^3$ e o de $p(x)$ é $x^2$. Logo, o próximo termo do quociente é $x^3 / x^2 = x$.
+	\item Multiplica-se esse termo pelo divisor: $x \cdot p(x) = x(x^2 + 1) = x^3 + x$.
+	\item Aplica-se XOR entre o resto parcial e o produto:
+	\[
+	r_1(x) = (x^3 + x + 1) + (x^3 + x) = 1.
+	\]
+	Os termos $x^3$ e $x$ se anulam porque cada um aparece duas vezes.
+	\item Como $\deg(1) = 0$ é menor que $\deg(p) = 2$, a divisão termina. O quociente é $q(x) = x$ e o resto é $r(x) = 1$.
+\end{enumerate}
+
+Substituindo o quociente e o resto obtidos na identidade da divisão, verifica-se que
+
+$$
+x^3 + x + 1 = x(x^2 + 1) + 1.
+$$
+
+Pela convenção em que o primeiro bit representa o coeficiente do termo constante, o quociente $q(x) = x$ tem representação binária 01, e o resto $r(x) = 1$ tem representação binária 1. Caso o resto seja armazenado com dois bits, que é o número de coeficientes de grau menor que o divisor de grau 2, sua representação é 10.
+
+
+\subsection{HySAIL e Codificação de Blocos}
+Empty
+
+\subsection{LT Codes}
+Empty
+
+\subsection{RaptorQ Codes}
+Empty
