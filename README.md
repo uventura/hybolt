@@ -86,6 +86,18 @@ MAC calculation uses up to eight worker threads by default. Use
 hybolt encode --max-threads 4 --server-list examples/server_list_example.json examples/hello.txt
 ```
 
+Each `encode` appends `file_path`, `file_size` (bytes), total `runtime`
+(seconds), average `block_size` (bytes), and average
+`polynomial_division_runtime` (seconds per division) to `encode_runtime.json`
+in the log directory (`logs/` by default). Plot runtime against file size and
+polynomial-division runtime against block size with:
+
+```sh
+hybolt plot logs/encode_runtime.json \
+  --output encode_runtime.png \
+  --polynomial-division-output polynomial_division_runtime.png
+```
+
 Pass `--debug` to either command to collect detailed execution timing and
 diagnostic logs under `logs/`. Use `--log-dir <directory>` to write
 `execution.log` to a different directory, for example
@@ -117,8 +129,9 @@ a failure status if the files differ.
 `make big_lorem_example` and `make big_lorem_example_debug` run the same
 round-trip verification for the 1 MiB
 [`examples/lorem_ipsum/1024kib.txt`](examples/lorem_ipsum/1024kib.txt) fixture.
-`make all_lorem_ipsum_sizes` round-trips all lorem ipsum examples smaller than
-4 MiB in [`examples/lorem_ipsum/`](examples/lorem_ipsum/).
+`make all_lorem_ipsum_sizes` encodes each lorem ipsum fixture smaller than
+1,024 KiB in [`examples/lorem_ipsum/`](examples/lorem_ipsum/), then writes the
+file-size/runtime and block-size/polynomial-division plots under `logs/`.
 
 `make binary_example` compiles [examples/hello_world.c](examples/hello_world.c),
 encodes and decodes the generated executable, compares the binary bytes, then

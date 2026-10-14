@@ -40,6 +40,8 @@ class HyboltEncode:
         self.max_threads = max_threads
         self.chunk_count = chunk_count
         self.average_chunk_encode_seconds = 0.0
+        self.average_block_size = 0.0
+        self.average_polynomial_division_seconds = 0.0
 
     @stop_record_timeit
     def encode(self) -> int:
@@ -55,6 +57,10 @@ class HyboltEncode:
         chunks = []
         packet_count = 0
         chunk_encode_durations = []
+        total_block_bytes = 0
+        block_count = 0
+        polynomial_division_total_seconds = 0.0
+        polynomial_division_count = 0
         progress = get_progress()
         chunk_task_id = create_progress_task(
             progress,
@@ -71,6 +77,12 @@ class HyboltEncode:
             encode_started_at = time.perf_counter()
             encoded = Encode(chunk_data, block_size, self.max_threads)
             chunk_encode_durations.append(time.perf_counter() - encode_started_at)
+            total_block_bytes += encoded.total_block_bytes
+            block_count += encoded.num_blocks
+            polynomial_division_total_seconds += (
+                encoded.polynomial_division_total_seconds
+            )
+            polynomial_division_count += encoded.polynomial_division_count
             saver = PacketSaver(
                 encoded.packets, input_path, self.server_list, chunk_index
             )
@@ -86,6 +98,12 @@ class HyboltEncode:
         if chunk_encode_durations:
             self.average_chunk_encode_seconds = sum(chunk_encode_durations) / len(
                 chunk_encode_durations
+            )
+        if block_count:
+            self.average_block_size = total_block_bytes / block_count
+        if polynomial_division_count:
+            self.average_polynomial_division_seconds = (
+                polynomial_division_total_seconds / polynomial_division_count
             )
         execution_logger.debug("Starting metadata write")
         self._save_packet_metadata(input_path, chunks)

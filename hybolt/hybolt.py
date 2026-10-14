@@ -1,4 +1,6 @@
 import json
+import os
+import time
 
 import click
 from rich.progress import (
@@ -17,6 +19,11 @@ from hybolt.encryption.digest import Digest
 from hybolt.logger.logger import execution_logger
 from hybolt.logger.progress import set_progress
 from hybolt.utils.debug import set_debugging
+from hybolt.utils.runtime_records import (
+    append_runtime_record,
+    plot_polynomial_division_runtime,
+    plot_runtime_records,
+)
 
 
 def _create_progress() -> Progress:
@@ -118,13 +125,24 @@ def encode_command(
             max_threads,
             chunk_count,
         )
+        encode_started_at = time.perf_counter()
         packet_count = hybolt_encode.encode()
+        encoding_runtime = time.perf_counter() - encode_started_at
         set_progress(None)
 
+    append_runtime_record(
+        log_dir,
+        input_file,
+        os.path.getsize(input_file),
+        encoding_runtime,
+        hybolt_encode.average_block_size,
+        hybolt_encode.average_polynomial_division_seconds,
+    )
     click.echo(
         f"Encoded {packet_count} packets distributed to {len(servers)} servers. "
         f"Average chunk encoding time: "
-        f"{hybolt_encode.average_chunk_encode_seconds:.3f}s"
+        f"{hybolt_encode.average_chunk_encode_seconds:.3f}s. "
+        f"Total encoding runtime: {encoding_runtime:.3f}s"
     )
 
 
@@ -166,6 +184,38 @@ def decode_command(metadata_file, server_file, output_file, debug, log_dir):
         set_progress(None)
 
     click.echo(f"Decoded file written to {output_path}")
+
+
+@main.command("plot")
+@click.argument("runtime_file", type=click.Path(exists=True, dir_okay=False))
+@click.option(
+    "--output",
+    type=click.Path(dir_okay=False),
+    default="encode_runtime.png",
+    show_default=True,
+    help="Path of the generated plot image",
+)
+@click.option(
+    "--polynomial-division-output",
+    type=click.Path(dir_okay=False),
+    default="polynomial_division_runtime.png",
+    show_default=True,
+    help="Path of the polynomial division runtime plot image",
+)
+def plot_command(runtime_file, output, polynomial_division_output):
+    try:
+        output_path = plot_runtime_records(runtime_file, output)
+        polynomial_division_output_path = plot_polynomial_division_runtime(
+            runtime_file, polynomial_division_output
+        )
+    except ValueError as error:
+        raise click.ClickException(str(error)) from error
+
+    click.echo(f"Runtime plot written to {output_path}")
+    click.echo(
+        "Polynomial division runtime plot written to "
+        f"{polynomial_division_output_path}"
+    )
 
 
 if __name__ == "__main__":

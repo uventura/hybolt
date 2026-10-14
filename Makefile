@@ -73,14 +73,7 @@ all_lorem_ipsum_sizes:
 	mkdir -p output/server_storage/server_1
 	mkdir -p output/server_storage/server_2
 	mkdir -p output/server_storage/server_3
-	set -e; for input_file in examples/lorem_ipsum/*.txt; do \
-		if [ "$$(wc -c < "$$input_file")" -ge 4194304 ]; then continue; fi; \
-		file_name=$$(basename "$$input_file" .txt); \
-		output_file="output/$${file_name}_decoded.txt"; \
-		hybolt encode --server-list examples/server_list_example.json --metadata-output output/ "$$input_file"; \
-		hybolt decode --server-file examples/server_list_example.json --output-file "$$output_file" "output/$${file_name}_metadata.pkl"; \
-		python scripts/compare_files.py "$$input_file" "$$output_file"; \
-	done
+	python scripts/all_lorem_ipsum.py
 
 binary_example:
 	rm -rf output/*

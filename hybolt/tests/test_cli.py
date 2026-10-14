@@ -19,6 +19,8 @@ def test_given_max_threads_option_when_encoding_then_forwards_max_threads(
 
     class StubHyboltEncode:
         average_chunk_encode_seconds = 0.25
+        average_block_size = 1.0
+        average_polynomial_division_seconds = 0.01
 
         def __init__(self, *args):
             captured["max_threads"] = args[4]
@@ -32,6 +34,7 @@ def test_given_max_threads_option_when_encoding_then_forwards_max_threads(
         "hybolt.hybolt.execution_logger.set_log_directory",
         lambda log_dir: captured.update(log_dir=log_dir),
     )
+    monkeypatch.setattr("hybolt.hybolt.time.perf_counter", iter([1.0, 3.5]).__next__)
 
     result = CliRunner().invoke(
         main,
@@ -50,6 +53,7 @@ def test_given_max_threads_option_when_encoding_then_forwards_max_threads(
     assert captured["chunk_count"] is None
     assert captured["log_dir"] == "logs"
     assert "Average chunk encoding time: 0.250s" in result.output
+    assert "Total encoding runtime: 2.500s" in result.output
 
 
 def test_given_chunk_count_option_when_encoding_then_forwards_chunk_count(
@@ -66,6 +70,8 @@ def test_given_chunk_count_option_when_encoding_then_forwards_chunk_count(
 
     class StubHyboltEncode:
         average_chunk_encode_seconds = 0.25
+        average_block_size = 1.0
+        average_polynomial_division_seconds = 0.01
 
         def __init__(self, *args):
             captured["chunk_count"] = args[5]

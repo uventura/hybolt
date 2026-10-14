@@ -1,4 +1,5 @@
 import random
+import time
 from concurrent.futures import ThreadPoolExecutor
 from functools import reduce
 import numpy as np
@@ -75,6 +76,22 @@ class Encode:
     def polynomials(self):
         return self._polynomials
 
+    @property
+    def average_block_size(self):
+        return sum(len(block) for block in self._blocks) / len(self._blocks)
+
+    @property
+    def total_block_bytes(self):
+        return sum(len(block) for block in self._blocks)
+
+    @property
+    def polynomial_division_total_seconds(self):
+        return self._polynomial_division_total_seconds
+
+    @property
+    def polynomial_division_count(self):
+        return self._polynomial_division_count
+
     def _encode(self):
         packets = {}
         K = self._num_blocks
@@ -117,6 +134,8 @@ class Encode:
 
     def _calculate_mac_for_each_block(self):
         mac_blocks = {}
+        self._polynomial_division_total_seconds = 0.0
+        self._polynomial_division_count = 0
         execution_logger.debug(
             f"Calculating {len(self._blocks) * len(self._polynomials)} MACs "
             f"for {len(self._blocks)} blocks"
@@ -128,11 +147,15 @@ class Encode:
         )
 
         with ThreadPoolExecutor(max_workers=self._max_threads) as executor:
-            for block_index, block_macs in executor.map(
-                self._calculate_mac_for_block,
-                enumerate(self._blocks),
-            ):
+            for (
+                block_index,
+                block_macs,
+                division_total_seconds,
+                division_count,
+            ) in executor.map(self._calculate_mac_for_block, enumerate(self._blocks)):
                 mac_blocks[block_index] = block_macs
+                self._polynomial_division_total_seconds += division_total_seconds
+                self._polynomial_division_count += division_count
                 execution_logger.debug(
                     f"Completed MACs for block {block_index + 1}/"
                     f"{len(self._blocks)}"
@@ -149,16 +172,20 @@ class Encode:
             f"({len(block)} bytes)"
         )
         representation = ga.bytes_to_poly_coeffs(block)
-        macs = [
-            op.calculate_mac_for_block(
-                representation=representation,
-                polynomial=polynomial,
-                polynomial_index=polynomial_index,
-                block_index=block_index,
+        macs = []
+        division_total_seconds = 0.0
+        for polynomial_index, polynomial in enumerate(self._polynomials):
+            division_started_at = time.perf_counter()
+            macs.append(
+                op.calculate_mac_for_block(
+                    representation=representation,
+                    polynomial=polynomial,
+                    polynomial_index=polynomial_index,
+                    block_index=block_index,
+                )
             )
-            for polynomial_index, polynomial in enumerate(self._polynomials)
-        ]
-        return block_index, macs
+            division_total_seconds += time.perf_counter() - division_started_at
+        return block_index, macs, division_total_seconds, len(macs)
 
     def _polynomial_set_generation(self):
         polynomials = []
