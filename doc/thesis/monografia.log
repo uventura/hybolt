@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.6.14)  14 OCT 2026 12:37
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.6.14)  14 OCT 2026 12:42
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -821,7 +821,7 @@ LaTeX Font Warning: Size substitutions with differences
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
 Package rerunfilecheck Info: File `monografia.out' has not changed.
-(rerunfilecheck)             Checksum: CFA4516A39C74FBA96B68BDEAA9B62B0;685.
+(rerunfilecheck)             Checksum: 4F8E9664C76DEEA9C31C8832C506FDE8;685.
  ) 
 Here is how much of TeX's memory you used:
  18911 strings out of 476182
@@ -834,7 +834,7 @@ Here is how much of TeX's memory you used:
 </usr/share/texmf/fonts/type1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/ty
 pe1/public/lm/lmr12.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1000.
 pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm2074.pfb>
-Output written on monografia.pdf (10 pages, 90890 bytes).
+Output written on monografia.pdf (10 pages, 91655 bytes).
 PDF statistics:
  117 PDF objects out of 1000 (max. 8388607)
  95 compressed objects within 1 object stream
