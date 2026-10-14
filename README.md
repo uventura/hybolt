@@ -101,6 +101,7 @@ make format
 make test
 make lorem_example
 make big_lorem_example
+make all_lorem_ipsum_sizes
 make binary_example
 ```
 
@@ -108,14 +109,16 @@ make binary_example
 `examples/hello.txt` and `examples/server_list_example.json` fixtures while
 redirecting storage to temporary directories.
 
-`make lorem_example` and `make lorem_example_debug` encode the lorem example,
-decode it into `output/lorem_ipsum_decoded.txt`, and verify the decoded bytes
+`make lorem_example` and `make lorem_example_debug` encode the 3 KiB lorem
+example, decode it into `output/3kib_decoded.txt`, and verify the decoded bytes
 against the original file. They print `Passed` on an exact match and exit with
 a failure status if the files differ.
 
 `make big_lorem_example` and `make big_lorem_example_debug` run the same
 round-trip verification for the 1 MiB
-[`examples/lorem_ipsum_1mib.txt`](examples/lorem_ipsum_1mib.txt) fixture.
+[`examples/lorem_ipsum/1024kib.txt`](examples/lorem_ipsum/1024kib.txt) fixture.
+`make all_lorem_ipsum_sizes` round-trips all lorem ipsum examples smaller than
+4 MiB in [`examples/lorem_ipsum/`](examples/lorem_ipsum/).
 
 `make binary_example` compiles [examples/hello_world.c](examples/hello_world.c),
 encodes and decodes the generated executable, compares the binary bytes, then

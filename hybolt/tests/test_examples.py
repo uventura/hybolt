@@ -127,7 +127,7 @@ def test_given_chunked_file_when_encoding_and_decoding_then_reports_chunk_progre
 def test_given_one_mebib_lorem_when_round_tripping_then_uses_chunked_metadata_within_runtime(
     tmp_path,
 ):
-    input_file = EXAMPLES_DIRECTORY / "lorem_ipsum_1mib.txt"
+    input_file = EXAMPLES_DIRECTORY / "lorem_ipsum" / "1024kib.txt"
     assert input_file.stat().st_size >= 1024 * 1024
 
     server_paths = [tmp_path / f"server_{index}" for index in range(3)]
@@ -145,7 +145,7 @@ def test_given_one_mebib_lorem_when_round_tripping_then_uses_chunked_metadata_wi
         server_list=servers,
         metadata_output=str(metadata_directory),
     ).encode()
-    metadata_file = metadata_directory / "lorem_ipsum_1mib_metadata.pkl"
+    metadata_file = metadata_directory / "1024kib_metadata.pkl"
     metadata = EncodingMetadata.load(metadata_file)
     output_file = tmp_path / "reconstructed.txt"
     reconstructed = HyboltDecode(
