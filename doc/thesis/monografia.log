@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.6.14)  14 OCT 2026 19:06
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.6.14)  19 OCT 2026 19:38
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -597,7 +597,7 @@ Package babel Info: Importing basic data for portuguese
 (babel)             from babel-pt.ini. Reported on input line 11.
 )
 Package babel Info: Hyphen rules for 'portuguese' set to \l@english
-(babel)             (\language0). Reported on input line 121.
+(babel)             (\language0). Reported on input line 130.
 )
 \openout1 = `monografia.aux'.
 
@@ -825,25 +825,25 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <17.28> on input line 20.
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <10> on input line 20.
- [6]) [7]
+ [6] [7{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathex.enc}]) [8]
 Chapter 3.
-(./tex/3_Metodologia_de_Pesquisa.tex) [8
+(./tex/3_Metodologia_de_Pesquisa.tex) [9
 
 ]
 Chapter 4.
-(./tex/4_Proposta.tex) [9
+(./tex/4_Proposta.tex) [10
 
 ]
 Chapter 5.
-(./tex/5_Implementacao.tex) [10
+(./tex/5_Implementacao.tex) [11
 
 ]
 Chapter 6.
-(./tex/6_Resultados.tex) [11
+(./tex/6_Resultados.tex) [12
 
 ]
 Chapter 7.
-(./tex/7_Conclusao.tex) [12
+(./tex/7_Conclusao.tex) [13
 
 ] (./monografia.bbl (./monografia.brf)
 \tf@brf=\write9
@@ -865,10 +865,10 @@ LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 2
 6.
 (/usr/share/texmf/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)) [13
+) [14
 
 
-] (./monografia.aux)
+]) [15] (./monografia.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -882,30 +882,32 @@ LaTeX Font Warning: Size substitutions with differences
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
 Package rerunfilecheck Info: File `monografia.out' has not changed.
-(rerunfilecheck)             Checksum: 969F31E455FC1ED0CD7D4D0DDA395129;3231.
+(rerunfilecheck)             Checksum: CE225058751DB7ECAFD0264075F0CB3D;3231.
 Package rerunfilecheck Info: File `monografia.brf' has not changed.
-(rerunfilecheck)             Checksum: AE31BC02EE04A38D19893895137ED58A;1047.
+(rerunfilecheck)             Checksum: B884A141B9E72B781035BD00734F200E;1296.
  ) 
 Here is how much of TeX's memory you used:
- 19320 strings out of 476182
- 329573 string characters out of 5795595
+ 19363 strings out of 476182
+ 330291 string characters out of 5795595
  1933975 words of memory out of 5000000
- 40882 multiletter control sequences out of 15000+600000
- 607895 words of font info for 67 fonts, out of 8000000 for 9000
+ 40907 multiletter control sequences out of 15000+600000
+ 622703 words of font info for 72 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 109i,6n,107p,2346b,598s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 109i,9n,107p,2346b,755s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf/fonts/type1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/ty
-pe1/public/lm/lmmi12.pfb></usr/share/texmf/fonts/type1/public/lm/lmmi8.pfb></us
-r/share/texmf/fonts/type1/public/lm/lmr12.pfb></usr/share/texmf/fonts/type1/pub
-lic/lm/lmr17.pfb></usr/share/texmf/fonts/type1/public/lm/lmr8.pfb></usr/share/t
-exmf/fonts/type1/public/lm/lmri12.pfb></usr/share/texmf/fonts/type1/public/lm/l
-msy10.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt12.pfb></usr/share/texmf/
-fonts/type1/public/cm-super/sfrm1000.pfb></usr/share/texmf/fonts/type1/public/c
-m-super/sfrm2074.pfb>
-Output written on monografia.pdf (19 pages, 230699 bytes).
+pe1/public/lm/lmex10.pfb></usr/share/texmf/fonts/type1/public/lm/lmmi12.pfb></u
+sr/share/texmf/fonts/type1/public/lm/lmmi6.pfb></usr/share/texmf/fonts/type1/pu
+blic/lm/lmmi8.pfb></usr/share/texmf/fonts/type1/public/lm/lmr12.pfb></usr/share
+/texmf/fonts/type1/public/lm/lmr17.pfb></usr/share/texmf/fonts/type1/public/lm/
+lmr8.pfb></usr/share/texmf/fonts/type1/public/lm/lmri12.pfb></usr/share/texmf/f
+onts/type1/public/lm/lmsy10.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy8.p
+fb></usr/share/texmf/fonts/type1/public/lm/lmtt12.pfb></usr/share/texmf/fonts/t
+ype1/public/cm-super/sfrm1000.pfb></usr/share/texmf/fonts/type1/public/cm-super
+/sfrm2074.pfb>
+Output written on monografia.pdf (21 pages, 257217 bytes).
 PDF statistics:
- 354 PDF objects out of 1000 (max. 8388607)
- 304 compressed objects within 4 object streams
- 65 named destinations out of 1000 (max. 500000)
+ 406 PDF objects out of 1000 (max. 8388607)
+ 347 compressed objects within 4 object streams
+ 77 named destinations out of 1000 (max. 500000)
  174 words of extra memory for PDF output out of 10000 (max. 10000000)
 

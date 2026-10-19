@@ -13,13 +13,14 @@
 \contentsline {subsection}{\numberline {2.3.1}Exemplo de divisão passo a passo}{6}{subsection.2.3.1}%
 \contentsline {subsection}{\numberline {2.3.2}HySAIL e Codificação de Blocos}{7}{subsection.2.3.2}%
 \contentsline {subsection}{\numberline {2.3.3}LT Codes}{7}{subsection.2.3.3}%
-\contentsline {subsection}{\numberline {2.3.4}RaptorQ Codes}{7}{subsection.2.3.4}%
-\contentsline {chapter}{\numberline {3}Metodologia de Pesquisa}{8}{chapter.3}%
-\contentsline {chapter}{\numberline {4}Proposta}{9}{chapter.4}%
-\contentsline {chapter}{\numberline {5}Implementação}{10}{chapter.5}%
-\contentsline {chapter}{\numberline {6}Resultados}{11}{chapter.6}%
-\contentsline {chapter}{\numberline {7}Conclusão}{12}{chapter.7}%
-\contentsline {chapter}{Refer\^encias}{13}{section*.6}%
+\contentsline {subsubsection}{Robust Soliton Distribution}{7}{section*.6}%
+\contentsline {subsection}{\numberline {2.3.4}RaptorQ Codes}{8}{subsection.2.3.4}%
+\contentsline {chapter}{\numberline {3}Metodologia de Pesquisa}{9}{chapter.3}%
+\contentsline {chapter}{\numberline {4}Proposta}{10}{chapter.4}%
+\contentsline {chapter}{\numberline {5}Implementação}{11}{chapter.5}%
+\contentsline {chapter}{\numberline {6}Resultados}{12}{chapter.6}%
+\contentsline {chapter}{\numberline {7}Conclusão}{13}{chapter.7}%
+\contentsline {chapter}{Refer\^encias}{14}{section*.7}%
 \babel@toc {american}{}\relax 
 \babel@toc {english}{}\relax 
 \babel@toc {portuguese}{}\relax 

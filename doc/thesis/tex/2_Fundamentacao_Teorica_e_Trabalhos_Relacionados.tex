@@ -61,7 +61,57 @@ Pela convenção em que o primeiro bit representa o coeficiente do termo constan
 Empty
 
 \subsection{LT Codes}
-Empty
+\textbf{LtCodes} pertencem à classe dos códigos fountain digitais (digital fountain codes), baseados na transformada de Luby, introduzidos por Michael Luby em 2002 \cite{luby2002lt}. Esses códigos são construídos randomicamente durante o processo de codificação, onde cada símbolo codificado é gerado através da combinação linear de um número variável de símbolos de origem.
+
+A distribuição de grau (quantidade de símbolos que serão combinados) é otimizada para minimizar o número de símbolos necessários para a recuperação completa dos dados, adotando a distribuição de grau de Soliton robusta (robust Soliton distribution), isto é, a distribuição de Soliton ideal acrescida de um termo corretivo para elevar a probabilidade de decodificação completa com baixo overhead \cite{shokrollahi2006raptor}.
+
+\subsubsection{Robust Soliton Distribution}
+
+Nos \emph{LtCodes}, a escolha do grau de cada símbolo codificado (bloco de bytes do arquivo, usado como unidade de codificação e decodificação) é controlada pela \emph{robust Soliton distribution}, proposta para melhorar o desempenho de decodificação em tamanho finito \cite{luby2002lt,karp2004finite}. A construção parte de duas distribuições: a distribuição de Soliton ideal $\rho(d)$ e um termo corretivo $\tau(d)$.
+
+Para $k$ símbolos de origem, a distribuição ideal é dada por:
+
+\begin{equation}
+\rho(d) = \begin{cases}
+\frac{1}{k}, & d=1 \\
+\frac{1}{d(d-1)}, & d=2,\ldots,k
+\end{cases}
+\end{equation}
+
+Define-se $R = c\ln\left(\frac{k}{\delta}\right)\sqrt{k}$, com $c>0$ e $\delta \in (0,1)$. O termo corretivo é:
+
+\begin{equation}
+\tau(d) = \begin{cases}
+\frac{R}{dk}, & d=1,\ldots,\left\lfloor\frac{k}{R}\right\rfloor-1 \\
+\frac{R\ln\left(\frac{R}{\delta}\right)}{k}, & d=\left\lfloor\frac{k}{R}\right\rfloor \\
+0, & d>\left\lfloor\frac{k}{R}\right\rfloor
+\end{cases}
+\end{equation}
+
+A robust Soliton distribution final é a normalização:
+
+\begin{equation}
+\mu(d) = \frac{\rho(d)+\tau(d)}{Z}, \quad Z = \sum_{i=1}^{k} \left(\rho(i)+\tau(i)\right)
+\end{equation}
+
+Essa formulação aumenta a probabilidade de existência de símbolos de grau baixo durante a decodificação por \emph{belief propagation}, reduzindo o risco de estagnação do processo e mantendo baixo overhead de recepção \cite{luby2002lt,hyytia2007analysis}.
+
+Os LtCodes utilizam operações XOR iterativas em corpos finitos (típicamente GF(2) para aplicações binárias). Seja $\mathbf{d} = (d_1, d_2, \ldots, d_k)$ o vetor contendo os $k$ símbolos de origem, o processo de codificação gera $n$ símbolos codificados $\mathbf{c} = (c_1, c_2, \ldots, c_n)$ conforme:
+
+\begin{equation}
+c_i = \bigoplus_{j \in S_i} d_j
+\end{equation}
+
+onde $\bigoplus$ denota a operação XOR (ou soma em GF(2)), e $S_i$ é um subconjunto de índices selecionados randomicamente de acordo com uma distribuição de grau Soliton. O grau (quantidade de índices em $S_i$, isto é, quantos símbolos originais serão combinados) $|S_i|$ segue uma distribuição de probabilidade específica $\rho(d)$:
+
+\begin{equation}
+\rho(d) = \begin{cases}
+1/k & \text{se } d = 1 \\
+1/(d(d-1)) & \text{se } d = 2, 3, \ldots, k
+\end{cases}
+\end{equation}
+
+A decodificação procede iterativamente, identificando símbolos codificados com grau 1 (que correspondem diretamente a símbolos de origem) e propagando a informação até recuperar todos os $k$ símbolos originais. Sendo este processo o \emph{belief propagation}.
 
 \subsection{RaptorQ Codes}
 Empty
