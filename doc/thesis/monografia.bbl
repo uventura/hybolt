@@ -12,6 +12,28 @@
   \providebibliographyfont{numeral}{}%
   \expandafter\btxselectlanguage\expandafter {\btxfallbacklanguage}
 
+\btxselectlanguage {portuguese}
+\bibitem {amaral2013hysail}
+\btxnamefont {\btxlastnamefont {Amaral}, Dino\btxfnamespacelong
+  Macedo}\btxauthorcolon\ \btxtitlefont {Hy-SAIL: Uma nova abordagem para
+  distribuição e armazenamento de informações em ambientes de computação
+  em nuvem}.
+\newblock \btxphdthesis {}, Universidade de Brasília, 2013.
+
+\expandafter\btxselectlanguage\expandafter {\btxfallbacklanguage}
+\bibitem {amaral2019hysail}
+\btxnamefont {\btxlastnamefont {Amaral}, Dino\btxfnamespacelong Macedo},
+  \btxnamefont {João\btxfnamespacelong J.\btxfnamespacelong C.
+  \btxlastnamefont {Gondim}}, \btxnamefont {Robson\btxfnamespacelong
+  de\btxfnamespacelong Oliveira \btxlastnamefont {Albuquerque}}, \btxnamefont
+  {Ana\btxfnamespacelong Lucila\btxfnamespacelong Sandoval \btxlastnamefont
+  {Orozco}}\btxandcomma {} \btxandlong {}\ \btxnamefont {Luis\btxfnamespacelong
+  Javier\btxfnamespacelong García \btxlastnamefont {Villalba}}\btxauthorcolon\
+  \btxjtitlefont {\btxifchangecase {Hy-sail: Hyper-scalability, availability
+  and integrity layer for cloud storage systems}{Hy-SAIL: Hyper-Scalability,
+  Availability and Integrity Layer for Cloud Storage Systems}}.
+\newblock \btxjournalfont {IEEE Access}, 7:90082--90093, 2019.
+
 \btxselectlanguage {english}
 \bibitem {frontiersbigdata}
 \btxnamefont {\btxlastnamefont {Luca~Clissa},~Mario~Lassnig,
@@ -31,14 +53,6 @@
   {\btxifchangecase {Energy and ai}{Energy and AI}}.
 \newblock \btxtechreplong {}, INTERNATIONAL ENERGY AGENCY, 2025.
 \newblock {\latintext \btxurlfont{https://www.iea.org/}}.
-
-\btxselectlanguage {portuguese}
-\bibitem {amaral2013hysail}
-\btxnamefont {\btxlastnamefont {Amaral}, Dino\btxfnamespacelong
-  Macedo}\btxauthorcolon\ \btxtitlefont {Hy-SAIL: Uma nova abordagem para
-  distribuição e armazenamento de informações em ambientes de computação
-  em nuvem}.
-\newblock \btxphdthesis {}, Universidade de Brasília, 2013.
 
 \expandafter\btxselectlanguage\expandafter {\btxfallbacklanguage}
 \bibitem {7485855}
@@ -112,12 +126,6 @@
   Foundations of Computer Science (FOCS)}, \btxpageslong {}\ 271--280.
   \btxpublisherfont {IEEE Computer Society}, 2002.
 
-\bibitem {shokrollahi2006raptor}
-\btxnamefont {\btxlastnamefont {Shokrollahi}, Amin}\btxauthorcolon\
-  \btxjtitlefont {\btxifchangecase {Raptor codes}{Raptor Codes}}.
-\newblock \btxjournalfont {IEEE Transactions on Information Theory},
-  52(6):2551--2567, 2006.
-
 \bibitem {maymounkov2002online}
 \btxnamefont {\btxlastnamefont {Maymounkov}, Petar}\btxauthorcolon\
   \btxtitlefont {\btxifchangecase {Online codes}{Online Codes}}.
@@ -136,5 +144,45 @@
   Systems II}, \btxvolumelong {}\ \btxvolumefont {2735} \btxofserieslong {}\
   \btxtitlefont {Lecture Notes in Computer Science}, \btxpageslong {}\
   247--255. \btxpublisherfont {Springer}, 2003.
+
+\btxselectlanguage {english}
+\bibitem {shokrollahi2006raptor}
+\btxnamefont {\btxlastnamefont {Shokrollahi}, Amin}\btxauthorcolon\
+  \btxjtitlefont {\btxifchangecase {Raptor codes}{Raptor Codes}}.
+\newblock \btxjournalfont {IEEE Transactions on Information Theory},
+  52(6):2551--2567, 2006.
+
+\expandafter\btxselectlanguage\expandafter {\btxfallbacklanguage}
+\bibitem {armknecht2021outsourcing}
+\btxnamefont {\btxlastnamefont {Armknecht}, Frederik}, \btxnamefont
+  {Jens\btxfnamespacelong Matthias \btxlastnamefont {Bohli}}, \btxnamefont
+  {Ghassan \btxlastnamefont {Karame}}\btxandcomma {} \btxandlong {}\
+  \btxnamefont {Wenting \btxlastnamefont {Li}}\btxauthorcolon\ \btxjtitlefont
+  {\btxifchangecase {Outsourcing proofs of retrievability}{Outsourcing Proofs
+  of Retrievability}}.
+\newblock \btxjournalfont {IEEE Transactions on Cloud Computing},
+  9(1):286--301, 2021.
+
+\bibitem {tan2023proof}
+\btxnamefont {\btxlastnamefont {Tan}, Xiao}, \btxnamefont {Qi \btxlastnamefont
+  {Xie}}, \btxnamefont {Lidong \btxlastnamefont {Han}}, \btxnamefont {Shengbao
+  \btxlastnamefont {Wang}}\btxandcomma {} \btxandlong {}\ \btxnamefont {Wenhao
+  \btxlastnamefont {Liu}}\btxauthorcolon\ \btxjtitlefont {\btxifchangecase
+  {Proof of retrievability with flexible designated verification for cloud
+  storage}{Proof of retrievability with flexible designated verification for
+  cloud storage}}.
+\newblock \btxjournalfont {Computers \& Security}, 135:103486, 2023.
+
+\btxselectlanguage {english}
+\bibitem {shen2024public}
+\btxnamefont {\btxlastnamefont {Shen}, Jun}, \btxnamefont {Xiaofeng
+  \btxlastnamefont {Chen}}, \btxnamefont {Xinyi \btxlastnamefont
+  {Huang}}\btxandcomma {} \btxandlong {}\ \btxnamefont {Yang \btxlastnamefont
+  {Xiang}}\btxauthorcolon\ \btxjtitlefont {\btxifchangecase {Public proofs of
+  data replication and retrievability with user-friendly replication}{Public
+  Proofs of Data Replication and Retrievability With User-Friendly
+  Replication}}.
+\newblock \btxjournalfont {IEEE Transactions on Dependable and Secure
+  Computing}, 21(4), 2024.
 
 \end{thebibliography}

@@ -1,5 +1,6 @@
+Este capítulo apresenta os fundamentos necessários à compreensão da proposta e os trabalhos relacionados. Inicialmente, são definidos os corpos finitos e a divisão polinomial em $GF(2)$, que fundamentam as operações de codificação de blocos. Em seguida, descreve-se o HySAIL e são apresentados os códigos \emph{fountain} relevantes ao trabalho: os LT Codes, que servem de base aos demais, os Online Codes, empregados na proposta original do HySAIL, e os RaptorQ Codes, cuja adoção é avaliada neste trabalho. Por fim, são analisados os trabalhos relacionados no campo de \acrshort{PoR}.
+
 \section{Conceitos Fundamentais}
-Antes de detalhar o modelo proposto, é importante compreender alguns conceitos matemáticos relacionados à codificação de blocos. Por fim, para que possamos compreender a nova abordagem adotada, é necessário revisar o funcionamento de HySAIL, LT Codes e RaptorQ Codes.
 
 \subsection{Corpos finitos e corpo de Galois}%
 Um corpo finito, ou corpo de Galois, é uma estrutura algébrica composta por um conjunto finito de elementos sobre o qual as operações de adição e multiplicação são fechadas, associativas, comutativas e distributivas, e em que todo elemento possui inverso aditivo e todo elemento não nulo possui inverso multiplicativo. No contexto do HySAIL, são utilizados o corpo $GF(2)$ e suas extensões $GF(2^n)$, que permitem representar e manipular dados binários por meio de operações algébricas bem definidas.
@@ -45,7 +46,7 @@ Segundo a convenção adotada, em que o primeiro bit corresponde ao coeficiente 
 Empty
 
 \subsection{LT Codes}
-Os \textbf{LT Codes} (\emph{Luby Transform Codes}), propostos por Luby \cite{luby2002lt}, são a primeira realização prática dos códigos \emph{fountain} digitais. Por não possuírem taxa fixa, permitem gerar, a partir de $k$ símbolos de origem, uma quantidade potencialmente ilimitada de símbolos codificados, dos quais qualquer subconjunto com pouco mais de $k$ elementos basta para reconstruir os dados, sem necessidade de retransmissão seletiva.
+Os códigos \emph{fountain} constituem a base do processo de codificação de blocos do HySAIL. Entre eles, os \textbf{LT Codes} (\emph{Luby Transform Codes}), propostos por Luby \cite{luby2002lt}, são a primeira realização prática dessa classe de códigos. Por não possuírem taxa fixa, permitem gerar, a partir de $k$ símbolos de origem, uma quantidade potencialmente ilimitada de símbolos codificados, dos quais qualquer subconjunto com pouco mais de $k$ elementos basta para reconstruir os dados, sem necessidade de retransmissão seletiva.
 
 Seja $\mathbf{d} = (d_1, \ldots, d_k)$ o vetor de símbolos de origem, cada um correspondente a um bloco de bytes do arquivo. Para gerar o símbolo codificado $c_i$, sorteia-se um grau $\delta_i$ segundo uma distribuição de grau e selecionam-se uniformemente $\delta_i$ símbolos de origem distintos, cujos índices formam o conjunto $S_i$. O símbolo é então dado por
 
@@ -77,60 +78,8 @@ Com os conjuntos sorteados $S_1 = \{2\}$, $S_2 = \{1, 2\}$ e $S_3 = \{1, 2, 3\}$
 
 Na decodificação, $c_1$ fornece diretamente $d_2$. Removendo $d_2$ dos demais símbolos, obtêm-se $c_2 \oplus d_2 = d_1 = 1010$ e $c_3 \oplus d_2 = d_1 \oplus d_3 = 0111$. Por fim, $0111 \oplus d_1 = 1101 = d_3$, completando a recuperação.
 
-\subsection{RaptorQ Codes}
-\textbf{RaptorQ Codes} pertencem à família dos códigos \emph{fountain} sem taxa fixa. Isso significa que, a partir de um conjunto de símbolos de origem, o codificador pode produzir uma quantidade potencialmente ilimitada de símbolos codificados. O receptor não precisa receber símbolos específicos nem todos os símbolos transmitidos: basta obter uma quantidade suficiente de símbolos distintos para reconstruir os dados originais. Essa característica torna o código adequado a cenários com perdas de pacotes, como a transmissão em redes não confiáveis e o armazenamento distribuído \cite{shokrollahi2006raptor,WOS:000381844400033}.
-
-O processo de codificação é composto por duas etapas. Primeiro, os $k$ símbolos de origem são submetidos a uma pré-codificação, que acrescenta símbolos de reparo e estabelece relações entre os símbolos do bloco. Em seguida, uma codificação LT gera cada símbolo de saída pela combinação de um subconjunto dos símbolos intermediários. Assim como nos LT Codes, essas combinações usam operações XOR em $GF(2)$ quando os símbolos são binários.
-
-De forma simplificada, seja $\mathbf{u} = (u_1, u_2, \ldots, u_k)$ o vetor de símbolos de origem. A pré-codificação produz um vetor intermediário $\mathbf{v}$, e cada símbolo codificado $c_i$ é obtido por:
-
-\begin{equation}
-c_i = \bigoplus_{j \in S_i} v_j,
-\end{equation}
-
-em que $S_i$ é o conjunto de índices selecionados para o símbolo $c_i$. A diferença em relação ao LT Code isolado é que as relações introduzidas na pré-codificação permitem recuperar símbolos de origem mesmo quando o processo iterativo não encontra imediatamente símbolos de grau 1.
-
-\subsubsection{Exemplo simplificado de codificação e recuperação}%
-Considere um bloco com três símbolos de origem de quatro bits:
-
-\begin{equation}
-u_1 = 1010, \quad u_2 = 0110, \quad u_3 = 1101.
-\end{equation}
-
-Para fins didáticos, suponha que a pré-codificação produza o símbolo de reparo $v_4 = u_1 \oplus u_2 \oplus u_3$. Assim, os símbolos intermediários são $v_1=u_1$, $v_2=u_2$, $v_3=u_3$ e:
-
-\begin{equation}
-v_4 = 1010 \oplus 0110 \oplus 1101 = 0001.
-\end{equation}
-
-Em seguida, a etapa LT pode gerar símbolos codificados a partir de subconjuntos desses símbolos intermediários. Considere os seguintes símbolos transmitidos:
-
-\begin{equation}
-c_1 = v_1 = 1010, \quad
-c_2 = v_2 \oplus v_3 = 1011, \quad
-c_3 = v_2 \oplus v_4 = 0111.
-\end{equation}
-
-Suponha que o símbolo de origem $u_2$ não seja recebido diretamente. A partir de $c_1$, o receptor recupera $u_1$. Além disso, como conhece a relação de pré-codificação e recebe $c_2$ e $c_3$, pode recuperar os símbolos ausentes. Primeiro, observa-se que:
-
-\begin{equation}
-c_2 \oplus c_3 = (v_2 \oplus v_3) \oplus (v_2 \oplus v_4) = v_3 \oplus v_4 = 1100.
-\end{equation}
-
-Pela relação de pré-codificação, $v_3 \oplus v_4 = u_3 \oplus (u_1 \oplus u_2 \oplus u_3) = u_1 \oplus u_2$. Portanto, como $u_1$ foi recuperado de $c_1$, obtém-se:
-
-\begin{equation}
-u_2 = (c_2 \oplus c_3) \oplus u_1 = 1100 \oplus 1010 = 0110.
-\end{equation}
-
-Esse exemplo ilustra o papel da pré-codificação: relações adicionais entre os símbolos permitem recuperar dados perdidos a partir dos símbolos codificados recebidos. O RaptorQ completo utiliza relações e distribuições de grau definidas pelo padrão, mas o princípio de recuperação por combinações XOR é o mesmo.
-
-Na decodificação, o receptor reúne os símbolos codificados recebidos e suas relações de codificação. Inicialmente, são aplicadas eliminações XOR para resolver os símbolos que podem ser obtidos diretamente. As relações restantes são então resolvidas em conjunto com as informações da pré-codificação. Desse modo, o RaptorQ combina a geração flexível de símbolos dos LT Codes com uma camada adicional de proteção, reduzindo a probabilidade de falha na recuperação quando são recebidos símbolos suficientes \cite{shokrollahi2006raptor,WOS:000381844400033}.
-
-Na prática, essa propriedade é expressa pelo \emph{overhead} de recepção: a quantidade de símbolos adicionais que pode ser necessária além dos $k$ símbolos de origem. Um \emph{overhead} pequeno permite recuperar o bloco mesmo após perdas, sem exigir a retransmissão de símbolos específicos. Entretanto, a etapa adicional de pré-codificação e a resolução das relações remanescentes aumentam a complexidade de decodificação em comparação com um LT Code simples \cite{WOS:000381844400033}.
-
 \subsection{Online Codes}
-Os \textbf{Online Codes}, propostos por Maymounkov \cite{maymounkov2002online,maymounkov2003rateless}, são códigos \emph{fountain} que, assim como os LT Codes, geram uma quantidade potencialmente ilimitada de símbolos codificados por meio de combinações XOR. Diferentemente destes, porém, empregam uma distribuição de grau com grau máximo constante, independente de $k$, o que resulta em codificação e decodificação de complexidade linear. Para compensar a recuperação apenas parcial que essa distribuição proporciona, os Online Codes combinam dois níveis de codificação, um código externo e um código interno.
+Os \textbf{Online Codes}, propostos por Maymounkov \cite{maymounkov2002online,maymounkov2003rateless}, são os códigos \emph{fountain} empregados na proposta original do HySAIL. Assim como os LT Codes, eles geram uma quantidade potencialmente ilimitada de símbolos codificados por meio de combinações XOR, diferentemente destes, porém, empregam uma distribuição de grau com grau máximo constante, independente de $k$, o que resulta em codificação e decodificação de complexidade linear. Para compensar a recuperação apenas parcial que essa distribuição proporciona, os Online Codes combinam dois níveis de codificação, um código externo e um código interno.
 
 O código externo (\emph{outer code}) acrescenta redundância aos $k$ símbolos de origem $\mathbf{d} = (d_1, \ldots, d_k)$. Cada símbolo de origem é associado aleatoriamente a $q$ dos $m$ símbolos auxiliares $a_1, \ldots, a_m$, sendo cada símbolo auxiliar a soma dos símbolos de origem a ele associados:
 
@@ -146,7 +95,7 @@ O código interno (\emph{inner code}) gera os símbolos codificados, denominados
 A decodificação ocorre em duas etapas. Inicialmente, o algoritmo de \emph{peeling} descrito para os LT Codes é aplicado aos blocos de verificação recebidos, recuperando uma fração dos símbolos da mensagem composta próxima de 1, mas não necessariamente todos. Em seguida, as relações do código externo, dadas pela Equação~\eqref{eq:online_auxiliar}, são utilizadas para recuperar os símbolos de origem remanescentes. Com $\varepsilon > 0$ como parâmetro de projeto, a recuperação completa é obtida com aproximadamente $(1 + 3\varepsilon)k$ blocos de verificação, com probabilidade de falha que decresce exponencialmente com $q$ \cite{maymounkov2002online}.
 
 \subsubsection{Exemplo de codificação e decodificação}%
-Considere os mesmos símbolos de origem do exemplo anterior, $d_1 = 1010$, $d_2 = 0110$ e $d_3 = 1101$, e um código externo com um único símbolo auxiliar associado a todos eles:
+Considere os mesmos símbolos de origem do exemplo de LT Codes, $d_1 = 1010$, $d_2 = 0110$ e $d_3 = 1101$, e um código externo com um único símbolo auxiliar associado a todos eles:
 
 \begin{equation}
 	a_1 = d_1 \oplus d_2 \oplus d_3 = 0001.
@@ -161,6 +110,58 @@ Suponha que o receptor obtenha os seguintes blocos de verificação, gerados a p
 \end{equation}
 
 Pelo código interno, $c_1$ e $c_3$ fornecem diretamente $d_1$ e $a_1$, e $c_2 \oplus a_1 = 1101 = d_3$. O símbolo $d_2$, que não participa de nenhum bloco recebido, é então recuperado pelo código externo: $d_2 = a_1 \oplus d_1 \oplus d_3 = 0110$.
+
+\subsection{RaptorQ Codes}
+Os \textbf{RaptorQ Codes} \cite{shokrollahi2006raptor,WOS:000381844400033} são códigos \emph{fountain} que, assim como os Online Codes, combinam uma etapa de pré-codificação com uma codificação LT. Sua adoção no HySAIL, em substituição aos Online Codes, constitui o objeto deste trabalho. Assim como nos demais códigos \emph{fountain}, o receptor não precisa obter símbolos específicos, bastando receber uma quantidade suficiente de símbolos codificados para reconstruir os dados originais, o que torna o código adequado a cenários com perdas, como a transmissão em redes não confiáveis e o armazenamento distribuído.
+
+O processo de codificação é composto por duas etapas. Primeiro, os $k$ símbolos de origem são submetidos a uma pré-codificação, que acrescenta símbolos de reparo e estabelece relações entre os símbolos do bloco. Em seguida, uma codificação LT gera cada símbolo de saída pela combinação de um subconjunto dos símbolos intermediários. Assim como nos LT Codes, essas combinações usam operações XOR em $GF(2)$ quando os símbolos são binários.
+
+De forma simplificada, seja $\mathbf{d} = (d_1, d_2, \ldots, d_k)$ o vetor de símbolos de origem. A pré-codificação produz um vetor intermediário $\mathbf{v}$, e cada símbolo codificado $c_i$ é obtido por:
+
+\begin{equation}
+c_i = \bigoplus_{j \in S_i} v_j,
+\end{equation}
+
+em que $S_i$ é o conjunto de índices selecionados para o símbolo $c_i$. A diferença em relação ao LT Code isolado é que as relações introduzidas na pré-codificação permitem recuperar símbolos de origem mesmo quando o processo iterativo não encontra imediatamente símbolos de grau 1.
+
+Na decodificação, o receptor reúne os símbolos codificados recebidos e suas relações de codificação. Inicialmente, são aplicadas eliminações XOR para resolver os símbolos que podem ser obtidos diretamente. As relações restantes são então resolvidas em conjunto com as informações da pré-codificação. Desse modo, o RaptorQ combina a geração flexível de símbolos dos LT Codes com uma camada adicional de proteção, reduzindo a probabilidade de falha na recuperação quando são recebidos símbolos suficientes \cite{shokrollahi2006raptor,WOS:000381844400033}.
+
+Essa camada adicional resulta em um \emph{overhead} de recepção reduzido, permitindo recuperar o bloco mesmo após perdas sem exigir a retransmissão de símbolos específicos. Em contrapartida, a pré-codificação e a resolução das relações remanescentes aumentam a complexidade de decodificação em comparação com os LT Codes \cite{WOS:000381844400033}.
+
+\subsubsection{Exemplo simplificado de codificação e recuperação}%
+Considere os mesmos símbolos de origem dos exemplos anteriores:
+
+\begin{equation}
+d_1 = 1010, \quad d_2 = 0110, \quad d_3 = 1101.
+\end{equation}
+
+Para fins didáticos, suponha que a pré-codificação produza o símbolo de reparo $v_4 = d_1 \oplus d_2 \oplus d_3$. Assim, os símbolos intermediários são $v_1=d_1$, $v_2=d_2$, $v_3=d_3$ e:
+
+\begin{equation}
+v_4 = 1010 \oplus 0110 \oplus 1101 = 0001.
+\end{equation}
+
+Em seguida, a etapa LT pode gerar símbolos codificados a partir de subconjuntos desses símbolos intermediários. Considere os seguintes símbolos transmitidos:
+
+\begin{equation}
+c_1 = v_1 = 1010, \quad
+c_2 = v_2 \oplus v_3 = 1011, \quad
+c_3 = v_2 \oplus v_4 = 0111.
+\end{equation}
+
+Suponha que o símbolo de origem $d_2$ não seja recebido diretamente. A partir de $c_1$, o receptor recupera $d_1$. Além disso, como conhece a relação de pré-codificação e recebe $c_2$ e $c_3$, pode recuperar os símbolos ausentes. Primeiro, observa-se que:
+
+\begin{equation}
+c_2 \oplus c_3 = (v_2 \oplus v_3) \oplus (v_2 \oplus v_4) = v_3 \oplus v_4 = 1100.
+\end{equation}
+
+Pela relação de pré-codificação, $v_3 \oplus v_4 = d_3 \oplus (d_1 \oplus d_2 \oplus d_3) = d_1 \oplus d_2$. Portanto, como $d_1$ foi recuperado de $c_1$, obtém-se:
+
+\begin{equation}
+d_2 = (c_2 \oplus c_3) \oplus d_1 = 1100 \oplus 1010 = 0110.
+\end{equation}
+
+Esse exemplo ilustra o papel da pré-codificação: relações adicionais entre os símbolos permitem recuperar dados perdidos a partir dos símbolos codificados recebidos. O RaptorQ completo utiliza relações e distribuições de grau definidas pelo padrão, mas o princípio de recuperação por combinações XOR é o mesmo.
 
 \section{Trabalhos Relacionados}
 

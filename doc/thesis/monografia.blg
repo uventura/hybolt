@@ -4,47 +4,49 @@ The top-level auxiliary file: monografia.aux
 The style file: babunsrt.bst
 Database file #1: bibliografia.bib
 Reallocated singl_function (elt_size=4) to 100 items from 50.
+Warning--empty language in amaral2019hysail
 Warning--empty language in 7485855
 Warning--empty language in maymounkov2003rateless
-You've used 12 entries,
+Warning--empty language in armknecht2021outsourcing
+You've used 16 entries,
             2465 wiz_defined-function locations,
-            676 strings with 8086 characters,
-and the built_in function-call counts, 3787 in all, are:
-= -- 313
-> -- 101
+            699 strings with 8950 characters,
+and the built_in function-call counts, 5245 in all, are:
+= -- 409
+> -- 163
 < -- 4
-+ -- 39
-- -- 27
-* -- 473
-:= -- 496
-add.period$ -- 31
-call.type$ -- 12
-change.case$ -- 11
++ -- 61
+- -- 45
+* -- 699
+:= -- 679
+add.period$ -- 39
+call.type$ -- 16
+change.case$ -- 15
 chr.to.int$ -- 0
-cite$ -- 14
-duplicate$ -- 216
-empty$ -- 416
-format.name$ -- 75
-if$ -- 830
+cite$ -- 20
+duplicate$ -- 299
+empty$ -- 568
+format.name$ -- 129
+if$ -- 1122
 int.to.chr$ -- 0
-int.to.str$ -- 12
-missing$ -- 16
-newline$ -- 73
-num.names$ -- 14
-pop$ -- 36
+int.to.str$ -- 16
+missing$ -- 24
+newline$ -- 93
+num.names$ -- 18
+pop$ -- 48
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 77
+skip$ -- 94
 stack$ -- 0
-substring$ -- 197
-swap$ -- 101
+substring$ -- 277
+swap$ -- 145
 text.length$ -- 4
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
-warning$ -- 2
-while$ -- 25
-width$ -- 14
-write$ -- 157
-(There were 2 warnings)
+warning$ -- 4
+while$ -- 34
+width$ -- 18
+write$ -- 201
+(There were 4 warnings)

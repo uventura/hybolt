@@ -82,3 +82,31 @@ parent={},%
 %
 }%
 
+\glsdefs@newdocentry{PoR}%
+{%
+name={\acronymfont {\glsentryshort {PoR}}},%
+sort={PoR},%
+type={acronym},%
+first={PoR},%
+firstplural={PoRs},%
+text={PoR},%
+plural={PoRs},%
+description={\emph {Proof of Retrievability}},%
+descriptionplural={\emph {Proof of Retrievability}},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={\protect \emph  {Proof of Retrievability}},%
+longplural={\protect \emph  {Proof of Retrievability}s},%
+short={PoR},%
+shortplural={PoRs},%
+counter={page},%
+parent={},%
+%
+}%
+

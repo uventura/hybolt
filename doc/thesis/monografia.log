@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.6.14)  21 OCT 2026 20:21
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.6.14)  21 OCT 2026 20:42
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -588,17 +588,16 @@ File: l3backend-pdftex.def 2024-01-04 L3 backend support: PDF output (pdfTeX)
 \l__pdf_internal_box=\box61
 )
 (./monografia.aux
-(/usr/share/texlive/texmf-dist/tex/generic/babel/locale/en/babel-english.tex
-Package babel Info: Importing basic data for english
-(babel)             from babel-en.ini. Reported on input line 11.
-)
 (/usr/share/texlive/texmf-dist/tex/generic/babel/locale/pt/babel-portuguese.tex
 Package babel Info: Importing basic data for portuguese
 (babel)             from babel-pt.ini. Reported on input line 11.
 )
 Package babel Info: Hyphen rules for 'portuguese' set to \l@english
-(babel)             (\language0). Reported on input line 145.
-)
+(babel)             (\language0). Reported on input line 151.
+ (/usr/share/texlive/texmf-dist/tex/generic/babel/locale/en/babel-english.tex
+Package babel Info: Importing basic data for english
+(babel)             from babel-en.ini. Reported on input line 11.
+))
 \openout1 = `monografia.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 26.
@@ -720,7 +719,7 @@ LaTeX Font Warning: Font shape `T1/cmr/m/n' in size <20> not available
 LaTeX Font Warning: Font shape `T1/ua1/b/n' in size <20> not available
 (Font)              size <20.74> substituted on input line 26.
 
-<img/positivo_cor.pdf, id=92, 119.44624pt x 60.225pt>
+<img/positivo_cor.pdf, id=96, 119.44624pt x 60.225pt>
 File: img/positivo_cor.pdf Graphic file (type pdf)
 <use img/positivo_cor.pdf>
 Package pdftex.def Info: img/positivo_cor.pdf  used on input line 26.
@@ -804,58 +803,52 @@ Chapter 1.
 (./tex/1_Introducao.tex [1
 
 
-{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathsy.enc}]
+]
 LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 1
-6.
-
-(/usr/share/texmf/tex/latex/lm/ts1lmr.fd
+8.
+ (/usr/share/texmf/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-) [2{/usr/share/texmf/fonts/enc/dvips/lm/lm-ts1.enc}] [3]) [4]
+) [2{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/share/texmf/fonts/
+enc/dvips/lm/lm-ts1.enc}] [3] [4]) [5]
 Chapter 2.
-(./tex/2_Fundamentacao_Teorica_e_Trabalhos_Relacionados.tex
-Overfull \hbox (7.44012pt too wide) in paragraph at lines 2--3
-\T1/lmr/m/n/12 Antes de de-tal-har o mod-elo pro-posto, é im-por-tante com-pree
-n-der al-guns con-ceitos matemáti-
- []
-
-[5
+(./tex/2_Fundamentacao_Teorica_e_Trabalhos_Relacionados.tex [6
 
 ]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <14.4> on input line 16.
+(Font)              <14.4> on input line 17.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 16.
+(Font)              <10> on input line 17.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 16.
+(Font)              <7> on input line 17.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 16.
+(hyperref)                removing `math shift' on input line 17.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 16.
+(hyperref)                removing `math shift' on input line 17.
 
-[6] [7{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathex.enc}] [8] [9] [10])
-[11]
+[7] [8{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathex.enc}] [9] [10] [11])
+[12]
 Chapter 3.
-(./tex/3_Proposta.tex) [12
+(./tex/3_Proposta.tex) [13
 
 ]
 Chapter 4.
-(./tex/4_Metodologia_de_Pesquisa.tex [13
+(./tex/4_Metodologia_de_Pesquisa.tex [14
 
-]) [14]
+]) [15]
 Chapter 5.
-(./tex/5_Implementacao.tex) [15
+(./tex/5_Implementacao.tex) [16
 
 ]
 Chapter 6.
-(./tex/6_Resultados.tex) [16
+(./tex/6_Resultados.tex) [17
 
 ]
 Chapter 7.
-(./tex/7_Conclusao.tex) [17
+(./tex/7_Conclusao.tex) [18
 
 ] (./monografia.bbl (./monografia.brf)
 \tf@brf=\write9
@@ -873,14 +866,14 @@ babelbib: Using the BibTeX style's default font for `ISBN'.
 babelbib: Using the BibTeX style's default font for `ISSN'.
 babelbib: Using the BibTeX style's default font for `url'.
 babelbib: Using the BibTeX style's default font for `numeral'.
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 2
-6.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 4
+8.
 (/usr/share/texmf/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-) [18
+) [19
 
 
-]) [19] (./monografia.aux)
+]) [20] (./monografia.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -894,18 +887,18 @@ LaTeX Font Warning: Size substitutions with differences
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
 Package rerunfilecheck Info: File `monografia.out' has not changed.
-(rerunfilecheck)             Checksum: 5075E56D83BC77ECC13FADFFD7E8B41F;3341.
+(rerunfilecheck)             Checksum: 1EEA53C81B4B9469EE70D20F4D87A737;3509.
 Package rerunfilecheck Info: File `monografia.brf' has not changed.
-(rerunfilecheck)             Checksum: DD6472B99B1FB8564B436F45EB7B0049;1529.
+(rerunfilecheck)             Checksum: 045E5ABE75FE9FFF306767E586BCC5D1;1684.
  ) 
 Here is how much of TeX's memory you used:
- 19376 strings out of 476182
- 330472 string characters out of 5795595
- 1934975 words of memory out of 5000000
- 40907 multiletter control sequences out of 15000+600000
+ 19430 strings out of 476182
+ 331344 string characters out of 5795595
+ 1933975 words of memory out of 5000000
+ 40954 multiletter control sequences out of 15000+600000
  620308 words of font info for 73 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 109i,6n,107p,2346b,755s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 109i,6n,107p,2346b,758s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf/fonts/type1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/ty
 pe1/public/lm/lmex10.pfb></usr/share/texmf/fonts/type1/public/lm/lmmi12.pfb></u
 sr/share/texmf/fonts/type1/public/lm/lmmi6.pfb></usr/share/texmf/fonts/type1/pu
@@ -915,10 +908,10 @@ mri12.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy10.pfb></usr/share/texmf/
 fonts/type1/public/lm/lmsy8.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt12.
 pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1000.pfb></usr/share/texm
 f/fonts/type1/public/cm-super/sfrm2074.pfb>
-Output written on monografia.pdf (25 pages, 249030 bytes).
+Output written on monografia.pdf (26 pages, 253370 bytes).
 PDF statistics:
- 443 PDF objects out of 1000 (max. 8388607)
- 382 compressed objects within 4 object streams
- 90 named destinations out of 1000 (max. 500000)
- 182 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 477 PDF objects out of 1000 (max. 8388607)
+ 414 compressed objects within 5 object streams
+ 97 named destinations out of 1000 (max. 500000)
+ 190 words of extra memory for PDF output out of 10000 (max. 10000000)
 
