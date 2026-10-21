@@ -18,43 +18,31 @@ Considere o vetor binário 1011. Adotando a convenção usada pelo projeto, em q
 Assim, o bloco passa a ser escrito como $1 + x^2 + x^3$.
 
 \section[Divisão polinomial em GF(2)]{Divisão polinomial em $GF(2)$}%
-A divisão polinomial em $GF(2)$ segue a mesma lógica estrutural da divisão entre inteiros, mas com uma diferença importante: como os coeficientes pertencem a um corpo binário, subtração e soma são equivalentes a XOR. Portanto, ao somar dois termos iguais, eles se anulam: $x^k + x^k = 0$.
+A divisão polinomial em $GF(2)$ segue o mesmo algoritmo da divisão polinomial convencional. Como os coeficientes pertencem a $GF(2)$, a soma e a subtração são equivalentes à operação XOR, de modo que termos iguais se anulam, isto é, $x^k + x^k = 0$.
 
-Dado um dividendo $m(x)$ e um divisor $p(x)$, procura-se obter um quociente $q(x)$ e um resto $r(x)$ tais que
+Dados um dividendo $m(x)$ e um divisor $p(x) \neq 0$, existem um único quociente $q(x)$ e um único resto $r(x)$ tais que
 
-$$
-m(x) = q(x) \cdot p(x) + r(x),
-$$
+\begin{equation}
+	m(x) = q(x) \cdot p(x) + r(x), \quad \deg(r) < \deg(p).
+	\label{eq:divisao_polinomial}
+\end{equation}
 
-com $\deg(r) < \deg(p)$.
+O algoritmo parte do dividendo como resto parcial. A cada iteração, o termo de maior grau do resto parcial é dividido pelo termo de maior grau do divisor, e o resultado constitui o próximo termo do quociente. Esse termo é multiplicado pelo divisor, e o produto é somado ao resto parcial, eliminando seu termo de maior grau. O processo é repetido enquanto o grau do resto parcial for maior ou igual ao grau do divisor.
 
-O procedimento é repetido enquanto o resto parcial tiver grau maior ou igual ao grau do divisor. Em cada iteração, divide-se o termo de maior grau do resto parcial pelo termo de maior grau do divisor. O resultado é o próximo termo do quociente. Em seguida, esse termo multiplica o divisor, e aplica-se XOR entre o produto e o resto parcial. Essa operação elimina o termo de maior grau, reduzindo o grau do novo resto.
+\subsection{Exemplo de divisão}%
+Considere o dividendo $m(x) = x^3 + x + 1$ e o divisor $p(x) = x^2 + 1$. A divisão do termo de maior grau do dividendo pelo termo de maior grau do divisor fornece $x^3 / x^2 = x$, primeiro termo do quociente. Multiplicando-o pelo divisor, obtém-se $x \cdot p(x) = x^3 + x$, que, somado ao resto parcial, resulta em
 
-\subsection{Exemplo de divisão passo a passo}%
-Seja $m(x) = x^3 + x + 1$ o dividendo e $p(x) = x^2 + 1$ o divisor. Inicialmente, o resto parcial é o próprio dividendo:
+\begin{equation}
+	r_1(x) = (x^3 + x + 1) + (x^3 + x) = 1,
+\end{equation}
 
-$$
-r_0(x) = x^3 + x + 1.
-$$
+\noindent uma vez que os termos $x^3$ e $x$ se anulam. Como $\deg(r_1) = 0 < \deg(p) = 2$, o algoritmo termina com quociente $q(x) = x$ e resto $r(x) = 1$, que satisfazem a Equação~\eqref{eq:divisao_polinomial}:
 
-\begin{enumerate}
-	\item O termo de maior grau de $r_0(x)$ é $x^3$ e o de $p(x)$ é $x^2$. Logo, o próximo termo do quociente é $x^3 / x^2 = x$.
-	\item Multiplica-se esse termo pelo divisor: $x \cdot p(x) = x(x^2 + 1) = x^3 + x$.
-	\item Aplica-se XOR entre o resto parcial e o produto:
-	\[
-	r_1(x) = (x^3 + x + 1) + (x^3 + x) = 1.
-	\]
-	Os termos $x^3$ e $x$ se anulam porque cada um aparece duas vezes.
-	\item Como $\deg(1) = 0$ é menor que $\deg(p) = 2$, a divisão termina. O quociente é $q(x) = x$ e o resto é $r(x) = 1$.
-\end{enumerate}
+\begin{equation}
+	x^3 + x + 1 = x(x^2 + 1) + 1.
+\end{equation}
 
-Substituindo o quociente e o resto obtidos na identidade da divisão, verifica-se que
-
-$$
-x^3 + x + 1 = x(x^2 + 1) + 1.
-$$
-
-Pela convenção em que o primeiro bit representa o coeficiente do termo constante, o quociente $q(x) = x$ tem representação binária 01, e o resto $r(x) = 1$ tem representação binária 1. Caso o resto seja armazenado com dois bits, que é o número de coeficientes de grau menor que o divisor de grau 2, sua representação é 10.
+Segundo a convenção adotada, em que o primeiro bit corresponde ao coeficiente do termo constante, o quociente é representado por $01$ e o resto por $1$. Como o resto de uma divisão por um polinômio de grau 2 possui no máximo dois coeficientes, sua representação com dois bits é $10$.
 
 
 \subsection{HySAIL e Codificação de Blocos}
@@ -146,7 +134,7 @@ Na decodificação, o receptor reúne os símbolos codificados recebidos e suas 
 Na prática, essa propriedade é expressa pelo \emph{overhead} de recepção: a quantidade de símbolos adicionais que pode ser necessária além dos $k$ símbolos de origem. Um \emph{overhead} pequeno permite recuperar o bloco mesmo após perdas, sem exigir a retransmissão de símbolos específicos. Entretanto, a etapa adicional de pré-codificação e a resolução das relações remanescentes aumentam a complexidade de decodificação em comparação com um LT Code simples \cite{WOS:000381844400033}.
 
 \subsection{Online Codes}
-Os \textbf{Online Codes}, propostos por Maymounkov \cite{maymounkov2002online,maymounkov2003rateless}, são códigos \emph{fountain} que, assim como os LT Codes, geram uma quantidade potencialmente ilimitada de símbolos codificados por meio de combinações XOR. Diferentemente destes, porém, empregam uma distribuição de grau com grau máximo constante, independente de $k$, o que resulta em codificação e decodificação de complexidade linear. Para compensar a recuperação apenas parcial que essa distribuição proporciona, os Online Codes combinam dois níveis de codificação: um código externo e um código interno.
+Os \textbf{Online Codes}, propostos por Maymounkov \cite{maymounkov2002online,maymounkov2003rateless}, são códigos \emph{fountain} que, assim como os LT Codes, geram uma quantidade potencialmente ilimitada de símbolos codificados por meio de combinações XOR. Diferentemente destes, porém, empregam uma distribuição de grau com grau máximo constante, independente de $k$, o que resulta em codificação e decodificação de complexidade linear. Para compensar a recuperação apenas parcial que essa distribuição proporciona, os Online Codes combinam dois níveis de codificação, um código externo e um código interno.
 
 O código externo (\emph{outer code}) acrescenta redundância aos $k$ símbolos de origem $\mathbf{d} = (d_1, \ldots, d_k)$. Cada símbolo de origem é associado aleatoriamente a $q$ dos $m$ símbolos auxiliares $a_1, \ldots, a_m$, sendo cada símbolo auxiliar a soma dos símbolos de origem a ele associados:
 
@@ -157,7 +145,7 @@ O código externo (\emph{outer code}) acrescenta redundância aos $k$ símbolos 
 
 \noindent em que $A_l$ é o conjunto de índices dos símbolos de origem associados a $a_l$. Os símbolos de origem e auxiliares formam a mensagem composta $\mathbf{v} = (d_1, \ldots, d_k, a_1, \ldots, a_m)$.
 
-O código interno (\emph{inner code}) gera os símbolos codificados, denominados blocos de verificação (\emph{check blocks}), de forma análoga à Equação~\eqref{eq:lt_codificacao}, porém sobre a mensagem composta: sorteia-se um grau segundo a distribuição de grau e combinam-se, via XOR, símbolos de $\mathbf{v}$ escolhidos uniformemente.
+O código interno (\emph{inner code}) gera os símbolos codificados, denominados blocos de verificação (\emph{check blocks}), de forma análoga à Equação~\eqref{eq:lt_codificacao}, porém sobre a mensagem composta, sorteia-se um grau segundo a distribuição de grau e combinam-se, via XOR, símbolos de $\mathbf{v}$ escolhidos uniformemente.
 
 A decodificação ocorre em duas etapas. Inicialmente, o algoritmo de \emph{peeling} descrito para os LT Codes é aplicado aos blocos de verificação recebidos, recuperando uma fração dos símbolos da mensagem composta próxima de 1, mas não necessariamente todos. Em seguida, as relações do código externo, dadas pela Equação~\eqref{eq:online_auxiliar}, são utilizadas para recuperar os símbolos de origem remanescentes. Com $\varepsilon > 0$ como parâmetro de projeto, a recuperação completa é obtida com aproximadamente $(1 + 3\varepsilon)k$ blocos de verificação, com probabilidade de falha que decresce exponencialmente com $q$ \cite{maymounkov2002online}.
 

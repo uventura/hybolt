@@ -10,14 +10,14 @@
 \contentsline {section}{\numberline {2.2}Corpos finitos e corpo de Galois}{5}{section.2.2}%
 \contentsline {subsection}{\numberline {2.2.1}Exemplo de representação polinomial}{5}{subsection.2.2.1}%
 \contentsline {section}{\numberline {2.3}Divisão polinomial em GF(2)}{6}{section.2.3}%
-\contentsline {subsection}{\numberline {2.3.1}Exemplo de divisão passo a passo}{6}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.1}Exemplo de divisão}{6}{subsection.2.3.1}%
 \contentsline {subsection}{\numberline {2.3.2}HySAIL e Codificação de Blocos}{7}{subsection.2.3.2}%
 \contentsline {subsection}{\numberline {2.3.3}LT Codes}{7}{subsection.2.3.3}%
-\contentsline {subsubsection}{Exemplo de codificação e decodificação}{8}{section*.6}%
+\contentsline {subsubsection}{Exemplo de codificação e decodificação}{7}{section*.6}%
 \contentsline {subsection}{\numberline {2.3.4}RaptorQ Codes}{8}{subsection.2.3.4}%
-\contentsline {subsubsection}{Exemplo simplificado de codificação e recuperação}{9}{section*.7}%
+\contentsline {subsubsection}{Exemplo simplificado de codificação e recuperação}{8}{section*.7}%
 \contentsline {subsection}{\numberline {2.3.5}Online Codes}{10}{subsection.2.3.5}%
-\contentsline {subsubsection}{Exemplo de codificação e decodificação}{11}{section*.8}%
+\contentsline {subsubsection}{Exemplo de codificação e decodificação}{10}{section*.8}%
 \contentsline {chapter}{\numberline {3}Proposta}{12}{chapter.3}%
 \contentsline {chapter}{\numberline {4}Metodologia de Pesquisa}{13}{chapter.4}%
 \contentsline {section}{\numberline {4.1}Provas de Integridade e Disponibilidade}{13}{section.4.1}%
