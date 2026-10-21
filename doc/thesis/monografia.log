@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.6.14)  21 OCT 2026 20:11
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.6.14)  21 OCT 2026 20:21
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -720,7 +720,7 @@ LaTeX Font Warning: Font shape `T1/cmr/m/n' in size <20> not available
 LaTeX Font Warning: Font shape `T1/ua1/b/n' in size <20> not available
 (Font)              size <20.74> substituted on input line 26.
 
-<img/positivo_cor.pdf, id=100, 119.44624pt x 60.225pt>
+<img/positivo_cor.pdf, id=92, 119.44624pt x 60.225pt>
 File: img/positivo_cor.pdf Graphic file (type pdf)
 <use img/positivo_cor.pdf>
 Package pdftex.def Info: img/positivo_cor.pdf  used on input line 26.
@@ -795,7 +795,8 @@ babelbib: Set language for keywords in the bibliography fixed to american
 
 ) (./monografia.acr [5
 
-]) [6
+{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/share/texmf/fonts/enc/
+dvips/lm/lm-rm.enc}]) [6
 
 
 ]
@@ -819,13 +820,24 @@ n-der al-guns con-ceitos matemáti-
 
 [5
 
-{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/share/texmf/fonts/enc/
-dvips/lm/lm-rm.enc}]
+]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <17.28> on input line 16.
+(Font)              <14.4> on input line 16.
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <10> on input line 16.
- [6] [7{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathex.enc}] [8] [9] [10]) [11]
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <7> on input line 16.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 16.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 16.
+
+[6] [7{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathex.enc}] [8] [9] [10])
+[11]
 Chapter 3.
 (./tex/3_Proposta.tex) [12
 
@@ -882,32 +894,31 @@ LaTeX Font Warning: Size substitutions with differences
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
 Package rerunfilecheck Info: File `monografia.out' has not changed.
-(rerunfilecheck)             Checksum: 5581A76F03C25FD3767EDE8028934405;3739.
+(rerunfilecheck)             Checksum: 5075E56D83BC77ECC13FADFFD7E8B41F;3341.
 Package rerunfilecheck Info: File `monografia.brf' has not changed.
-(rerunfilecheck)             Checksum: 47EC8065705E68D6374C0CF10446A988;1530.
+(rerunfilecheck)             Checksum: DD6472B99B1FB8564B436F45EB7B0049;1529.
  ) 
 Here is how much of TeX's memory you used:
- 19372 strings out of 476182
- 330437 string characters out of 5795595
+ 19376 strings out of 476182
+ 330472 string characters out of 5795595
  1934975 words of memory out of 5000000
- 40905 multiletter control sequences out of 15000+600000
- 616723 words of font info for 70 fonts, out of 8000000 for 9000
+ 40907 multiletter control sequences out of 15000+600000
+ 620308 words of font info for 73 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  109i,6n,107p,2346b,755s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf/fonts/type1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/ty
 pe1/public/lm/lmex10.pfb></usr/share/texmf/fonts/type1/public/lm/lmmi12.pfb></u
 sr/share/texmf/fonts/type1/public/lm/lmmi6.pfb></usr/share/texmf/fonts/type1/pu
 blic/lm/lmmi8.pfb></usr/share/texmf/fonts/type1/public/lm/lmr12.pfb></usr/share
-/texmf/fonts/type1/public/lm/lmr17.pfb></usr/share/texmf/fonts/type1/public/lm/
-lmr8.pfb></usr/share/texmf/fonts/type1/public/lm/lmri12.pfb></usr/share/texmf/f
-onts/type1/public/lm/lmsy10.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy8.p
-fb></usr/share/texmf/fonts/type1/public/lm/lmtt12.pfb></usr/share/texmf/fonts/t
-ype1/public/cm-super/sfrm1000.pfb></usr/share/texmf/fonts/type1/public/cm-super
-/sfrm2074.pfb>
-Output written on monografia.pdf (25 pages, 264453 bytes).
+/texmf/fonts/type1/public/lm/lmr8.pfb></usr/share/texmf/fonts/type1/public/lm/l
+mri12.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy10.pfb></usr/share/texmf/
+fonts/type1/public/lm/lmsy8.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt12.
+pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1000.pfb></usr/share/texm
+f/fonts/type1/public/cm-super/sfrm2074.pfb>
+Output written on monografia.pdf (25 pages, 249030 bytes).
 PDF statistics:
- 457 PDF objects out of 1000 (max. 8388607)
- 394 compressed objects within 4 object streams
+ 443 PDF objects out of 1000 (max. 8388607)
+ 382 compressed objects within 4 object streams
  90 named destinations out of 1000 (max. 500000)
- 198 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 182 words of extra memory for PDF output out of 10000 (max. 10000000)
 

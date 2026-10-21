@@ -1,19 +1,19 @@
 \section{Conceitos Fundamentais}
 Antes de detalhar o modelo proposto, é importante compreender alguns conceitos matemáticos relacionados à codificação de blocos. Por fim, para que possamos compreender a nova abordagem adotada, é necessário revisar o funcionamento de HySAIL, LT Codes e RaptorQ Codes.
 
-\section{Corpos finitos e corpo de Galois}%
+\subsection{Corpos finitos e corpo de Galois}%
 Um corpo finito, ou corpo de Galois, é uma estrutura algébrica composta por um conjunto finito de elementos sobre o qual as operações de adição e multiplicação são fechadas, associativas, comutativas e distributivas, e em que todo elemento possui inverso aditivo e todo elemento não nulo possui inverso multiplicativo. No contexto do HySAIL, são utilizados o corpo $GF(2)$ e suas extensões $GF(2^n)$, que permitem representar e manipular dados binários por meio de operações algébricas bem definidas.
 
-O corpo $GF(2)$ possui apenas os elementos 0 e 1. Nele, a adição corresponde à operação XOR e a multiplicação, à operação AND; assim, $1 + 1 = 0$ e $1 + 0 = 1$. As extensões $GF(2^n)$ possuem $2^n$ elementos, representados por polinômios de grau menor que $n$ com coeficientes em $GF(2)$, de modo que cada elemento corresponde a um vetor de $n$ bits.
+O corpo $GF(2)$ possui apenas os elementos 0 e 1. Nele, a adição corresponde à operação XOR e a multiplicação, à operação AND. Assim, $1 + 1 = 0$ e $1 + 0 = 1$. As extensões $GF(2^n)$ possuem $2^n$ elementos, representados por polinômios de grau menor que $n$ com coeficientes em $GF(2)$, de modo que cada elemento corresponde a um vetor de $n$ bits.
 
-\subsection{Exemplo de representação polinomial}%
+\subsubsection{Exemplo de representação polinomial}%
 Neste trabalho, adota-se a convenção em que a primeira posição de um vetor binário corresponde ao coeficiente do termo constante e cada posição seguinte, ao coeficiente da potência imediatamente superior de $x$. Segundo essa convenção, o vetor $1011$ possui coeficientes $1$, $0$, $1$ e $1$ associados, respectivamente, a $x^0$, $x^1$, $x^2$ e $x^3$, e é representado pelo polinômio
 
 \begin{equation}
 	1 + x^2 + x^3.
 \end{equation}
 
-\section[Divisão polinomial em GF(2)]{Divisão polinomial em $GF(2)$}%
+\subsection{Divisão polinomial em $GF(2)$}%
 A divisão polinomial em $GF(2)$ segue o mesmo algoritmo da divisão polinomial convencional. Como os coeficientes pertencem a $GF(2)$, a soma e a subtração são equivalentes à operação XOR, de modo que termos iguais se anulam, isto é, $x^k + x^k = 0$.
 
 Dados um dividendo $m(x)$ e um divisor $p(x) \neq 0$, existem um único quociente $q(x)$ e um único resto $r(x)$ tais que
@@ -25,7 +25,7 @@ Dados um dividendo $m(x)$ e um divisor $p(x) \neq 0$, existem um único quocient
 
 O algoritmo parte do dividendo como resto parcial. A cada iteração, o termo de maior grau do resto parcial é dividido pelo termo de maior grau do divisor, e o resultado constitui o próximo termo do quociente. Esse termo é multiplicado pelo divisor, e o produto é somado ao resto parcial, eliminando seu termo de maior grau. O processo é repetido enquanto o grau do resto parcial for maior ou igual ao grau do divisor.
 
-\subsection{Exemplo de divisão}%
+\subsubsection{Exemplo de divisão}%
 Considere o dividendo $m(x) = x^3 + x + 1$ e o divisor $p(x) = x^2 + 1$. A divisão do termo de maior grau do dividendo pelo termo de maior grau do divisor fornece $x^3 / x^2 = x$, primeiro termo do quociente. Multiplicando-o pelo divisor, obtém-se $x \cdot p(x) = x^3 + x$, que, somado ao resto parcial, resulta em
 
 \begin{equation}
@@ -161,3 +161,7 @@ Suponha que o receptor obtenha os seguintes blocos de verificação, gerados a p
 \end{equation}
 
 Pelo código interno, $c_1$ e $c_3$ fornecem diretamente $d_1$ e $a_1$, e $c_2 \oplus a_1 = 1101 = d_3$. O símbolo $d_2$, que não participa de nenhum bloco recebido, é então recuperado pelo código externo: $d_2 = a_1 \oplus d_1 \oplus d_3 = 0110$.
+
+\section{Trabalhos Relacionados}
+
+Esta seção tem como objetivo analisar os trabalhos desenvolvidos no campo de \acrshort{PoR}. São examinadas as principais abordagens propostas na literatura, incluindo variantes com verificação delegada e auditoria pública \cite{armknecht2021outsourcing,tan2023proof,shen2024public}, bem como os principais algoritmos atualmente empregados na construção desses esquemas, com o intuito de identificar suas contribuições e limitações em relação à proposta deste trabalho.
