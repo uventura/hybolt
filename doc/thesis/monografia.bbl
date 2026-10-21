@@ -118,4 +118,23 @@
 \newblock \btxjournalfont {IEEE Transactions on Information Theory},
   52(6):2551--2567, 2006.
 
+\bibitem {maymounkov2002online}
+\btxnamefont {\btxlastnamefont {Maymounkov}, Petar}\btxauthorcolon\
+  \btxtitlefont {\btxifchangecase {Online codes}{Online Codes}}.
+\newblock \Btxtechreplong {}\ TR2002-833, New York University, New York, NY,
+  \btxprintmonthyear{.}{11}{2002}{long}.
+
+\expandafter\btxselectlanguage\expandafter {\btxfallbacklanguage}
+\bibitem {maymounkov2003rateless}
+\btxnamefont {\btxlastnamefont {Maymounkov}, Petar} \btxandlong {}\
+  \btxnamefont {David \btxlastnamefont {Mazieres}}\btxauthorcolon\
+  \btxtitlefont {\btxifchangecase {Rateless codes and big downloads}{Rateless
+  Codes and Big Downloads}}.
+\newblock \Btxinlong {}\ \btxnamefont {\btxlastnamefont {Kaashoek},
+  M.\btxfnamespacelong Frans} \btxandlong {}\ \btxnamefont {Ion
+  \btxlastnamefont {Stoica}}\ (\btxeditorslong {}): \btxtitlefont {Peer-to-Peer
+  Systems II}, \btxvolumelong {}\ \btxvolumefont {2735} \btxofserieslong {}\
+  \btxtitlefont {Lecture Notes in Computer Science}, \btxpageslong {}\
+  247--255. \btxpublisherfont {Springer}, 2003.
+
 \end{thebibliography}

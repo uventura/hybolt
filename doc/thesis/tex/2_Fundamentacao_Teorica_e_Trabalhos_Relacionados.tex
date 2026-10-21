@@ -144,3 +144,36 @@ Esse exemplo ilustra o papel da pré-codificação: relações adicionais entre 
 Na decodificação, o receptor reúne os símbolos codificados recebidos e suas relações de codificação. Inicialmente, são aplicadas eliminações XOR para resolver os símbolos que podem ser obtidos diretamente. As relações restantes são então resolvidas em conjunto com as informações da pré-codificação. Desse modo, o RaptorQ combina a geração flexível de símbolos dos LT Codes com uma camada adicional de proteção, reduzindo a probabilidade de falha na recuperação quando são recebidos símbolos suficientes \cite{shokrollahi2006raptor,WOS:000381844400033}.
 
 Na prática, essa propriedade é expressa pelo \emph{overhead} de recepção: a quantidade de símbolos adicionais que pode ser necessária além dos $k$ símbolos de origem. Um \emph{overhead} pequeno permite recuperar o bloco mesmo após perdas, sem exigir a retransmissão de símbolos específicos. Entretanto, a etapa adicional de pré-codificação e a resolução das relações remanescentes aumentam a complexidade de decodificação em comparação com um LT Code simples \cite{WOS:000381844400033}.
+
+\subsection{Online Codes}
+Os \textbf{Online Codes}, propostos por Maymounkov \cite{maymounkov2002online,maymounkov2003rateless}, são códigos \emph{fountain} que, assim como os LT Codes, geram uma quantidade potencialmente ilimitada de símbolos codificados por meio de combinações XOR. Diferentemente destes, porém, empregam uma distribuição de grau com grau máximo constante, independente de $k$, o que resulta em codificação e decodificação de complexidade linear. Para compensar a recuperação apenas parcial que essa distribuição proporciona, os Online Codes combinam dois níveis de codificação: um código externo e um código interno.
+
+O código externo (\emph{outer code}) acrescenta redundância aos $k$ símbolos de origem $\mathbf{d} = (d_1, \ldots, d_k)$. Cada símbolo de origem é associado aleatoriamente a $q$ dos $m$ símbolos auxiliares $a_1, \ldots, a_m$, sendo cada símbolo auxiliar a soma dos símbolos de origem a ele associados:
+
+\begin{equation}
+	a_l = \bigoplus_{j \in A_l} d_j,
+	\label{eq:online_auxiliar}
+\end{equation}
+
+\noindent em que $A_l$ é o conjunto de índices dos símbolos de origem associados a $a_l$. Os símbolos de origem e auxiliares formam a mensagem composta $\mathbf{v} = (d_1, \ldots, d_k, a_1, \ldots, a_m)$.
+
+O código interno (\emph{inner code}) gera os símbolos codificados, denominados blocos de verificação (\emph{check blocks}), de forma análoga à Equação~\eqref{eq:lt_codificacao}, porém sobre a mensagem composta: sorteia-se um grau segundo a distribuição de grau e combinam-se, via XOR, símbolos de $\mathbf{v}$ escolhidos uniformemente.
+
+A decodificação ocorre em duas etapas. Inicialmente, o algoritmo de \emph{peeling} descrito para os LT Codes é aplicado aos blocos de verificação recebidos, recuperando uma fração dos símbolos da mensagem composta próxima de 1, mas não necessariamente todos. Em seguida, as relações do código externo, dadas pela Equação~\eqref{eq:online_auxiliar}, são utilizadas para recuperar os símbolos de origem remanescentes. Com $\varepsilon > 0$ como parâmetro de projeto, a recuperação completa é obtida com aproximadamente $(1 + 3\varepsilon)k$ blocos de verificação, com probabilidade de falha que decresce exponencialmente com $q$ \cite{maymounkov2002online}.
+
+\subsubsection{Exemplo de codificação e decodificação}%
+Considere os mesmos símbolos de origem do exemplo anterior, $d_1 = 1010$, $d_2 = 0110$ e $d_3 = 1101$, e um código externo com um único símbolo auxiliar associado a todos eles:
+
+\begin{equation}
+	a_1 = d_1 \oplus d_2 \oplus d_3 = 0001.
+\end{equation}
+
+Suponha que o receptor obtenha os seguintes blocos de verificação, gerados a partir da mensagem composta $\mathbf{v} = (d_1, d_2, d_3, a_1)$:
+
+\begin{equation}
+	c_1 = d_1 = 1010, \quad
+	c_2 = d_3 \oplus a_1 = 1100, \quad
+	c_3 = a_1 = 0001.
+\end{equation}
+
+Pelo código interno, $c_1$ e $c_3$ fornecem diretamente $d_1$ e $a_1$, e $c_2 \oplus a_1 = 1101 = d_3$. O símbolo $d_2$, que não participa de nenhum bloco recebido, é então recuperado pelo código externo: $d_2 = a_1 \oplus d_1 \oplus d_3 = 0110$.
