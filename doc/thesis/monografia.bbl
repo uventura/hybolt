@@ -118,23 +118,4 @@
 \newblock \btxjournalfont {IEEE Transactions on Information Theory},
   52(6):2551--2567, 2006.
 
-\bibitem {karp2004finite}
-\btxnamefont {\btxlastnamefont {Karp}, Richard}, \btxnamefont {Michael
-  \btxlastnamefont {Luby}}\btxandcomma {} \btxandlong {}\ \btxnamefont {Amin
-  \btxlastnamefont {Shokrollahi}}\btxauthorcolon\ \btxtitlefont
-  {\btxifchangecase {Finite length analysis of lt codes}{Finite Length Analysis
-  of LT Codes}}.
-\newblock \Btxinlong {}\ \btxtitlefont {Proceedings of the 2004 IEEE
-  International Symposium on Information Theory (ISIT)}, \btxpagelong {}~39.
-  \btxpublisherfont {IEEE}, 2004.
-
-\bibitem {hyytia2007analysis}
-\btxnamefont {\btxlastnamefont {Hyytia}, Esa}, \btxnamefont {Vesa
-  \btxlastnamefont {Tirronen}}\btxandcomma {} \btxandlong {}\ \btxnamefont
-  {Jorma \btxlastnamefont {Virtamo}}\btxauthorcolon\ \btxjtitlefont
-  {\btxifchangecase {On the degree distribution of lt codes with unequal error
-  protection}{On the Degree Distribution of LT Codes with Unequal Error
-  Protection}}.
-\newblock \btxjournalfont {IEEE Communications Letters}, 11(8):642--644, 2007.
-
 \end{thebibliography}

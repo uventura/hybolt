@@ -23,6 +23,7 @@
 \backcite {7485855}{{3}{1}{chapter.1}}
 \backcite {WOS:000381844400033}{{4}{1.1}{section.1.1}}
 \backcite {luby2002lt}{{7}{2.3.3}{subsection.2.3.3}}
-\backcite {shokrollahi2006raptor}{{7}{2.3.3}{subsection.2.3.3}}
-\backcite {luby2002lt,karp2004finite}{{7}{2.3.3}{section*.6}}
-\backcite {luby2002lt,hyytia2007analysis}{{8}{2.3.3}{equation.2.3.3}}
+\backcite {luby2002lt}{{7}{2.3.3}{equation.2.3.1}}
+\backcite {shokrollahi2006raptor,WOS:000381844400033}{{8}{2.3.4}{subsection.2.3.4}}
+\backcite {shokrollahi2006raptor,WOS:000381844400033}{{10}{2.3.4}{equation.2.3.9}}
+\backcite {WOS:000381844400033}{{10}{2.3.4}{equation.2.3.9}}

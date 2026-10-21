@@ -61,57 +61,86 @@ Pela convenção em que o primeiro bit representa o coeficiente do termo constan
 Empty
 
 \subsection{LT Codes}
-\textbf{LtCodes} pertencem à classe dos códigos fountain digitais (digital fountain codes), baseados na transformada de Luby, introduzidos por Michael Luby em 2002 \cite{luby2002lt}. Esses códigos são construídos randomicamente durante o processo de codificação, onde cada símbolo codificado é gerado através da combinação linear de um número variável de símbolos de origem.
+Os \textbf{LT Codes} (\emph{Luby Transform Codes}), propostos por Luby \cite{luby2002lt}, são a primeira realização prática dos códigos \emph{fountain} digitais. Por não possuírem taxa fixa, permitem gerar, a partir de $k$ símbolos de origem, uma quantidade potencialmente ilimitada de símbolos codificados, dos quais qualquer subconjunto com pouco mais de $k$ elementos basta para reconstruir os dados, sem necessidade de retransmissão seletiva.
 
-A distribuição de grau (quantidade de símbolos que serão combinados) é otimizada para minimizar o número de símbolos necessários para a recuperação completa dos dados, adotando a distribuição de grau de Soliton robusta (robust Soliton distribution), isto é, a distribuição de Soliton ideal acrescida de um termo corretivo para elevar a probabilidade de decodificação completa com baixo overhead \cite{shokrollahi2006raptor}.
-
-\subsubsection{Robust Soliton Distribution}
-
-Nos \emph{LtCodes}, a escolha do grau de cada símbolo codificado (bloco de bytes do arquivo, usado como unidade de codificação e decodificação) é controlada pela \emph{robust Soliton distribution}, proposta para melhorar o desempenho de decodificação em tamanho finito \cite{luby2002lt,karp2004finite}. A construção parte de duas distribuições: a distribuição de Soliton ideal $\rho(d)$ e um termo corretivo $\tau(d)$.
-
-Para $k$ símbolos de origem, a distribuição ideal é dada por:
+Seja $\mathbf{d} = (d_1, \ldots, d_k)$ o vetor de símbolos de origem, cada um correspondente a um bloco de bytes do arquivo. Para gerar o símbolo codificado $c_i$, sorteia-se um grau $\delta_i$ segundo uma distribuição de grau e selecionam-se uniformemente $\delta_i$ símbolos de origem distintos, cujos índices formam o conjunto $S_i$. O símbolo é então dado por
 
 \begin{equation}
-\rho(d) = \begin{cases}
-\frac{1}{k}, & d=1 \\
-\frac{1}{d(d-1)}, & d=2,\ldots,k
-\end{cases}
+	c_i = \bigoplus_{j \in S_i} d_j,
+	\label{eq:lt_codificacao}
 \end{equation}
 
-Define-se $R = c\ln\left(\frac{k}{\delta}\right)\sqrt{k}$, com $c>0$ e $\delta \in (0,1)$. O termo corretivo é:
+\noindent em que $\bigoplus$ denota a soma em $GF(2)$, isto é, o XOR bit a bit. Para que o receptor conheça $S_i$, transmite-se junto a $c_i$ a semente do gerador pseudoaleatório utilizado, permitindo reproduzir as escolhas do codificador.
+
+A distribuição de grau determina o desempenho do código: símbolos de grau baixo são necessários para iniciar e manter a decodificação, enquanto símbolos de grau elevado garantem que todos os símbolos de origem sejam cobertos \cite{luby2002lt}. Seu projeto busca equilibrar esses requisitos, minimizando o \emph{overhead} de recepção, isto é, o número de símbolos adicionais necessários à recuperação.
+
+A decodificação utiliza o algoritmo iterativo de \emph{belief propagation}, ou \emph{peeling}. A cada iteração, um símbolo codificado de grau unitário fornece diretamente um símbolo de origem $d_j$, que é somado aos demais símbolos codificados que o contêm, reduzindo seus graus e podendo originar novos símbolos de grau unitário. O processo termina quando os $k$ símbolos são recuperados ou, na ausência de símbolos de grau unitário, é suspenso até a chegada de novos símbolos codificados.
+
+\subsubsection{Exemplo de codificação e decodificação}%
+Considere três símbolos de origem de quatro bits:
 
 \begin{equation}
-\tau(d) = \begin{cases}
-\frac{R}{dk}, & d=1,\ldots,\left\lfloor\frac{k}{R}\right\rfloor-1 \\
-\frac{R\ln\left(\frac{R}{\delta}\right)}{k}, & d=\left\lfloor\frac{k}{R}\right\rfloor \\
-0, & d>\left\lfloor\frac{k}{R}\right\rfloor
-\end{cases}
+	d_1 = 1010, \quad d_2 = 0110, \quad d_3 = 1101.
 \end{equation}
 
-A robust Soliton distribution final é a normalização:
+Com os conjuntos sorteados $S_1 = \{2\}$, $S_2 = \{1, 2\}$ e $S_3 = \{1, 2, 3\}$, a Equação~\eqref{eq:lt_codificacao} fornece:
 
 \begin{equation}
-\mu(d) = \frac{\rho(d)+\tau(d)}{Z}, \quad Z = \sum_{i=1}^{k} \left(\rho(i)+\tau(i)\right)
+	c_1 = d_2 = 0110, \quad
+	c_2 = d_1 \oplus d_2 = 1100, \quad
+	c_3 = d_1 \oplus d_2 \oplus d_3 = 0001.
 \end{equation}
 
-Essa formulação aumenta a probabilidade de existência de símbolos de grau baixo durante a decodificação por \emph{belief propagation}, reduzindo o risco de estagnação do processo e mantendo baixo overhead de recepção \cite{luby2002lt,hyytia2007analysis}.
-
-Os LtCodes utilizam operações XOR iterativas em corpos finitos (típicamente GF(2) para aplicações binárias). Seja $\mathbf{d} = (d_1, d_2, \ldots, d_k)$ o vetor contendo os $k$ símbolos de origem, o processo de codificação gera $n$ símbolos codificados $\mathbf{c} = (c_1, c_2, \ldots, c_n)$ conforme:
-
-\begin{equation}
-c_i = \bigoplus_{j \in S_i} d_j
-\end{equation}
-
-onde $\bigoplus$ denota a operação XOR (ou soma em GF(2)), e $S_i$ é um subconjunto de índices selecionados randomicamente de acordo com uma distribuição de grau Soliton. O grau (quantidade de índices em $S_i$, isto é, quantos símbolos originais serão combinados) $|S_i|$ segue uma distribuição de probabilidade específica $\rho(d)$:
-
-\begin{equation}
-\rho(d) = \begin{cases}
-1/k & \text{se } d = 1 \\
-1/(d(d-1)) & \text{se } d = 2, 3, \ldots, k
-\end{cases}
-\end{equation}
-
-A decodificação procede iterativamente, identificando símbolos codificados com grau 1 (que correspondem diretamente a símbolos de origem) e propagando a informação até recuperar todos os $k$ símbolos originais. Sendo este processo o \emph{belief propagation}.
+Na decodificação, $c_1$ fornece diretamente $d_2$. Removendo $d_2$ dos demais símbolos, obtêm-se $c_2 \oplus d_2 = d_1 = 1010$ e $c_3 \oplus d_2 = d_1 \oplus d_3 = 0111$. Por fim, $0111 \oplus d_1 = 1101 = d_3$, completando a recuperação.
 
 \subsection{RaptorQ Codes}
-Empty
+\textbf{RaptorQ Codes} pertencem à família dos códigos \emph{fountain} sem taxa fixa. Isso significa que, a partir de um conjunto de símbolos de origem, o codificador pode produzir uma quantidade potencialmente ilimitada de símbolos codificados. O receptor não precisa receber símbolos específicos nem todos os símbolos transmitidos: basta obter uma quantidade suficiente de símbolos distintos para reconstruir os dados originais. Essa característica torna o código adequado a cenários com perdas de pacotes, como a transmissão em redes não confiáveis e o armazenamento distribuído \cite{shokrollahi2006raptor,WOS:000381844400033}.
+
+O processo de codificação é composto por duas etapas. Primeiro, os $k$ símbolos de origem são submetidos a uma pré-codificação, que acrescenta símbolos de reparo e estabelece relações entre os símbolos do bloco. Em seguida, uma codificação LT gera cada símbolo de saída pela combinação de um subconjunto dos símbolos intermediários. Assim como nos LT Codes, essas combinações usam operações XOR em $GF(2)$ quando os símbolos são binários.
+
+De forma simplificada, seja $\mathbf{u} = (u_1, u_2, \ldots, u_k)$ o vetor de símbolos de origem. A pré-codificação produz um vetor intermediário $\mathbf{v}$, e cada símbolo codificado $c_i$ é obtido por:
+
+\begin{equation}
+c_i = \bigoplus_{j \in S_i} v_j,
+\end{equation}
+
+em que $S_i$ é o conjunto de índices selecionados para o símbolo $c_i$. A diferença em relação ao LT Code isolado é que as relações introduzidas na pré-codificação permitem recuperar símbolos de origem mesmo quando o processo iterativo não encontra imediatamente símbolos de grau 1.
+
+\subsubsection{Exemplo simplificado de codificação e recuperação}%
+Considere um bloco com três símbolos de origem de quatro bits:
+
+\begin{equation}
+u_1 = 1010, \quad u_2 = 0110, \quad u_3 = 1101.
+\end{equation}
+
+Para fins didáticos, suponha que a pré-codificação produza o símbolo de reparo $v_4 = u_1 \oplus u_2 \oplus u_3$. Assim, os símbolos intermediários são $v_1=u_1$, $v_2=u_2$, $v_3=u_3$ e:
+
+\begin{equation}
+v_4 = 1010 \oplus 0110 \oplus 1101 = 0001.
+\end{equation}
+
+Em seguida, a etapa LT pode gerar símbolos codificados a partir de subconjuntos desses símbolos intermediários. Considere os seguintes símbolos transmitidos:
+
+\begin{equation}
+c_1 = v_1 = 1010, \quad
+c_2 = v_2 \oplus v_3 = 1011, \quad
+c_3 = v_2 \oplus v_4 = 0111.
+\end{equation}
+
+Suponha que o símbolo de origem $u_2$ não seja recebido diretamente. A partir de $c_1$, o receptor recupera $u_1$. Além disso, como conhece a relação de pré-codificação e recebe $c_2$ e $c_3$, pode recuperar os símbolos ausentes. Primeiro, observa-se que:
+
+\begin{equation}
+c_2 \oplus c_3 = (v_2 \oplus v_3) \oplus (v_2 \oplus v_4) = v_3 \oplus v_4 = 1100.
+\end{equation}
+
+Pela relação de pré-codificação, $v_3 \oplus v_4 = u_3 \oplus (u_1 \oplus u_2 \oplus u_3) = u_1 \oplus u_2$. Portanto, como $u_1$ foi recuperado de $c_1$, obtém-se:
+
+\begin{equation}
+u_2 = (c_2 \oplus c_3) \oplus u_1 = 1100 \oplus 1010 = 0110.
+\end{equation}
+
+Esse exemplo ilustra o papel da pré-codificação: relações adicionais entre os símbolos permitem recuperar dados perdidos a partir dos símbolos codificados recebidos. O RaptorQ completo utiliza relações e distribuições de grau definidas pelo padrão, mas o princípio de recuperação por combinações XOR é o mesmo.
+
+Na decodificação, o receptor reúne os símbolos codificados recebidos e suas relações de codificação. Inicialmente, são aplicadas eliminações XOR para resolver os símbolos que podem ser obtidos diretamente. As relações restantes são então resolvidas em conjunto com as informações da pré-codificação. Desse modo, o RaptorQ combina a geração flexível de símbolos dos LT Codes com uma camada adicional de proteção, reduzindo a probabilidade de falha na recuperação quando são recebidos símbolos suficientes \cite{shokrollahi2006raptor,WOS:000381844400033}.
+
+Na prática, essa propriedade é expressa pelo \emph{overhead} de recepção: a quantidade de símbolos adicionais que pode ser necessária além dos $k$ símbolos de origem. Um \emph{overhead} pequeno permite recuperar o bloco mesmo após perdas, sem exigir a retransmissão de símbolos específicos. Entretanto, a etapa adicional de pré-codificação e a resolução das relações remanescentes aumentam a complexidade de decodificação em comparação com um LT Code simples \cite{WOS:000381844400033}.

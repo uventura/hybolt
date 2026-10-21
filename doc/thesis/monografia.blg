@@ -5,45 +5,45 @@ The style file: babunsrt.bst
 Database file #1: bibliografia.bib
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Warning--empty language in 7485855
-You've used 12 entries,
+You've used 10 entries,
             2465 wiz_defined-function locations,
-            672 strings with 8153 characters,
-and the built_in function-call counts, 3747 in all, are:
-= -- 304
-> -- 103
-< -- 2
-+ -- 40
-- -- 28
-* -- 472
-:= -- 492
-add.period$ -- 31
-call.type$ -- 12
-change.case$ -- 11
+            660 strings with 7791 characters,
+and the built_in function-call counts, 3054 in all, are:
+= -- 249
+> -- 81
+< -- 1
++ -- 32
+- -- 22
+* -- 387
+:= -- 408
+add.period$ -- 26
+call.type$ -- 10
+change.case$ -- 9
 chr.to.int$ -- 0
-cite$ -- 13
-duplicate$ -- 214
-empty$ -- 417
-format.name$ -- 79
-if$ -- 820
+cite$ -- 11
+duplicate$ -- 169
+empty$ -- 338
+format.name$ -- 61
+if$ -- 663
 int.to.chr$ -- 0
-int.to.str$ -- 12
-missing$ -- 18
-newline$ -- 72
-num.names$ -- 12
-pop$ -- 38
+int.to.str$ -- 10
+missing$ -- 15
+newline$ -- 64
+num.names$ -- 10
+pop$ -- 27
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 71
+skip$ -- 56
 stack$ -- 0
-substring$ -- 194
-swap$ -- 96
-text.length$ -- 2
+substring$ -- 165
+swap$ -- 73
+text.length$ -- 1
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
 warning$ -- 1
-while$ -- 24
-width$ -- 14
-write$ -- 154
+while$ -- 19
+width$ -- 12
+write$ -- 133
 (There was 1 warning)
