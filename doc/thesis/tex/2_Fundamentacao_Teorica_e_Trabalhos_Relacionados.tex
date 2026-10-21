@@ -2,20 +2,16 @@
 Antes de detalhar o modelo proposto, é importante compreender alguns conceitos matemáticos relacionados à codificação de blocos. Por fim, para que possamos compreender a nova abordagem adotada, é necessário revisar o funcionamento de HySAIL, LT Codes e RaptorQ Codes.
 
 \section{Corpos finitos e corpo de Galois}%
-O corpo de Galois é uma estrutura algébrica que define operações e suas propriedades sobre um conjunto finito de elementos. No contexto do HySail, destacam-se o corpo $GF(2)$ e suas extensões $GF(2^n)$, que permitem representar e manipular dados binários por meio de operações matematicamente bem definidas.
+Um corpo finito, ou corpo de Galois, é uma estrutura algébrica composta por um conjunto finito de elementos sobre o qual as operações de adição e multiplicação são fechadas, associativas, comutativas e distributivas, e em que todo elemento possui inverso aditivo e todo elemento não nulo possui inverso multiplicativo. No contexto do HySAIL, são utilizados o corpo $GF(2)$ e suas extensões $GF(2^n)$, que permitem representar e manipular dados binários por meio de operações algébricas bem definidas.
 
-Em $GF(2)$, os únicos elementos são 0 e 1, e a soma segue a mesma lógica da operação XOR, ou seja, o resultado é 0 quando os operandos são iguais e 1 quando são diferentes. Assim, $1+1=0$ e $1+0=1$. As extensões $GF(2^n)$, por sua vez, permitem operar sob elementos representados por combinações de $n$ coeficientes binários.
+O corpo $GF(2)$ possui apenas os elementos 0 e 1. Nele, a adição corresponde à operação XOR e a multiplicação, à operação AND; assim, $1 + 1 = 0$ e $1 + 0 = 1$. As extensões $GF(2^n)$ possuem $2^n$ elementos, representados por polinômios de grau menor que $n$ com coeficientes em $GF(2)$, de modo que cada elemento corresponde a um vetor de $n$ bits.
 
 \subsection{Exemplo de representação polinomial}%
-Considere o vetor binário 1011. Adotando a convenção usada pelo projeto, em que a primeira posição do vetor representa o termo constante, o bloco é lido em três passos:
+Neste trabalho, adota-se a convenção em que a primeira posição de um vetor binário corresponde ao coeficiente do termo constante e cada posição seguinte, ao coeficiente da potência imediatamente superior de $x$. Segundo essa convenção, o vetor $1011$ possui coeficientes $1$, $0$, $1$ e $1$ associados, respectivamente, a $x^0$, $x^1$, $x^2$ e $x^3$, e é representado pelo polinômio
 
-\begin{enumerate}
-	\item o primeiro coeficiente vale 1 e representa $1$;
-	\item o segundo coeficiente vale 0 e representa $0x$;
-	\item os coeficientes seguintes valem 1 e 1, representando $x^2$ e $x^3$.
-\end{enumerate}
-
-Assim, o bloco passa a ser escrito como $1 + x^2 + x^3$.
+\begin{equation}
+	1 + x^2 + x^3.
+\end{equation}
 
 \section[Divisão polinomial em GF(2)]{Divisão polinomial em $GF(2)$}%
 A divisão polinomial em $GF(2)$ segue o mesmo algoritmo da divisão polinomial convencional. Como os coeficientes pertencem a $GF(2)$, a soma e a subtração são equivalentes à operação XOR, de modo que termos iguais se anulam, isto é, $x^k + x^k = 0$.

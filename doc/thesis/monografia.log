@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.6.14)  21 OCT 2026 20:08
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.6.14)  21 OCT 2026 20:11
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -822,9 +822,9 @@ n-der al-guns con-ceitos matemáti-
 {/usr/share/texmf/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/share/texmf/fonts/enc/
 dvips/lm/lm-rm.enc}]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <17.28> on input line 20.
+(Font)              <17.28> on input line 16.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 20.
+(Font)              <10> on input line 16.
  [6] [7{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathex.enc}] [8] [9] [10]) [11]
 Chapter 3.
 (./tex/3_Proposta.tex) [12
@@ -884,13 +884,13 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 Package rerunfilecheck Info: File `monografia.out' has not changed.
 (rerunfilecheck)             Checksum: 5581A76F03C25FD3767EDE8028934405;3739.
 Package rerunfilecheck Info: File `monografia.brf' has not changed.
-(rerunfilecheck)             Checksum: 3B12EE97EC877ECF8470FBEE58BB6C85;1529.
+(rerunfilecheck)             Checksum: 47EC8065705E68D6374C0CF10446A988;1530.
  ) 
 Here is how much of TeX's memory you used:
- 19376 strings out of 476182
- 330502 string characters out of 5795595
+ 19372 strings out of 476182
+ 330437 string characters out of 5795595
  1934975 words of memory out of 5000000
- 40907 multiletter control sequences out of 15000+600000
+ 40905 multiletter control sequences out of 15000+600000
  616723 words of font info for 70 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  109i,6n,107p,2346b,755s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -904,10 +904,10 @@ onts/type1/public/lm/lmsy10.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy8.p
 fb></usr/share/texmf/fonts/type1/public/lm/lmtt12.pfb></usr/share/texmf/fonts/t
 ype1/public/cm-super/sfrm1000.pfb></usr/share/texmf/fonts/type1/public/cm-super
 /sfrm2074.pfb>
-Output written on monografia.pdf (25 pages, 263948 bytes).
+Output written on monografia.pdf (25 pages, 264453 bytes).
 PDF statistics:
- 459 PDF objects out of 1000 (max. 8388607)
- 396 compressed objects within 4 object streams
- 92 named destinations out of 1000 (max. 500000)
+ 457 PDF objects out of 1000 (max. 8388607)
+ 394 compressed objects within 4 object streams
+ 90 named destinations out of 1000 (max. 500000)
  198 words of extra memory for PDF output out of 10000 (max. 10000000)
 

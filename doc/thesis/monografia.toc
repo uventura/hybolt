@@ -15,7 +15,7 @@
 \contentsline {subsection}{\numberline {2.3.3}LT Codes}{7}{subsection.2.3.3}%
 \contentsline {subsubsection}{Exemplo de codificação e decodificação}{7}{section*.6}%
 \contentsline {subsection}{\numberline {2.3.4}RaptorQ Codes}{8}{subsection.2.3.4}%
-\contentsline {subsubsection}{Exemplo simplificado de codificação e recuperação}{8}{section*.7}%
+\contentsline {subsubsection}{Exemplo simplificado de codificação e recuperação}{9}{section*.7}%
 \contentsline {subsection}{\numberline {2.3.5}Online Codes}{10}{subsection.2.3.5}%
 \contentsline {subsubsection}{Exemplo de codificação e decodificação}{10}{section*.8}%
 \contentsline {chapter}{\numberline {3}Proposta}{12}{chapter.3}%
