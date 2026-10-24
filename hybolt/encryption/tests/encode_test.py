@@ -96,3 +96,38 @@ def test_given_retrievability_proof_when_encoding_then_tags_every_packet():
         expected = ga.gf2_poly_mod(ga.bytes_to_poly_coeffs(packet.data), polynomial)
         assert np.array_equal(encoded.packet_macs[packet.index][0], expected)
     assert encoded.polynomial_division_count == len(encoded.packets)
+
+
+@pytest.mark.parametrize(
+    ("redundancy", "expected_repair"), [(0.25, 3), (0.5, 5), (1.0, 10), (0.01, 1)]
+)
+def test_given_redundancy_when_encoding_then_generates_proportional_repair_packets(
+    redundancy, expected_repair
+):
+    encoded = Encode(b"0123456789" * 10, block_size=10, redundancy=redundancy)
+
+    assert encoded.num_blocks == 10
+    assert encoded.repair_packets == expected_repair
+    assert len(encoded.packets) == encoded.num_blocks + expected_repair
+
+
+@pytest.mark.parametrize("redundancy", [0, -0.5])
+def test_given_non_positive_redundancy_when_encoding_then_raises_value_error(
+    redundancy,
+):
+    with pytest.raises(ValueError, match="redundancy"):
+        Encode(b"HelloWorld", block_size=2, redundancy=redundancy)
+
+
+def test_given_redundancy_when_losing_as_many_packets_as_repairs_then_still_decodes():
+    original = bytes(range(256)) * 4
+    encoded = Encode(original, block_size=64, redundancy=0.5)
+    decoder = Decoder.with_defaults(encoded.total_block_bytes, encoded.symbol_size)
+
+    decoded = None
+    for packet in encoded.packets[encoded.repair_packets :]:
+        decoded = decoder.decode(packet.data)
+        if decoded is not None:
+            break
+
+    assert decoded == original

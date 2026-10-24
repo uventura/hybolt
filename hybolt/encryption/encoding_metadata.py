@@ -35,6 +35,7 @@ class ChunkMetadata:
     codec: str = "raptorq"
     transfer_length: int = 0
     symbol_size: int = 0
+    repair_packets: int = 0
 
 
 @dataclass
@@ -80,6 +81,8 @@ class EncodingMetadata:
                     chunk.transfer_length = 0
                 if not hasattr(chunk, "symbol_size"):
                     chunk.symbol_size = 0
+                if not hasattr(chunk, "repair_packets"):
+                    chunk.repair_packets = 0
                 for packet in chunk.packets:
                     if not hasattr(packet, "packet_sha256"):
                         packet.packet_sha256 = ""

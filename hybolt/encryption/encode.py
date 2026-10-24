@@ -1,3 +1,5 @@
+import math
+
 from raptorq import Encoder
 
 from hybolt.encryption.block import Block
@@ -7,7 +9,7 @@ from hybolt.encryption.retrievability import (
 )
 from hybolt.logger.logger import execution_logger
 from hybolt.logger.progress import advance_progress, create_progress_task, get_progress
-from hybolt.constant import MAX_MAC_THREADS
+from hybolt.constant import DEFAULT_REDUNDANCY, MAX_MAC_THREADS
 
 
 class Encode:
@@ -17,11 +19,14 @@ class Encode:
         block_size,
         max_threads=MAX_MAC_THREADS,
         proof: RetrievabilityProof | None = None,
+        redundancy: float = DEFAULT_REDUNDANCY,
     ):
         if not data:
             raise ValueError("Data cannot be empty")
         if not 1 <= max_threads <= MAX_MAC_THREADS:
             raise ValueError(f"max_threads must be between 1 and {MAX_MAC_THREADS}")
+        if redundancy <= 0:
+            raise ValueError("redundancy must be positive")
 
         self._progress = get_progress()
         self._block_size = block_size
@@ -48,6 +53,7 @@ class Encode:
         )
 
         self._num_blocks = len(self._blocks)
+        self._repair_packets = max(1, math.ceil(redundancy * self._num_blocks))
         # RaptorQ packets are not XORs of source blocks, so MACs are kept per packet.
         self._mac_blocks = {}
         self._proof = proof or DisabledRetrievabilityProof()
@@ -62,6 +68,10 @@ class Encode:
     @property
     def symbol_size(self):
         return self._block_size
+
+    @property
+    def repair_packets(self):
+        return self._repair_packets
 
     @property
     def num_blocks(self):
@@ -96,7 +106,8 @@ class Encode:
         return self._proof.polynomial_division_count
 
     def _encode(self):
-        repair_packets_per_block = 2
+        # Chunks fit in a single RaptorQ source block, so this is the chunk's total.
+        repair_packets_per_block = self._repair_packets
         encoder = Encoder.with_defaults(self._data, self._block_size)
         encoded_packets = encoder.get_encoded_packets(repair_packets_per_block)
         execution_logger.debug(

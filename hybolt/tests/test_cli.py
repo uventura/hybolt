@@ -220,3 +220,67 @@ def test_given_retrievability_proof_flag_when_decoding_then_forwards_flag(
 
     assert result.exit_code == 0, result.output
     assert captured["retrievability_proof"] is expected
+
+
+@pytest.mark.parametrize(
+    ("flag", "expected"), [([], 0.25), (["--redundancy", "0.5"], 0.5)]
+)
+def test_given_redundancy_option_when_encoding_then_forwards_redundancy(
+    tmp_path, monkeypatch, flag, expected
+):
+    input_file = tmp_path / "input.txt"
+    input_file.write_text("HyBolt", encoding="utf-8")
+    server_list = tmp_path / "servers.json"
+    server_list.write_text(
+        json.dumps({"servers": [{"id": 1, "storage_location": str(tmp_path)}]}),
+        encoding="utf-8",
+    )
+    captured = {}
+
+    class StubHyboltEncode:
+        average_chunk_encode_seconds = 0.25
+        average_block_size = 1.0
+        average_polynomial_division_seconds = 0.01
+
+        def __init__(self, *args):
+            captured["redundancy"] = args[7]
+
+        def encode(self):
+            return 1
+
+    monkeypatch.setattr("hybolt.hybolt.HyboltEncode", StubHyboltEncode)
+    monkeypatch.setattr(
+        "hybolt.hybolt.execution_logger.set_log_directory", lambda log_dir: None
+    )
+    monkeypatch.setattr(
+        "hybolt.hybolt.append_runtime_record", lambda *args, **kwargs: None
+    )
+
+    result = CliRunner().invoke(
+        main, ["encode", str(input_file), "--server-list", str(server_list), *flag]
+    )
+
+    assert result.exit_code == 0, result.output
+    assert captured["redundancy"] == expected
+
+
+def test_given_non_positive_redundancy_when_encoding_then_rejects_option(tmp_path):
+    input_file = tmp_path / "input.txt"
+    input_file.write_text("HyBolt", encoding="utf-8")
+    server_list = tmp_path / "servers.json"
+    server_list.write_text(json.dumps({"servers": []}), encoding="utf-8")
+
+    result = CliRunner().invoke(
+        main,
+        [
+            "encode",
+            str(input_file),
+            "--server-list",
+            str(server_list),
+            "--redundancy",
+            "0",
+        ],
+    )
+
+    assert result.exit_code != 0
+    assert "--redundancy" in result.output

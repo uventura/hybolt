@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 
 from hybolt.constant import POLYNOMIAL_SET_SIZE
@@ -5,7 +7,7 @@ from hybolt.encryption.encoding_metadata import EncodingMetadata
 from hybolt.hybolt_encode import HyboltEncode
 
 
-def _encode(tmp_path, retrievability_proof=True, chunk_count=3):
+def _encode(tmp_path, retrievability_proof=True, chunk_count=3, redundancy=0.25):
     input_file = tmp_path / "input.txt"
     input_file.write_bytes(b"Hy-SAIL keeps one challenge set per file. " * 8)
     HyboltEncode(
@@ -15,6 +17,7 @@ def _encode(tmp_path, retrievability_proof=True, chunk_count=3):
         metadata_output=str(tmp_path),
         chunk_count=chunk_count,
         retrievability_proof=retrievability_proof,
+        redundancy=redundancy,
     ).encode()
     return EncodingMetadata.load(tmp_path / "input_metadata.pkl")
 
@@ -43,3 +46,12 @@ def test_given_chunked_file_when_encoding_without_proof_then_stores_no_polynomia
     assert all(
         packet.macs == [] for chunk in metadata.chunks for packet in chunk.packets
     )
+
+
+def test_given_redundancy_when_encoding_then_records_repair_packets_per_chunk(tmp_path):
+    metadata = _encode(tmp_path, retrievability_proof=False, redundancy=0.5)
+
+    for chunk in metadata.chunks:
+        assert chunk.repair_packets >= 1
+        source_packets = len(chunk.packets) - chunk.repair_packets
+        assert chunk.repair_packets == math.ceil(0.5 * source_packets)

@@ -2,3 +2,5 @@ DEFAULT_BLOCK_SIZE_PERCENTAGE = 0.10
 MAX_MAC_THREADS = 8
 POLYNOMIAL_SET_SIZE = 40
 POLYNOMIAL_LAMBDA = 127
+# Repair packets per source packet; 0.25 tolerates losing 20% of a chunk.
+DEFAULT_REDUNDANCY = 0.25

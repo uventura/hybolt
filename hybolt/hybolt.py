@@ -14,7 +14,7 @@ from rich.progress import (
 
 from hybolt.hybolt_decode import HyboltDecode
 from hybolt.hybolt_encode import HyboltEncode
-from hybolt.constant import MAX_MAC_THREADS
+from hybolt.constant import DEFAULT_REDUNDANCY, MAX_MAC_THREADS
 from hybolt.encryption.digest import Digest
 from hybolt.logger.logger import execution_logger
 from hybolt.logger.progress import set_progress
@@ -88,6 +88,13 @@ def main():
     help="Compute per-packet polynomial MACs so servers can be challenged before downloads",
 )
 @click.option(
+    "--redundancy",
+    type=click.FloatRange(min=0, min_open=True),
+    default=DEFAULT_REDUNDANCY,
+    show_default=True,
+    help="Repair packets generated per source packet of each chunk",
+)
+@click.option(
     "--debug",
     is_flag=True,
     help="Enable debug mode with detailed execution logs and timing instrumentation",
@@ -107,6 +114,7 @@ def encode_command(
     max_threads,
     chunk_count,
     retrievability_proof,
+    redundancy,
     debug,
     log_dir,
 ):
@@ -132,6 +140,7 @@ def encode_command(
             max_threads,
             chunk_count,
             retrievability_proof,
+            redundancy,
         )
         encode_started_at = time.perf_counter()
         packet_count = hybolt_encode.encode()
