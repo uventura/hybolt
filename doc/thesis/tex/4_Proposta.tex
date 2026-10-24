@@ -91,10 +91,21 @@ No HySAIL original, a redundância decorre dos parâmetros dos Online Codes, que
 
 A proposta define $r = \lceil \varepsilon K \rceil$, em que $\varepsilon > 0$ é um parâmetro de projeto. Um \emph{chunk} com $K + r$ pacotes tolera a perda ou corrupção de $r$ deles, o que corresponde a uma densidade de corrupção $\alpha = r / (K + r) \approx \varepsilon / (1 + \varepsilon)$. O valor padrão $\varepsilon = 0{,}25$ tolera, portanto, a perda de 20\% dos pacotes de cada \emph{chunk}. Esse dimensionamento explícito é necessário porque, com um número fixo de dois símbolos de reparo por \emph{chunk}, um \emph{chunk} com 127 símbolos de origem toleraria a perda de apenas dois pacotes, valor muito inferior ao admitido pelo modelo adversarial do HySAIL.
 
+O parâmetro $\varepsilon$ também determina quantos provedores podem deixar o sistema sem perda de dados. Como os $K + r$ pacotes de cada \emph{chunk} são distribuídos de forma equilibrada entre os $N$ provedores, cada provedor armazena cerca de $(K + r)/N$ deles, e a perda de $f$ provedores é tolerada enquanto $f (K + r)/N \le r$, isto é, enquanto
+
+\begin{equation}
+	\varepsilon \ge \frac{f}{N - f}.
+	\label{eq:tolerancia_provedores}
+\end{equation}
+
+\noindent Com três provedores, o valor padrão $\varepsilon = 0{,}25$ não tolera a saída de nenhum deles, e é necessário $\varepsilon \ge 0{,}5$ para tolerar a saída de um.
+
 \section{Redistribuição}
 \label{sec:redistribuicao}
 
-Nos Online Codes, um bloco de verificação corrompido pode ser reconstruído pelo XOR de outros blocos de verificação, sem transferir o arquivo, graças à codificação local \cite{maymounkov2003rateless,amaral2019hysail}. Os símbolos de reparo do RaptorQ não admitem essa reconstrução local, pois dependem dos símbolos intermediários de todo o bloco de origem. A proposta reconstrói, por isso, apenas o \emph{chunk} afetado: o \emph{chunk} é decodificado a partir de seus pacotes íntegros, cuja integridade é confirmada pelo \emph{hash} SHA-256 armazenado, e recodificado. Como a codificação RaptorQ é determinística para os mesmos dados e parâmetros, o pacote com o mesmo \acrshort{ESI} do pacote corrompido é reproduzido de forma idêntica ao original, o que permite confirmar a reconstrução pelo seu \emph{hash} e manter válidos os \acrshort{MAC}s já armazenados. O pacote reconstruído é então enviado a um provedor diferente daquele em que a corrupção foi detectada.
+Nos Online Codes, um bloco de verificação corrompido pode ser reconstruído pelo XOR de outros blocos de verificação, sem transferir o arquivo, graças à codificação local \cite{maymounkov2003rateless,amaral2019hysail}. Os símbolos de reparo do RaptorQ não admitem essa reconstrução local, pois dependem dos símbolos intermediários de todo o bloco de origem. A proposta reconstrói, por isso, apenas o \emph{chunk} afetado: o \emph{chunk} é decodificado a partir de seus pacotes íntegros, cuja integridade é confirmada pelo \emph{hash} SHA-256 armazenado, e recodificado.
+
+Em vez de reproduzir o pacote corrompido, a proposta explora a propriedade \emph{fountain} do RaptorQ, que permite gerar um número ilimitado de símbolos de reparo distintos a partir do mesmo bloco de origem \cite{luby2011rfc6330}. Cada pacote perdido é substituído por um novo símbolo de reparo, cujo \acrshort{ESI} nunca foi utilizado no \emph{chunk}, controlado por um contador mantido nos metadados. O novo pacote recebe \emph{hash}, etiqueta ou \acrshort{MAC}s próprios e é armazenado no provedor que menos pacotes do \emph{chunk} possui, excluído aquele em que a perda foi detectada. Como a codificação RaptorQ é determinística para os mesmos dados e parâmetros, a recodificação é validada antes de qualquer alteração, regenerando um pacote íntegro já armazenado e comparando-o com seu \emph{hash}. O uso de \acrshort{ESI}s inéditos evita que o mesmo conteúdo seja entregue novamente a um provedor que possa ter retido a cópia anterior, e permite, na mesma operação, gerar símbolos de reparo adicionais que ampliam a margem $r$ de um \emph{chunk} que perdeu pacotes, por exemplo, quando um provedor deixa o sistema.
 
 A divisão do arquivo em \emph{chunks} de, por padrão, no máximo $\lambda \cdot 512$ bytes (65.024 bytes para $\lambda = 127$) limita o volume transferido em cada Redistribuição a um único \emph{chunk}, independentemente do tamanho do arquivo. Essa é a principal concessão da substituição em relação ao HySAIL original: a Redistribuição deixa de ser estritamente local, mas seu custo permanece limitado e independente do tamanho de $F$.
 

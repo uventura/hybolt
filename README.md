@@ -121,10 +121,17 @@ fails when it holds more than `--tau-maximum` corrupted packets (default `0`),
 and a chunk is at risk when it has more corrupted packets than repair packets.
 The command exits with status 1 when it finds corruption.
 
-Add `--redistribute` to rebuild the corrupted packets and move them to other
-servers. The affected chunk is decoded from its verified packets, re-encoded,
-and the packet with the same RaptorQ ESI is regenerated. Its stored SHA-256
-confirms the rebuild.
+Add `--redistribute` to replace the corrupted or lost packets. The affected
+chunk is decoded from its verified packets and re-encoded, and each lost packet
+is replaced by a fresh RaptorQ repair packet with a never-used ESI, stored on
+the least-loaded server of the chunk. `--extra-repair N` adds N more repair
+packets to each repaired chunk to widen its margin. A server missing from the
+server file has all of its packets reported lost, and decoding continues
+without it.
+
+With packets balanced over N servers, losing f of them is tolerated while
+`redundancy >= f / (N - f)`. With three servers, for example, `--redundancy
+0.5` is needed to survive one server leaving.
 
 Disable the proof with `--no-retrievability-proof` on `encode` or `decode`.
 The SHA-256 check after each download stays active either way.
