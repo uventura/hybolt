@@ -185,6 +185,17 @@
 \newblock \btxjournalfont {IEEE Transactions on Dependable and Secure
   Computing}, 21(4), 2024.
 
+\bibitem {shacham2008compact}
+\btxnamefont {\btxlastnamefont {Shacham}, Hovav} \btxandlong {}\ \btxnamefont
+  {Brent \btxlastnamefont {Waters}}\btxauthorcolon\ \btxtitlefont
+  {\btxifchangecase {Compact proofs of retrievability}{Compact Proofs of
+  Retrievability}}.
+\newblock \Btxinlong {}\ \btxnamefont {\btxlastnamefont {Pieprzyk}, Josef}\
+  (\btxeditorlong {}): \btxtitlefont {Advances in Cryptology -- ASIACRYPT
+  2008}, \btxvolumelong {}\ \btxvolumefont {5350} \btxofserieslong {}\
+  \btxtitlefont {Lecture Notes in Computer Science}, \btxpageslong {}\ 90--107,
+  Berlin, Heidelberg, 2008. \btxpublisherfont {Springer}.
+
 \bibitem {luby2011rfc6330}
 \btxnamefont {\btxlastnamefont {Luby}, Michael}, \btxnamefont {Amin
   \btxlastnamefont {Shokrollahi}}, \btxnamefont {Mark \btxlastnamefont
@@ -197,6 +208,25 @@
   2011.
 \newblock {\latintext \btxurlfont{https://www.rfc-editor.org/rfc/rfc6330}},
   Acesso em: 24 out. 2026.
+
+\bibitem {juels2007pors}
+\btxnamefont {\btxlastnamefont {Juels}, Ari} \btxandlong {}\ \btxnamefont
+  {Burton\btxfnamespacelong S. \btxlastnamefont {Kaliski}, Jr.}\btxauthorcolon\
+  \btxtitlefont {\btxifchangecase {{PORs}: Proofs of retrievability for large
+  files}{{PORs}: Proofs of Retrievability for Large Files}}.
+\newblock \Btxinlong {}\ \btxtitlefont {Proceedings of the 14th ACM Conference
+  on Computer and Communications Security (CCS)}, \btxpageslong {}\ 584--597,
+  New York, NY, 2007. \btxpublisherfont {ACM}.
+
+\bibitem {bowers2009proofs}
+\btxnamefont {\btxlastnamefont {Bowers}, Kevin\btxfnamespacelong D.},
+  \btxnamefont {Ari \btxlastnamefont {Juels}}\btxandcomma {} \btxandlong {}\
+  \btxnamefont {Alina \btxlastnamefont {Oprea}}\btxauthorcolon\ \btxtitlefont
+  {\btxifchangecase {Proofs of retrievability: Theory and
+  implementation}{Proofs of Retrievability: Theory and Implementation}}.
+\newblock \Btxinlong {}\ \btxtitlefont {Proceedings of the 2009 ACM Workshop on
+  Cloud Computing Security (CCSW)}, \btxpageslong {}\ 43--54, New York, NY,
+  2009. \btxpublisherfont {ACM}.
 
 \bibitem {rabin1980probabilistic}
 \btxnamefont {\btxlastnamefont {Rabin}, Michael\btxfnamespacelong

@@ -26,25 +26,29 @@
 \contentsline {chapter}{\numberline {4}Proposta}{16}{chapter.4}%
 \contentsline {section}{\numberline {4.1}Arquitetura Geral}{16}{section.4.1}%
 \contentsline {section}{\numberline {4.2}Substituição dos Online Codes pelos RaptorQ Codes}{17}{section.4.2}%
-\contentsline {section}{\numberline {4.3}Impacto sobre o MAC Homomórfico}{17}{section.4.3}%
-\contentsline {section}{\numberline {4.4}Escolha dos Polinômios de Desafio}{18}{section.4.4}%
-\contentsline {section}{\numberline {4.5}Auditoria no Modelo Limitado}{19}{section.4.5}%
-\contentsline {section}{\numberline {4.6}Redundância}{20}{section.4.6}%
-\contentsline {section}{\numberline {4.7}Redistribuição}{20}{section.4.7}%
-\contentsline {chapter}{\numberline {5}Implementação}{22}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Visão Geral}{22}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Fluxo das Fases}{22}{section.5.2}%
-\contentsline {subsection}{\numberline {5.2.1}Codificação e Distribuição}{22}{subsection.5.2.1}%
-\contentsline {subsection}{\numberline {5.2.2}Auditoria}{23}{subsection.5.2.2}%
-\contentsline {subsection}{\numberline {5.2.3}Redistribuição}{23}{subsection.5.2.3}%
-\contentsline {subsection}{\numberline {5.2.4}Decodificação}{23}{subsection.5.2.4}%
-\contentsline {section}{\numberline {5.3}Organização do Código}{24}{section.5.3}%
-\contentsline {section}{\numberline {5.4}Metadados do Usuário}{24}{section.5.4}%
-\contentsline {section}{\numberline {5.5}Simplificações}{25}{section.5.5}%
-\contentsline {section}{\numberline {5.6}Validação}{25}{section.5.6}%
-\contentsline {chapter}{\numberline {6}Resultados}{26}{chapter.6}%
-\contentsline {chapter}{\numberline {7}Conclusão}{27}{chapter.7}%
-\contentsline {chapter}{Refer\^encias}{28}{section*.13}%
+\contentsline {section}{\numberline {4.3}Problemas da Substituição Direta}{17}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Impacto sobre o MAC Homomórfico}{19}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Escolha dos Polinômios de Desafio}{19}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Auditoria no Modelo Limitado}{20}{section.4.6}%
+\contentsline {section}{\numberline {4.7}Redundância}{21}{section.4.7}%
+\contentsline {section}{\numberline {4.8}Redistribuição}{21}{section.4.8}%
+\contentsline {section}{\numberline {4.9}Esquema Compacto e Ilimitado}{22}{section.4.9}%
+\contentsline {section}{\numberline {4.10}Ocultação da Estrutura do Código}{24}{section.4.10}%
+\contentsline {chapter}{\numberline {5}Implementação}{25}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Visão Geral}{25}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Fluxo das Fases}{26}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}Codificação e Distribuição}{26}{subsection.5.2.1}%
+\contentsline {subsection}{\numberline {5.2.2}Auditoria}{26}{subsection.5.2.2}%
+\contentsline {subsection}{\numberline {5.2.3}Redistribuição}{26}{subsection.5.2.3}%
+\contentsline {subsection}{\numberline {5.2.4}Decodificação}{27}{subsection.5.2.4}%
+\contentsline {section}{\numberline {5.3}Organização do Código}{27}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Metadados do Usuário}{28}{section.5.4}%
+\contentsline {section}{\numberline {5.5}Problemas Observados na Substituição Direta}{28}{section.5.5}%
+\contentsline {section}{\numberline {5.6}Simplificações}{29}{section.5.6}%
+\contentsline {section}{\numberline {5.7}Validação}{30}{section.5.7}%
+\contentsline {chapter}{\numberline {6}Resultados}{31}{chapter.6}%
+\contentsline {chapter}{\numberline {7}Conclusão}{32}{chapter.7}%
+\contentsline {chapter}{Refer\^encias}{33}{section*.13}%
 \babel@toc {american}{}\relax 
 \babel@toc {portuguese}{}\relax 
 \babel@toc {american}{}\relax 

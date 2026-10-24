@@ -8,45 +8,45 @@ Warning--empty language in amaral2019hysail
 Warning--empty language in 7485855
 Warning--empty language in maymounkov2003rateless
 Warning--empty language in armknecht2021outsourcing
-You've used 19 entries,
+You've used 22 entries,
             2465 wiz_defined-function locations,
-            718 strings with 9467 characters,
-and the built_in function-call counts, 6090 in all, are:
-= -- 471
-> -- 195
-< -- 5
-+ -- 73
-- -- 54
-* -- 809
-:= -- 790
-add.period$ -- 46
-call.type$ -- 19
-change.case$ -- 17
+            740 strings with 10031 characters,
+and the built_in function-call counts, 7450 in all, are:
+= -- 602
+> -- 226
+< -- 9
++ -- 84
+- -- 62
+* -- 949
+:= -- 945
+add.period$ -- 55
+call.type$ -- 22
+change.case$ -- 20
 chr.to.int$ -- 0
-cite$ -- 23
-duplicate$ -- 352
-empty$ -- 663
-format.name$ -- 155
-if$ -- 1302
+cite$ -- 26
+duplicate$ -- 441
+empty$ -- 809
+format.name$ -- 178
+if$ -- 1628
 int.to.chr$ -- 0
-int.to.str$ -- 19
-missing$ -- 28
-newline$ -- 106
-num.names$ -- 21
-pop$ -- 61
+int.to.str$ -- 22
+missing$ -- 31
+newline$ -- 118
+num.names$ -- 26
+pop$ -- 81
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 106
+skip$ -- 150
 stack$ -- 0
-substring$ -- 302
-swap$ -- 169
-text.length$ -- 5
+substring$ -- 385
+swap$ -- 220
+text.length$ -- 9
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
 warning$ -- 4
-while$ -- 39
-width$ -- 21
-write$ -- 234
+while$ -- 52
+width$ -- 24
+write$ -- 271
 (There were 4 warnings)
