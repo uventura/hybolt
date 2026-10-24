@@ -4,6 +4,7 @@ import pytest
 from hybolt.utils.galois import (
     _poly_coeffs_to_int,
     _prime_factors,
+    aggregate_remainders,
     bytes_to_poly_coeffs,
     gf2_poly_mod,
     generate_challenge_polynomial,
@@ -140,3 +141,37 @@ def test_given_mersenne_exponent_when_factoring_group_order_then_returns_single_
 
 def test_given_composite_group_order_when_factoring_then_returns_distinct_primes():
     assert _prime_factors(2**64 - 1) == [3, 5, 17, 257, 641, 65537, 6700417]
+
+
+def test_given_remainders_of_different_widths_when_aggregating_then_pads_high_terms():
+    short = np.array([1, 1], dtype=np.uint8)
+    full = np.array([1, 0, 1, 1], dtype=np.uint8)
+    # x^5 + x^2 + 1, degree 5, so remainders have five coefficients
+    polynomial = np.array([1, 0, 1, 0, 0, 1], dtype=np.uint8)
+
+    aggregate = aggregate_remainders([short, full], polynomial)
+
+    np.testing.assert_array_equal(aggregate, np.array([0, 1, 1, 1, 0], dtype=np.uint8))
+
+
+def test_given_shift_when_aggregating_then_matches_remainder_of_shifted_message():
+    polynomial = generate_challenge_polynomial(16)
+    message = bytes_to_poly_coeffs(b"\x12\x34\x56")
+    shifted_message = np.concatenate([np.zeros(5, dtype=np.uint8), message])
+
+    aggregate = aggregate_remainders(
+        [gf2_poly_mod(message, polynomial)], polynomial, shifts=[5]
+    )
+
+    np.testing.assert_array_equal(aggregate, gf2_poly_mod(shifted_message, polynomial))
+
+
+def test_given_equal_errors_when_aggregating_with_distinct_shifts_then_they_do_not_cancel():
+    polynomial = generate_challenge_polynomial(16)
+    error = gf2_poly_mod(bytes_to_poly_coeffs(b"\xff\xff\xff"), polynomial)
+
+    plain = aggregate_remainders([error, error], polynomial)
+    weighted = aggregate_remainders([error, error], polynomial, shifts=[3, 11])
+
+    assert not plain.any()
+    assert weighted.any()

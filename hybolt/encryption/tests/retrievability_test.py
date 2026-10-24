@@ -4,7 +4,10 @@ import pytest
 import hybolt.utils.galois as ga
 from hybolt.constant import POLYNOMIAL_LAMBDA, POLYNOMIAL_SET_SIZE
 from hybolt.encryption.block import Block, LocalBlock
+from hybolt.encryption.encoding_metadata import EncodingMetadata
 from hybolt.encryption.retrievability import (
+    ChallengeLedger,
+    ChallengeSetExhaustedError,
     DisabledRetrievabilityProof,
     PolynomialRetrievabilityProof,
     create_retrievability_proof,
@@ -128,3 +131,63 @@ def test_given_source_macs_when_xoring_then_matches_mac_of_xored_data(as_bytes):
     combined = bytes(a ^ b for a, b in zip(b"ABCD", b"WXYZ"))
 
     assert np.array_equal(xor_macs([mac_a, mac_b]), _mac(combined))
+
+
+def _ledger(tmp_path, polynomial_count=3, used=None):
+    metadata = EncodingMetadata(polynomials=[], blocks=[], packets=[])
+    metadata.used_polynomial_indices = list(used or [])
+    metadata_file = tmp_path / "metadata.pkl"
+    metadata.save(metadata_file)
+    return ChallengeLedger(metadata, metadata_file, polynomial_count), metadata_file
+
+
+def test_given_ledger_when_drawing_every_challenge_then_returns_each_index_once(
+    tmp_path,
+):
+    ledger, _ = _ledger(tmp_path)
+
+    drawn = [ledger.draw() for _ in range(3)]
+
+    assert sorted(drawn) == [0, 1, 2]
+    assert ledger.remaining == []
+
+
+def test_given_draw_when_drawing_then_persists_revealed_index_before_returning(
+    tmp_path,
+):
+    ledger, metadata_file = _ledger(tmp_path)
+
+    index = ledger.draw()
+
+    assert EncodingMetadata.load(metadata_file).used_polynomial_indices == [index]
+
+
+def test_given_used_indices_when_drawing_then_only_returns_unused_index(tmp_path):
+    ledger, _ = _ledger(tmp_path, used=[0, 2])
+
+    assert ledger.remaining == [1]
+    assert ledger.draw() == 1
+
+
+def test_given_exhausted_ledger_when_drawing_then_raises(tmp_path):
+    ledger, _ = _ledger(tmp_path, used=[0, 1, 2])
+
+    with pytest.raises(ChallengeSetExhaustedError, match="re-encode"):
+        ledger.draw()
+
+
+def test_given_fixed_challenge_index_when_verifying_then_always_uses_it():
+    second_polynomial = np.array([1, 1] + [0] * 14 + [1], dtype=np.uint8)
+    proof = PolynomialRetrievabilityProof(
+        [POLYNOMIAL, second_polynomial], challenge_index=1
+    )
+    server = ChallengeServer(_mac(b"ABCD", second_polynomial))
+
+    for _ in range(5):
+        assert proof.verify(
+            server,
+            _block(),
+            lambda j: _mac(b"ABCD", [POLYNOMIAL, second_polynomial][j]),
+        )
+
+    assert all(np.array_equal(call[0], second_polynomial) for call in server.calls)

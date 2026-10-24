@@ -99,3 +99,62 @@ def test_given_packet_when_storing_then_writes_pickle_readable_by_download(tmp_p
 
     assert packet_path == tmp_path / "storage" / "input_packet_4.pkl"
     assert server.download_block(4, "input_packet_4.pkl") == b"\x05\x06"
+
+
+def test_given_packets_when_answering_aggregate_challenge_then_xors_remainders(
+    tmp_path,
+):
+    server = Server(str(tmp_path / "storage"))
+    polynomial = ga.generate_challenge_polynomial(16)
+    server.store_packet(Block(0, 0, [], b"\x01\x02\x03\x04"), "a.pkl")
+    server.store_packet(Block(1, 0, [], b"\xff\x00\xaa\x55"), "b.pkl")
+
+    answer = server.receive_aggregate_challenge(polynomial, ["a.pkl", "b.pkl"])
+
+    expected = np.bitwise_xor(
+        ga.gf2_poly_mod(ga.bytes_to_poly_coeffs(b"\x01\x02\x03\x04"), polynomial),
+        ga.gf2_poly_mod(ga.bytes_to_poly_coeffs(b"\xff\x00\xaa\x55"), polynomial),
+    )
+    np.testing.assert_array_equal(answer, expected)
+
+
+def test_given_shifts_when_answering_aggregate_challenge_then_weights_each_packet(
+    tmp_path,
+):
+    server = Server(str(tmp_path / "storage"))
+    polynomial = ga.generate_challenge_polynomial(16)
+    server.store_packet(Block(0, 0, [], b"\x01\x02\x03\x04"), "a.pkl")
+    server.store_packet(Block(1, 0, [], b"\x01\x02\x03\x04"), "b.pkl")
+
+    plain = server.receive_aggregate_challenge(polynomial, ["a.pkl", "b.pkl"])
+    weighted = server.receive_aggregate_challenge(
+        polynomial, ["a.pkl", "b.pkl"], shifts=[1, 2]
+    )
+
+    remainder = ga.gf2_poly_mod(
+        ga.bytes_to_poly_coeffs(b"\x01\x02\x03\x04"), polynomial
+    )
+    np.testing.assert_array_equal(
+        weighted, ga.aggregate_remainders([remainder, remainder], polynomial, [1, 2])
+    )
+    assert not plain.any()
+    assert weighted.any()
+
+
+def test_given_missing_packet_when_answering_aggregate_challenge_then_raises(
+    tmp_path,
+):
+    server = Server(str(tmp_path / "storage"))
+
+    with pytest.raises(ValueError, match="missing.pkl"):
+        server.receive_aggregate_challenge(np.array([1, 1, 1]), ["missing.pkl"])
+
+
+def test_given_stored_packet_when_removing_then_deletes_file(tmp_path):
+    server = Server(str(tmp_path / "storage"))
+    path = server.store_packet(Block(0, 0, [], b"\x01"), "a.pkl")
+
+    server.remove_packet("a.pkl")
+    server.remove_packet("a.pkl")
+
+    assert not path.exists()

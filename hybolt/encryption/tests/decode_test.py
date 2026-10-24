@@ -13,6 +13,7 @@ from hybolt.encryption.encoding_metadata import (
     EncodingMetadata,
     PacketMetadata,
 )
+from hybolt.encryption.retrievability import ChallengeSetExhaustedError
 from hybolt.hybolt_encode import HyboltEncode
 from hybolt.server.server import Server
 
@@ -207,8 +208,47 @@ def test_given_lt_metadata_when_loading_then_local_blocks_carry_packet_hashes(tm
     _, metadata_file, server_file = _write_lt_metadata(tmp_path, [b"ABCD"])
     decoder = Decode(metadata_file, server_file)
 
-    strategy = decoder._create_strategy(decoder._metadata)
+    strategy, _ = decoder._create_strategy(decoder._metadata)
 
     block = strategy._local_blocks[1][0]
     assert isinstance(block, LocalBlock)
     assert block.packet_sha256 == hashlib.sha256(b"ABCD").hexdigest()
+
+
+def test_given_decode_with_proof_when_decoding_then_reveals_a_single_polynomial(
+    tmp_path, monkeypatch
+):
+    _, metadata_file, server_file = _encode_raptorq(tmp_path, True)
+    polynomials = []
+    original_receive_challenge = Server.receive_challenge
+
+    def record(self, polynomial, *args, **kwargs):
+        polynomials.append(tuple(polynomial.tolist()))
+        return original_receive_challenge(self, polynomial, *args, **kwargs)
+
+    monkeypatch.setattr(Server, "receive_challenge", record)
+
+    Decode(metadata_file, server_file).decode()
+
+    assert len(set(polynomials)) == 1
+    assert len(EncodingMetadata.load(metadata_file).used_polynomial_indices) == 1
+
+
+def test_given_decode_without_proof_when_decoding_then_reveals_no_polynomial(
+    tmp_path,
+):
+    _, metadata_file, server_file = _encode_raptorq(tmp_path, True)
+
+    Decode(metadata_file, server_file, retrievability_proof=False).decode()
+
+    assert EncodingMetadata.load(metadata_file).used_polynomial_indices == []
+
+
+def test_given_exhausted_challenge_set_when_decoding_with_proof_then_raises(tmp_path):
+    _, metadata_file, server_file = _encode_raptorq(tmp_path, True)
+    metadata = EncodingMetadata.load(metadata_file)
+    metadata.used_polynomial_indices = list(range(len(metadata.polynomials)))
+    metadata.save(metadata_file)
+
+    with pytest.raises(ChallengeSetExhaustedError):
+        Decode(metadata_file, server_file).decode()

@@ -37,6 +37,20 @@ class Server:
         response = self._compute_response(polynomial, block_path)
         return response
 
+    def receive_aggregate_challenge(self, polynomial, packet_files, shifts=None):
+        """Hy-SAIL Algorithm 2: answer (sum of x^k_eta * c_eta) mod P_j."""
+        remainders = []
+        for packet_file in packet_files:
+            block_path = self._find_check_block(None, packet_file)
+            if block_path is None:
+                raise ValueError(f"Check block not found: {packet_file}")
+            remainders.append(self._compute_response(polynomial, block_path))
+
+        return ga.aggregate_remainders(remainders, polynomial, shifts)
+
+    def remove_packet(self, packet_file):
+        Path(self._storage_location, packet_file).unlink(missing_ok=True)
+
     def _find_check_block(self, check_block_index, packet_file=""):
         if packet_file:
             packet_path = Path(self._storage_location) / packet_file

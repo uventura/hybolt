@@ -1,4 +1,5 @@
 import random
+import secrets
 import time
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
@@ -38,9 +39,13 @@ class RetrievabilityProof(ABC):
 
 
 class PolynomialRetrievabilityProof(RetrievabilityProof):
-    def __init__(self, polynomials=None, max_threads=MAX_MAC_THREADS):
+    def __init__(
+        self, polynomials=None, max_threads=MAX_MAC_THREADS, challenge_index=None
+    ):
         super().__init__()
         self._max_threads = max_threads
+        # The polynomial revealed in this session; random only when none was drawn.
+        self.challenge_index = challenge_index
         self._polynomials = (
             list(polynomials)
             if polynomials is not None
@@ -80,7 +85,9 @@ class PolynomialRetrievabilityProof(RetrievabilityProof):
         return packet_macs
 
     def verify(self, server, block, expected_mac):
-        polynomial_index = random.randint(0, len(self._polynomials) - 1)
+        polynomial_index = self.challenge_index
+        if polynomial_index is None:
+            polynomial_index = random.randint(0, len(self._polynomials) - 1)
         polynomial = self._polynomials[polynomial_index]
 
         if block.packet_file:
@@ -152,6 +159,45 @@ def create_retrievability_proof(
         return DisabledRetrievabilityProof()
 
     return PolynomialRetrievabilityProof(polynomials, max_threads)
+
+
+class ChallengeSetExhaustedError(ValueError):
+    pass
+
+
+class ChallengeLedger:
+    """Hands out each challenge polynomial once, as Hy-SAIL's bounded model requires.
+
+    A server that learns P_j can keep c mod P_j and discard c, so a revealed
+    polynomial must never be reused. The draw is persisted before the
+    polynomial leaves the client, so a crash cannot cause a reuse either.
+    """
+
+    def __init__(self, metadata, metadata_file, polynomial_count):
+        self._metadata = metadata
+        self._metadata_file = metadata_file
+        self._polynomial_count = polynomial_count
+
+    @property
+    def remaining(self) -> list[int]:
+        used = set(self._metadata.used_polynomial_indices)
+        return [index for index in range(self._polynomial_count) if index not in used]
+
+    def draw(self) -> int:
+        remaining = self.remaining
+        if not remaining:
+            raise ChallengeSetExhaustedError(
+                f"All {self._polynomial_count} challenge polynomials were already "
+                "revealed; re-encode the file to obtain a new challenge set"
+            )
+
+        index = secrets.choice(remaining)
+        self._metadata.used_polynomial_indices.append(index)
+        self._metadata.save(self._metadata_file)
+        execution_logger.debug(
+            f"Drew challenge polynomial {index}; {len(remaining) - 1} remaining"
+        )
+        return index
 
 
 def xor_macs(macs):

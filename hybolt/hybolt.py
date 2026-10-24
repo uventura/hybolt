@@ -12,6 +12,7 @@ from rich.progress import (
     TimeRemainingColumn,
 )
 
+from hybolt.audit.audit import Audit
 from hybolt.hybolt_decode import HyboltDecode
 from hybolt.hybolt_encode import HyboltEncode
 from hybolt.constant import DEFAULT_REDUNDANCY, MAX_MAC_THREADS
@@ -211,6 +212,70 @@ def decode_command(
         set_progress(None)
 
     click.echo(f"Decoded file written to {output_path}")
+
+
+@main.command("audit")
+@click.argument("metadata_file", type=click.Path(exists=True))
+@click.option(
+    "--server-file",
+    type=click.Path(exists=True),
+    required=True,
+    help="JSON file with server information for auditing",
+)
+@click.option(
+    "--sample-size",
+    type=click.IntRange(1),
+    default=None,
+    help="Packets challenged per server in this round; all of them if omitted",
+)
+@click.option(
+    "--tau-maximum",
+    type=click.IntRange(0),
+    default=0,
+    show_default=True,
+    help="Corrupted packets tolerated per server before it fails the audit",
+)
+@click.option(
+    "--log-dir",
+    type=click.Path(file_okay=False, dir_okay=True),
+    default="logs",
+    show_default=True,
+    help="Directory where execution.log is written",
+)
+def audit_command(metadata_file, server_file, sample_size, tau_maximum, log_dir):
+    execution_logger.set_log_directory(log_dir)
+    try:
+        report = Audit(metadata_file, server_file, sample_size, tau_maximum).run()
+    except ValueError as error:
+        raise click.ClickException(str(error)) from error
+
+    click.echo(
+        f"Challenge polynomial {report.polynomial_index} "
+        f"({report.remaining_challenges} challenges remaining)"
+    )
+    for server in report.servers:
+        status = "OK" if server.passed else "FAILED"
+        click.echo(
+            f"  server {server.server}: {server.checked_packets}/"
+            f"{server.stored_packets} packets checked, tau_provider="
+            f"{server.tau_provider} (tau_maximum={server.tau_maximum}) [{status}]"
+        )
+    for chunk in report.chunks:
+        if chunk.corrupted:
+            status = "retrievable" if chunk.retrievable else "AT RISK"
+            click.echo(
+                f"  chunk {chunk.chunk_index}: {chunk.corrupted} corrupted, "
+                f"{chunk.tolerated_losses} tolerated [{status}]"
+            )
+
+    if report.passed and not report.corrupted_packets:
+        click.echo("Audit passed")
+        return
+
+    click.echo(
+        f"Audit found {len(report.corrupted_packets)} corrupted packets", err=True
+    )
+    raise SystemExit(1)
 
 
 @main.command("plot")

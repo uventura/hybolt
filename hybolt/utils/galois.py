@@ -88,6 +88,33 @@ def gf2_poly_mod(m_coeffs, p_coeffs):
     return _int_to_poly_coeffs(current_dividend, remainder_width)
 
 
+def polynomial_degree(p_coeffs):
+    return _poly_coeffs_to_int(p_coeffs).bit_length() - 1
+
+
+def aggregate_remainders(remainders, p_coeffs, shifts=None):
+    """Computes (sum of x^k_i * r_i(x)) mod p(x) as deg(p) coefficients.
+
+    A plain XOR of remainders lets two check blocks corrupted with the same error
+    pattern cancel out whatever p(x) is. Weighting each remainder by x^k_i, with
+    secret distinct exponents, keeps the MAC homomorphic (x^k * c mod p equals
+    x^k * (c mod p) mod p) while making such cancellations require
+    x^k_1 = x^k_2 mod p, which a primitive p(x) rules out for k_i < 2^deg - 1.
+    """
+    modulus = _poly_coeffs_to_int(p_coeffs)
+    degree = modulus.bit_length() - 1
+    shifts = shifts if shifts is not None else [0] * len(remainders)
+
+    aggregate = 0
+    for remainder, shift in zip(remainders, shifts, strict=True):
+        value = _poly_coeffs_to_int(remainder)
+        if shift:
+            weight = _gf2_pow_mod(0b10, shift, modulus)
+            value = _gf2_mul_mod(value, weight, modulus)
+        aggregate ^= value
+    return _int_to_poly_coeffs(aggregate, degree)
+
+
 @start_record_timeit(runs=5)
 def generate_challenge_polynomial(degree=POLYNOMIAL_LAMBDA):
     """

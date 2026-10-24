@@ -47,6 +47,8 @@ class EncodingMetadata:
     original_file_hash: str = ""
     packet_root_hash: str = ""
     chunks: List[ChunkMetadata] | None = None
+    # Challenge polynomials already revealed to a server (bounded model).
+    used_polynomial_indices: List[int] = field(default_factory=list)
 
     def add_packet(
         self, server: str, packet_index: int, degree: int, indices: List[int]
@@ -70,6 +72,8 @@ class EncodingMetadata:
             metadata.packet_root_hash = ""
         if not hasattr(metadata, "chunks"):
             metadata.chunks = None
+        if not hasattr(metadata, "used_polynomial_indices"):
+            metadata.used_polynomial_indices = []
         for packet in metadata.packets:
             if not hasattr(packet, "macs"):
                 packet.macs = []

@@ -284,3 +284,96 @@ def test_given_non_positive_redundancy_when_encoding_then_rejects_option(tmp_pat
 
     assert result.exit_code != 0
     assert "--redundancy" in result.output
+
+
+def _audit_report(passed, corrupted=()):
+    from hybolt.audit.audit import AuditReport, ChunkAudit, ServerAudit
+
+    server = ServerAudit(
+        server="server_1",
+        stored_packets=4,
+        checked_packets=4,
+        corrupted=list(corrupted),
+    )
+    chunk = ChunkAudit(
+        chunk_index=0, packets=4, tolerated_losses=1, corrupted=len(corrupted)
+    )
+    report = AuditReport(
+        polynomial_index=3, remaining_challenges=39, servers=[server], chunks=[chunk]
+    )
+    assert report.passed is passed
+    return report
+
+
+def _invoke_audit(tmp_path, monkeypatch, report, extra=()):
+    metadata_file = tmp_path / "metadata.pkl"
+    metadata_file.write_bytes(b"metadata")
+    server_file = tmp_path / "servers.json"
+    server_file.write_text(json.dumps({"servers": []}), encoding="utf-8")
+    captured = {}
+
+    class StubAudit:
+        def __init__(self, *args):
+            captured["args"] = args
+
+        def run(self):
+            return report
+
+    monkeypatch.setattr("hybolt.hybolt.Audit", StubAudit)
+    monkeypatch.setattr(
+        "hybolt.hybolt.execution_logger.set_log_directory", lambda value: None
+    )
+    result = CliRunner().invoke(
+        main,
+        ["audit", str(metadata_file), "--server-file", str(server_file), *extra],
+    )
+    return result, captured
+
+
+def test_given_clean_audit_when_auditing_then_reports_success(tmp_path, monkeypatch):
+    result, captured = _invoke_audit(
+        tmp_path,
+        monkeypatch,
+        _audit_report(True),
+        ["--sample-size", "2", "--tau-maximum", "1"],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert captured["args"][2:] == (2, 1)
+    assert "Challenge polynomial 3 (39 challenges remaining)" in result.output
+    assert "Audit passed" in result.output
+
+
+def test_given_corruption_when_auditing_then_exits_with_failure(tmp_path, monkeypatch):
+    from hybolt.audit.audit import PacketLocation
+
+    corrupted = [PacketLocation(0, 2, "server_1", "input_chunk_0_packet_2.pkl")]
+
+    result, _ = _invoke_audit(tmp_path, monkeypatch, _audit_report(False, corrupted))
+
+    assert result.exit_code == 1
+    assert "[FAILED]" in result.output
+    assert "chunk 0: 1 corrupted, 1 tolerated [retrievable]" in result.output
+    assert "Audit found 1 corrupted packets" in result.output
+
+
+def test_given_audit_error_when_auditing_then_reports_click_error(
+    tmp_path, monkeypatch
+):
+    metadata_file = tmp_path / "metadata.pkl"
+    metadata_file.write_bytes(b"metadata")
+    server_file = tmp_path / "servers.json"
+    server_file.write_text(json.dumps({"servers": []}), encoding="utf-8")
+
+    class FailingAudit:
+        def __init__(self, *args):
+            raise ValueError("Audit requires metadata encoded with the proof")
+
+    monkeypatch.setattr("hybolt.hybolt.Audit", FailingAudit)
+
+    result = CliRunner().invoke(
+        main, ["audit", str(metadata_file), "--server-file", str(server_file)]
+    )
+
+    assert result.exit_code == 1
+    assert "Error: Audit requires metadata encoded with the proof" in result.output
