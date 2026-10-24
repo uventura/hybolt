@@ -89,3 +89,13 @@ def test_given_missing_block_when_receiving_challenge_then_raises(tmp_path):
 
     with pytest.raises(ValueError, match="Check block not found"):
         server.receive_challenge(np.array([1, 1]), 3)
+
+
+def test_given_packet_when_storing_then_writes_pickle_readable_by_download(tmp_path):
+    server = Server(str(tmp_path / "storage"))
+    packet = Block(4, 1, [0], b"\x05\x06")
+
+    packet_path = server.store_packet(packet, "input_packet_4.pkl")
+
+    assert packet_path == tmp_path / "storage" / "input_packet_4.pkl"
+    assert server.download_block(4, "input_packet_4.pkl") == b"\x05\x06"

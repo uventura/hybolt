@@ -16,6 +16,12 @@ class Server:
         destination_path = Path(self._storage_location) / source_path.name
         shutil.copyfile(source_path, destination_path)
 
+    def store_packet(self, packet, packet_file) -> Path:
+        packet_path = Path(self._storage_location) / packet_file
+        with open(packet_path, "wb") as file:
+            pickle.dump(packet, file)
+        return packet_path
+
     def download_block(self, block_index, packet_file=""):
         block_path = self._find_check_block(block_index, packet_file)
         if block_path is None:

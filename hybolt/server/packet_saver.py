@@ -1,7 +1,5 @@
-import pickle
 import random
 import hashlib
-from pathlib import Path
 
 from hybolt.logger.progress import advance_progress, create_progress_task, get_progress
 from hybolt.logger.logger import execution_logger
@@ -45,21 +43,16 @@ class PacketSaver:
             total=len(self.packets),
         )
 
-        for packet in self.packets:
-            self._save_single_packet(packet, servers, task_id)
+        # Packets were shuffled, so assigning them round-robin by position sends
+        # each packet to a random server while keeping the load balanced.
+        for position, packet in enumerate(self.packets):
+            self._save_single_packet(packet, servers[position % len(servers)], task_id)
 
         execution_logger.debug("Packet distribution completed")
 
-    def _save_single_packet(self, packet, servers, task_id):
-        server_index = packet.index % len(servers)
-        server = servers[server_index]
+    def _save_single_packet(self, packet, server, task_id):
         packet.set_server(server)
-        server_storage = Path(server._storage_location)
-        server_storage.mkdir(parents=True, exist_ok=True)
-        packet_file = server_storage / self._packet_file_name(packet.index)
-
-        with open(packet_file, "wb") as f:
-            pickle.dump(packet, f)
+        packet_file = server.store_packet(packet, self._packet_file_name(packet.index))
 
         self._packet_metadata.append(
             PacketMetadata(

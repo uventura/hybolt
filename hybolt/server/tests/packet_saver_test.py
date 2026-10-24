@@ -46,3 +46,41 @@ def test_given_multiple_packets_and_servers_when_saving_then_assigns_each_block_
         str(tmp_path / "server1"),
         str(tmp_path / "server2"),
     }
+
+
+def _server_dirs(tmp_path, count):
+    return [
+        {"id": index, "storage_location": str(tmp_path / f"server{index}")}
+        for index in range(count)
+    ]
+
+
+def test_given_many_packets_when_saving_then_balances_load_across_servers(tmp_path):
+    packets = [Block(index, 1, [index], b"data") for index in range(10)]
+    server_list = _server_dirs(tmp_path, 3)
+
+    PacketSaver(packets, Path("test.txt"), server_list=server_list).save()
+
+    counts = [
+        len(list((tmp_path / f"server{index}").glob("*.pkl"))) for index in range(3)
+    ]
+    assert sorted(counts) == [3, 3, 4]
+
+
+def test_given_shuffled_packets_when_saving_then_server_follows_shuffled_position(
+    tmp_path, monkeypatch
+):
+    packets = [Block(index, 1, [index], b"data") for index in range(4)]
+    server_list = _server_dirs(tmp_path, 2)
+    monkeypatch.setattr(
+        "hybolt.server.packet_saver.random.shuffle", lambda items: items.reverse()
+    )
+
+    saver = PacketSaver(packets, Path("test.txt"), server_list=server_list)
+    saver.save()
+
+    servers = {meta.packet_index: meta.server for meta in saver.packet_metadata}
+    assert servers[3] == str(tmp_path / "server0")
+    assert servers[2] == str(tmp_path / "server1")
+    assert servers[1] == str(tmp_path / "server0")
+    assert servers[0] == str(tmp_path / "server1")
