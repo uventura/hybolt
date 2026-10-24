@@ -15,7 +15,7 @@ HySAIL é dividido em diferentes fases para o seu processo funcionamento, são e
 \item \textit{Fase de Decodificação:} os blocos são recuperados e decodificados para reconstruir os dados originais.
 \end{itemize}
 
-O presente trabalho realiza uma substituição no processo de Codificação, passando a utilizar RaptorQ Codes em vez dos Online Codes originalmente empregados no HySAIL. Portanto, questões relativas a preservação da integridade e disponibilidade dos dados permanecem mesmo com a mudança no esquema de codificação.
+O presente trabalho realiza uma substituição no processo de Codificação, passando a utilizar RaptorQ Codes em vez dos Online Codes originalmente empregados no HySAIL. A substituição, contudo, não é transparente para as demais fases: o \acrshort{MAC} homomórfico, o dimensionamento da redundância e a Redistribuição foram concebidos em função da estrutura dos Online Codes, em que todo bloco de verificação é o XOR de blocos de mensagem. As seções a seguir analisam o impacto da mudança sobre cada um desses elementos e descrevem as adaptações propostas para que as garantias de integridade e disponibilidade do HySAIL sejam preservadas.
 
 \section{Substituição dos Online Codes pelos RaptorQ Codes}
 
@@ -26,3 +26,57 @@ Online Codes em HySAIL é utilizado em HySAIL da seguinte forma:
 \item Os blocos codificados são distribuídos entre os servidores participantes.
 \item Durante a decodificação, os blocos codificados são recuperados e utilizados para reconstruir os blocos originais.
 \end{itemize}
+
+Na proposta deste trabalho, cada bloco de tamanho limitado do arquivo (\emph{chunk}) é dividido em $K$ símbolos de origem e codificado com RaptorQ \cite{luby2011rfc6330}, que produz os $K$ símbolos de origem, emitidos de forma sistemática, seguidos de $r$ símbolos de reparo. Cada símbolo codificado, aqui denominado pacote, é identificado pelo seu \emph{Encoding Symbol Identifier} (\acrshort{ESI}) e substitui o bloco de verificação do HySAIL original nas fases de Distribuição, Auditoria e Redistribuição.
+
+\section{Impacto sobre o MAC Homomórfico}
+
+A propriedade da Equação~\eqref{eq:hysail_homomorfismo} permite ao usuário do HySAIL calcular o \acrshort{MAC} esperado de qualquer bloco de verificação a partir dos \acrshort{MAC}s dos blocos de mensagem, porque cada bloco de verificação é o XOR de blocos de mensagem. Nos RaptorQ Codes, essa relação não se mantém. Os símbolos de reparo são combinações dos símbolos intermediários produzidos pela pré-codificação LDPC e HDPC, e parte dessas combinações envolve multiplicações por elementos de $GF(256)$ \cite{luby2011rfc6330}. A multiplicação de cada byte por uma constante de $GF(256)$ não é compatível com a interpretação do pacote inteiro como um polinômio de $GF(2)[x]$ reduzido módulo $P_j(x)$, de modo que não existe combinação dos valores $h_{i,j}$ que forneça o \acrshort{MAC} de um símbolo de reparo.
+
+A adaptação proposta consiste em calcular o \acrshort{MAC} diretamente sobre cada pacote. Sendo $c_\eta$ o pacote de \acrshort{ESI} $\eta$, o usuário armazena, para cada desafio $P_j$,
+
+\begin{equation}
+	h_{\eta,j}(x) = c_\eta(x) \bmod P_j(x).
+	\label{eq:mac_por_pacote}
+\end{equation}
+
+Com isso, a memória do usuário passa de $n \cdot l$ para $t \cdot l$ \acrshort{MAC}s, em que $t = K + r$ é o número de pacotes. Como $r = \lceil \varepsilon K \rceil$ (Seção~\ref{sec:redundancia}), o aumento corresponde ao fator $(1 + \varepsilon)$ sobre o esquema original, e o custo de codificação passa a incluir $t \cdot l$ divisões polinomiais em vez de $n \cdot l$. A propriedade homomórfica continua válida entre pacotes, pois a Equação~\eqref{eq:hysail_homomorfismo} vale para quaisquer polinômios, o que preserva a possibilidade de desafios agregados sobre conjuntos de pacotes na fase de Auditoria.
+
+\section{Escolha dos Polinômios de Desafio}
+
+O argumento de integridade do HySAIL, que caracteriza o \acrshort{MAC} como uma função de \emph{hash} 2-universal, pressupõe que os polinômios de desafio $P_j(x)$ sejam primitivos e, portanto, irredutíveis. Um polinômio redutível possui fatores próprios, e restos módulo seus fatores podem colidir com probabilidade maior que $2^{-\lambda}$, de modo que o limite de falsificação deixa de valer. Por esse motivo, a proposta gera cada desafio por amostragem com rejeição: sorteia-se um polinômio de grau $\lambda$ com termo constante e coeficiente líder iguais a 1, que é aceito somente se passar no teste de irredutibilidade de Rabin \cite{rabin1980probabilistic} e se a ordem de $x$ módulo $P_j(x)$ for $2^\lambda - 1$.
+
+O teste de Rabin estabelece que um polinômio $f(x)$ de grau $\lambda$ sobre $GF(2)$ é irredutível se, e somente se, $x^{2^\lambda} \equiv x \pmod{f(x)}$ e, para todo divisor primo $q$ de $\lambda$, $\gcd\left(x^{2^{\lambda/q}} - x, f(x)\right) = 1$ \cite{rabin1980probabilistic}. A primitividade exige, adicionalmente, que $x^{(2^\lambda - 1)/p} \not\equiv 1 \pmod{f(x)}$ para todo divisor primo $p$ de $2^\lambda - 1$ \cite{menezes1997handbook}. Para o parâmetro adotado pelo HySAIL, $\lambda = 127$, o número $2^{127} - 1$ é um primo de Mersenne; como a ordem de $x$ divide $2^{127} - 1$ e é diferente de 1, todo polinômio irredutível de grau 127 é primitivo, e a verificação reduz-se ao teste de Rabin. Como a densidade de polinômios irredutíveis entre os candidatos com termo constante não nulo é de aproximadamente $2/\lambda$, são necessários, em média, cerca de 64 sorteios por polinômio aceito.
+
+Por fim, um único conjunto de $l$ polinômios é gerado para todo o arquivo e compartilhado por seus \emph{chunks}, como no HySAIL original, o que evita repetir o custo da geração em cada \emph{chunk} e permite controlar, para o arquivo como um todo, quais desafios já foram revelados.
+
+\section{Auditoria no Modelo Limitado}
+
+No modelo limitado, cada polinômio de desafio pode ser utilizado em uma única rodada de auditoria. Uma vez que $P_j$ é revelado, um provedor desonesto pode armazenar apenas os restos $c_\eta(x) \bmod P_j(x)$ e descartar os pacotes, respondendo corretamente a desafios futuros com o mesmo polinômio sem possuir os dados. A proposta registra, nos metadados mantidos pelo usuário, os índices dos polinômios já revelados, e o registro é persistido antes de o polinômio ser enviado ao provedor, de modo que nem uma interrupção do processo leve à sua reutilização. Assim, um arquivo codificado com $l$ polinômios admite $l$ rodadas de auditoria, após as quais deve ser recodificado. O mesmo princípio aplica-se ao desafio realizado antes de cada transferência durante a decodificação, que consome um único polinômio por sessão.
+
+Em cada rodada, o usuário sorteia um polinômio ainda não revelado e, para cada provedor $S_i$, uma amostra aleatória de $s$ pacotes por ele armazenados, solicitando uma resposta agregada. A Auditoria do HySAIL original utiliza o XOR simples dos pacotes, $\left(\bigoplus_\eta c_\eta(x)\right) \bmod P_j(x)$. Essa forma de agregação, entretanto, permite que corrupções se cancelem: se dois pacotes de uma mesma amostra forem alterados pelo mesmo padrão de erro $e(x)$, isto é, $c'_a = c_a \oplus e$ e $c'_b = c_b \oplus e$, então $c'_a \oplus c'_b = c_a \oplus c_b$ e a resposta agregada coincide com a esperada para qualquer $P_j$. Um adversário capaz de corromper pacotes aos pares pode, portanto, ocultar as alterações sem conhecer os desafios.
+
+Para eliminar esse cancelamento, a proposta pondera cada pacote por uma potência secreta de $x$. O usuário sorteia expoentes distintos $k_\eta < 2^{32}$ e o provedor responde
+
+\begin{equation}
+	A(x) = \left(\sum_{\eta} x^{k_\eta} \, c_\eta(x)\right) \bmod P_j(x),
+	\label{eq:desafio_ponderado}
+\end{equation}
+
+\noindent que o usuário compara com $\left(\sum_\eta x^{k_\eta} h_{\eta,j}(x)\right) \bmod P_j(x)$, calculado a partir dos \acrshort{MAC}s armazenados, pois a redução módulo $P_j(x)$ é compatível com a multiplicação. No exemplo anterior, as contribuições do erro deixam de se anular, já que $\left(x^{k_a} + x^{k_b}\right) e(x) \equiv 0 \pmod{P_j(x)}$ exigiria, sendo $P_j$ irredutível e $e(x) \not\equiv 0$, que $x^{k_a - k_b} \equiv 1 \pmod{P_j(x)}$. Como $x$ tem ordem $2^\lambda - 1$ para $P_j$ primitivo, isso só ocorreria se $k_a \equiv k_b \pmod{2^\lambda - 1}$, o que é impossível para expoentes distintos menores que $2^{32}$. O caso $e(x) \equiv 0 \pmod{P_j(x)}$ corresponde à falsificação de um \acrshort{MAC} isolado, cuja probabilidade já é limitada por $2^{-\lambda}$.
+
+Quando a resposta agregada de um provedor diverge da esperada, os pacotes da amostra são verificados individualmente com o mesmo polinômio, já revelado naquela rodada, para localizar os pacotes corrompidos. O número de pacotes corrompidos encontrados em $S_i$ define $\tau_{provider}$, e o provedor é considerado aprovado se $\tau_{provider} \le \tau_{maximum}$, em que $\tau_{maximum}$ é um parâmetro da auditoria. Adicionalmente, cada \emph{chunk} é considerado recuperável enquanto o número de pacotes corrompidos não exceder seus $r$ pacotes de reparo, o que corresponde ao limite global $\tau_{global}$ do HySAIL. Se uma fração $\beta$ dos pacotes de um provedor estiver corrompida, uma amostra de $s$ pacotes detecta ao menos uma corrupção com probabilidade de, no mínimo, $1 - (1 - \beta)^s$, o que orienta a escolha de $s$ em função do custo aceitável por rodada.
+
+\section{Redundância}
+\label{sec:redundancia}
+
+No HySAIL original, a redundância decorre dos parâmetros dos Online Codes, que produzem $(1 + k\delta)n$ blocos compostos e um fluxo de blocos de verificação dimensionado para tolerar a densidade de corrupção $\alpha$ do modelo de corrupção limitada \cite{amaral2019hysail}. Nos RaptorQ Codes, a decodificação é bem-sucedida com probabilidade de falha inferior a 1\% ao receber $K$ símbolos quaisquer, inferior a 0,01\% com $K + 1$ símbolos e inferior a 0,0001\% com $K + 2$ símbolos \cite{luby2011rfc6330}, de modo que a tolerância a perdas é determinada essencialmente pelo número $r$ de símbolos de reparo.
+
+A proposta define $r = \lceil \varepsilon K \rceil$, em que $\varepsilon > 0$ é um parâmetro de projeto. Um \emph{chunk} com $K + r$ pacotes tolera a perda ou corrupção de $r$ deles, o que corresponde a uma densidade de corrupção $\alpha = r / (K + r) \approx \varepsilon / (1 + \varepsilon)$. O valor padrão $\varepsilon = 0{,}25$ tolera, portanto, a perda de 20\% dos pacotes de cada \emph{chunk}. Esse dimensionamento explícito é necessário porque, com um número fixo de dois símbolos de reparo por \emph{chunk}, um \emph{chunk} com 127 símbolos de origem toleraria a perda de apenas dois pacotes, valor muito inferior ao admitido pelo modelo adversarial do HySAIL.
+
+\section{Redistribuição}
+\label{sec:redistribuicao}
+
+Nos Online Codes, um bloco de verificação corrompido pode ser reconstruído pelo XOR de outros blocos de verificação, sem transferir o arquivo, graças à codificação local \cite{maymounkov2003rateless,amaral2019hysail}. Os símbolos de reparo do RaptorQ não admitem essa reconstrução local, pois dependem dos símbolos intermediários de todo o bloco de origem. A proposta reconstrói, por isso, apenas o \emph{chunk} afetado: o \emph{chunk} é decodificado a partir de seus pacotes íntegros, cuja integridade é confirmada pelo \emph{hash} SHA-256 armazenado, e recodificado. Como a codificação RaptorQ é determinística para os mesmos dados e parâmetros, o pacote com o mesmo \acrshort{ESI} do pacote corrompido é reproduzido de forma idêntica ao original, o que permite confirmar a reconstrução pelo seu \emph{hash} e manter válidos os \acrshort{MAC}s já armazenados. O pacote reconstruído é então enviado a um provedor diferente daquele em que a corrupção foi detectada.
+
+A divisão do arquivo em \emph{chunks} de, por padrão, no máximo $\lambda \cdot 512$ bytes (65.024 bytes para $\lambda = 127$) limita o volume transferido em cada Redistribuição a um único \emph{chunk}, independentemente do tamanho do arquivo. Essa é a principal concessão da substituição em relação ao HySAIL original: a Redistribuição deixa de ser estritamente local, mas seu custo permanece limitado e independente do tamanho de $F$.
