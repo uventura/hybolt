@@ -5,8 +5,10 @@ storage protocol. It encodes a file into redundant packets, distributes those
 packets across storage locations, and reconstructs the original data from the
 packet metadata.
 
-The implementation uses RaptorQ (RFC 6330) fountain coding and stores a
-SHA-256 integrity hash for every encoded packet.
+The implementation uses RaptorQ (RFC 6330) fountain coding, stores a SHA-256
+integrity hash for every encoded packet, and implements Hy-SAIL's polynomial
+MAC proof of retrievability with auditing and redistribution of corrupted
+packets.
 
 ## Requirements
 
@@ -79,21 +81,56 @@ Use `--chunk-count` to divide a file into an exact number of balanced chunks,
 for example `hybolt encode --chunk-count 8 ...`. The command prints the
 average MAC-and-packet-generation time per chunk after encoding completes.
 
+### Redundancy
+
+Each chunk is encoded into its K source packets plus `ceil(redundancy * K)`
+RaptorQ repair packets, so a chunk survives the loss of that many packets. Set
+the ratio with `--redundancy` on `encode` (default `0.25`, which tolerates
+losing 20% of a chunk's packets).
+
 ### Proof of retrievability
 
-By default, `encode` generates a set of challenge polynomials per chunk and
-stores, for every packet, its remainder modulo each polynomial (a polynomial
-MAC over GF(2)). Before `decode` downloads a packet, it challenges the server
-with a random polynomial and only downloads the packet when the server's
-remainder matches the stored MAC; the downloaded bytes are then checked against
-the packet's SHA-256 hash. Packets that fail either check are skipped, and
-decoding continues with the remaining redundant packets.
+By default, `encode` generates one set of 40 primitive challenge polynomials of
+degree 127 for the whole file and stores, for every packet, its remainder
+modulo each polynomial (a polynomial MAC over GF(2)). Polynomials are checked
+for primitivity because Hy-SAIL's 2-universal hashing argument depends on it.
 
-Disable the proof with `--no-retrievability-proof` on either command. Encoding
-without it skips the MAC computation (much faster on large files) and produces
-metadata that can only be decoded with `--no-retrievability-proof`; decoding
-such metadata with the proof enabled fails with an explicit error. The SHA-256
-check after each download stays active either way.
+Audit the stored packets without downloading them:
+
+```sh
+hybolt audit \
+  --server-file examples/server_list_example.json \
+  output/hello_metadata.pkl
+```
+
+Each audit round reveals one unused polynomial, asks every server for the
+aggregate remainder of a random sample of its packets (`--sample-size`, all
+packets by default) and compares it with the stored MACs. Each packet in the
+aggregate is weighted by a secret power of x, so packets corrupted with the
+same error pattern cannot cancel each other out. When an aggregate fails, the
+sampled packets are checked individually to locate the corrupted ones. A server
+fails when it holds more than `--tau-maximum` corrupted packets (default `0`),
+and a chunk is at risk when it has more corrupted packets than repair packets.
+The command exits with status 1 when it finds corruption.
+
+Revealed polynomials are recorded in the metadata file and never reused,
+because a server that knows a polynomial could keep only the remainders and
+discard the data. The set therefore supports 40 challenges per encode (Hy-SAIL's
+bounded model). After that, re-encode the file to get a new set.
+
+Add `--redistribute` to rebuild the corrupted packets and move them to other
+servers. The affected chunk is decoded from its verified packets, re-encoded,
+and the packet with the same RaptorQ ESI is regenerated. Its stored SHA-256
+confirms the rebuild.
+
+`decode` also challenges every server before downloading a packet. A decode
+session spends a single polynomial, and packets that fail the challenge or
+their SHA-256 hash are skipped in favor of other redundant packets.
+
+Disable the proof with `--no-retrievability-proof` on `encode` or `decode`.
+Encoding without it skips the MAC computation (much faster on large files) and
+produces metadata that can be neither audited nor decoded with the proof
+enabled. The SHA-256 check after each download stays active either way.
 
 Each `encode` appends `file_path`, `file_size` (bytes), total `runtime`
 (seconds) and average `block_size` (bytes) to `encode_runtime.json` in the log
