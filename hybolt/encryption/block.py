@@ -10,6 +10,7 @@ class LocalBlock:
     indices: list[int]
     server: Server
     packet_file: str = ""
+    packet_sha256: str = ""
 
 
 class Block:

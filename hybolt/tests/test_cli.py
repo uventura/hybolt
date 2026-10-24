@@ -1,5 +1,6 @@
 import json
 
+import pytest
 from click.testing import CliRunner
 
 from hybolt.hybolt import main
@@ -134,3 +135,88 @@ def test_given_log_directory_option_when_decoding_then_forwards_log_directory(
 
     assert result.exit_code == 0, result.output
     assert captured["log_dir"] == str(log_dir)
+
+
+@pytest.mark.parametrize(
+    ("flag", "expected"),
+    [
+        ([], True),
+        (["--retrievability-proof"], True),
+        (["--no-retrievability-proof"], False),
+    ],
+)
+def test_given_retrievability_proof_flag_when_encoding_then_forwards_flag(
+    tmp_path, monkeypatch, flag, expected
+):
+    input_file = tmp_path / "input.txt"
+    input_file.write_text("HyBolt", encoding="utf-8")
+    server_list = tmp_path / "servers.json"
+    server_list.write_text(
+        json.dumps({"servers": [{"id": 1, "storage_location": str(tmp_path)}]}),
+        encoding="utf-8",
+    )
+    captured = {}
+
+    class StubHyboltEncode:
+        average_chunk_encode_seconds = 0.25
+        average_block_size = 1.0
+        average_polynomial_division_seconds = 0.01
+
+        def __init__(self, *args):
+            captured["retrievability_proof"] = args[6]
+
+        def encode(self):
+            return 1
+
+    monkeypatch.setattr("hybolt.hybolt.HyboltEncode", StubHyboltEncode)
+    monkeypatch.setattr(
+        "hybolt.hybolt.execution_logger.set_log_directory", lambda log_dir: None
+    )
+    monkeypatch.setattr(
+        "hybolt.hybolt.append_runtime_record", lambda *args, **kwargs: None
+    )
+
+    result = CliRunner().invoke(
+        main, ["encode", str(input_file), "--server-list", str(server_list), *flag]
+    )
+
+    assert result.exit_code == 0, result.output
+    assert captured["retrievability_proof"] is expected
+
+
+@pytest.mark.parametrize(
+    ("flag", "expected"),
+    [
+        ([], True),
+        (["--retrievability-proof"], True),
+        (["--no-retrievability-proof"], False),
+    ],
+)
+def test_given_retrievability_proof_flag_when_decoding_then_forwards_flag(
+    tmp_path, monkeypatch, flag, expected
+):
+    metadata_file = tmp_path / "metadata.pkl"
+    metadata_file.write_bytes(b"metadata")
+    server_file = tmp_path / "servers.json"
+    server_file.write_text(json.dumps({"servers": []}), encoding="utf-8")
+    captured = {}
+
+    class StubHyboltDecode:
+        def __init__(self, *args):
+            captured["retrievability_proof"] = args[3]
+
+        def decode(self):
+            return tmp_path / "decoded.txt"
+
+    monkeypatch.setattr("hybolt.hybolt.HyboltDecode", StubHyboltDecode)
+    monkeypatch.setattr(
+        "hybolt.hybolt.execution_logger.set_log_directory", lambda value: None
+    )
+
+    result = CliRunner().invoke(
+        main,
+        ["decode", str(metadata_file), "--server-file", str(server_file), *flag],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert captured["retrievability_proof"] is expected

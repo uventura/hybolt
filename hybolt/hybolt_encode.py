@@ -13,6 +13,7 @@ from hybolt.encryption.encoding_metadata import (
     PacketMetadata,
 )
 from hybolt.encryption.digest import Digest
+from hybolt.encryption.retrievability import create_retrievability_proof
 from hybolt.logger.logger import execution_logger
 from hybolt.logger.progress import (
     advance_progress,
@@ -32,6 +33,7 @@ class HyboltEncode:
         metadata_output: str = "./",
         max_threads: int = MAX_MAC_THREADS,
         chunk_count: int | None = None,
+        retrievability_proof: bool = True,
     ):
         self.input_file = input_file
         self.block_size = block_size
@@ -39,6 +41,7 @@ class HyboltEncode:
         self.metadata_output = metadata_output
         self.max_threads = max_threads
         self.chunk_count = chunk_count
+        self.retrievability_proof = retrievability_proof
         self.average_chunk_encode_seconds = 0.0
         self.average_block_size = 0.0
         self.average_polynomial_division_seconds = 0.0
@@ -51,7 +54,8 @@ class HyboltEncode:
             f"path={input_path}, bytes={input_path.stat().st_size}, "
             f"chunk_size={Digest(input_path, chunk_count=self.chunk_count).chunk_size}, "
             f"chunks={Digest(input_path, chunk_count=self.chunk_count).chunk_count}, "
-            f"servers={len(self.server_list or [])}, max_threads={self.max_threads}"
+            f"servers={len(self.server_list or [])}, max_threads={self.max_threads}, "
+            f"retrievability_proof={self.retrievability_proof}"
         )
         digest = Digest(input_path, chunk_count=self.chunk_count)
         chunks = []
@@ -75,7 +79,10 @@ class HyboltEncode:
                 f"bytes={len(chunk_data)}, block_size={block_size}"
             )
             encode_started_at = time.perf_counter()
-            encoded = Encode(chunk_data, block_size, self.max_threads)
+            proof = create_retrievability_proof(
+                self.retrievability_proof, max_threads=self.max_threads
+            )
+            encoded = Encode(chunk_data, block_size, self.max_threads, proof)
             chunk_encode_durations.append(time.perf_counter() - encode_started_at)
             total_block_bytes += encoded.total_block_bytes
             block_count += encoded.num_blocks
@@ -124,6 +131,7 @@ class HyboltEncode:
 
         packets = []
         for packet in saver.packet_metadata:
+            packet.macs = encoded.packet_macs.get(packet.packet_index, [])
             packets.append(packet)
 
         return ChunkMetadata(

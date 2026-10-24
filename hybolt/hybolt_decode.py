@@ -11,10 +11,12 @@ class HyboltDecode:
         metadata_file: str,
         server_file: str,
         output_file: str | None = None,
+        retrievability_proof: bool = True,
     ):
         self.metadata_file = metadata_file
         self.server_file = server_file
         self.output_file = output_file
+        self.retrievability_proof = retrievability_proof
 
     def decode(self) -> Path:
         metadata_path = Path(self.metadata_file)
@@ -23,7 +25,9 @@ class HyboltDecode:
         progress = get_progress()
         task_id = create_progress_task(progress, "Decoding file", total=3)
 
-        decoder = Decode(self.metadata_file, self.server_file)
+        decoder = Decode(
+            self.metadata_file, self.server_file, self.retrievability_proof
+        )
         advance_progress(progress, task_id)
 
         decoded_data = decoder.decode()

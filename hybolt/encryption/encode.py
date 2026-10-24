@@ -1,13 +1,23 @@
 from raptorq import Encoder
 
 from hybolt.encryption.block import Block
+from hybolt.encryption.retrievability import (
+    DisabledRetrievabilityProof,
+    RetrievabilityProof,
+)
 from hybolt.logger.logger import execution_logger
 from hybolt.logger.progress import advance_progress, create_progress_task, get_progress
 from hybolt.constant import MAX_MAC_THREADS
 
 
 class Encode:
-    def __init__(self, data, block_size, max_threads=MAX_MAC_THREADS):
+    def __init__(
+        self,
+        data,
+        block_size,
+        max_threads=MAX_MAC_THREADS,
+        proof: RetrievabilityProof | None = None,
+    ):
         if not data:
             raise ValueError("Data cannot be empty")
         if not 1 <= max_threads <= MAX_MAC_THREADS:
@@ -38,12 +48,12 @@ class Encode:
         )
 
         self._num_blocks = len(self._blocks)
-        self._polynomials = []
+        # RaptorQ packets are not XORs of source blocks, so MACs are kept per packet.
         self._mac_blocks = {}
-        self._polynomial_division_total_seconds = 0.0
-        self._polynomial_division_count = 0
+        self._proof = proof or DisabledRetrievabilityProof()
 
         self._packets = self._encode()
+        self._packet_macs = self._proof.tag_packets(self._packets)
 
     @property
     def packets(self):
@@ -62,8 +72,12 @@ class Encode:
         return self._mac_blocks
 
     @property
+    def packet_macs(self):
+        return self._packet_macs
+
+    @property
     def polynomials(self):
-        return self._polynomials
+        return self._proof.polynomials
 
     @property
     def average_block_size(self):
@@ -75,11 +89,11 @@ class Encode:
 
     @property
     def polynomial_division_total_seconds(self):
-        return self._polynomial_division_total_seconds
+        return self._proof.polynomial_division_total_seconds
 
     @property
     def polynomial_division_count(self):
-        return self._polynomial_division_count
+        return self._proof.polynomial_division_count
 
     def _encode(self):
         repair_packets_per_block = 2

@@ -1,8 +1,11 @@
+import numpy as np
 import pytest
 from raptorq import Decoder
 
+import hybolt.utils.galois as ga
 from hybolt.constant import MAX_MAC_THREADS
 from hybolt.encryption.encode import Encode
+from hybolt.encryption.retrievability import PolynomialRetrievabilityProof
 
 
 def test_given_input_data_when_encoding_then_generates_source_and_repair_packets():
@@ -76,3 +79,20 @@ def test_given_raptorq_encoding_then_omits_incompatible_source_mac_metadata():
 
     assert encoded.polynomials == []
     assert encoded.mac_blocks == {}
+    assert encoded.packet_macs == {}
+
+
+def test_given_retrievability_proof_when_encoding_then_tags_every_packet():
+    polynomial = np.array([1, 0, 1, 1] + [0] * 12 + [1], dtype=np.uint8)
+    proof = PolynomialRetrievabilityProof([polynomial])
+
+    encoded = Encode(b"HelloWorld", block_size=2, proof=proof)
+
+    assert len(encoded.polynomials) == 1
+    assert np.array_equal(encoded.polynomials[0], polynomial)
+    assert encoded.mac_blocks == {}
+    assert set(encoded.packet_macs) == {packet.index for packet in encoded.packets}
+    for packet in encoded.packets:
+        expected = ga.gf2_poly_mod(ga.bytes_to_poly_coeffs(packet.data), polynomial)
+        assert np.array_equal(encoded.packet_macs[packet.index][0], expected)
+    assert encoded.polynomial_division_count == len(encoded.packets)

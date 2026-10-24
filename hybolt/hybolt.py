@@ -82,6 +82,12 @@ def main():
     help="Split the input into exactly this many chunks",
 )
 @click.option(
+    "--retrievability-proof/--no-retrievability-proof",
+    default=True,
+    show_default=True,
+    help="Compute per-packet polynomial MACs so servers can be challenged before downloads",
+)
+@click.option(
     "--debug",
     is_flag=True,
     help="Enable debug mode with detailed execution logs and timing instrumentation",
@@ -100,6 +106,7 @@ def encode_command(
     metadata_output,
     max_threads,
     chunk_count,
+    retrievability_proof,
     debug,
     log_dir,
 ):
@@ -124,6 +131,7 @@ def encode_command(
             metadata_output,
             max_threads,
             chunk_count,
+            retrievability_proof,
         )
         encode_started_at = time.perf_counter()
         packet_count = hybolt_encode.encode()
@@ -162,6 +170,12 @@ def encode_command(
     help="Path where the decoded file will be written",
 )
 @click.option(
+    "--retrievability-proof/--no-retrievability-proof",
+    default=True,
+    show_default=True,
+    help="Challenge each server with a polynomial division before downloading its packet",
+)
+@click.option(
     "--debug",
     is_flag=True,
     help="Enable debug mode with detailed execution logs and timing instrumentation",
@@ -173,13 +187,17 @@ def encode_command(
     show_default=True,
     help="Directory where execution.log is written",
 )
-def decode_command(metadata_file, server_file, output_file, debug, log_dir):
+def decode_command(
+    metadata_file, server_file, output_file, retrievability_proof, debug, log_dir
+):
     execution_logger.set_log_directory(log_dir)
     _enable_debug_mode(debug)
 
     with _create_progress() as progress:
         set_progress(progress)
-        hybolt_decode = HyboltDecode(metadata_file, server_file, output_file)
+        hybolt_decode = HyboltDecode(
+            metadata_file, server_file, output_file, retrievability_proof
+        )
         output_path = hybolt_decode.decode()
         set_progress(None)
 

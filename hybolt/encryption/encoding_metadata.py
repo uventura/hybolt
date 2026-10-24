@@ -1,5 +1,5 @@
 import pickle
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List
 
@@ -21,6 +21,8 @@ class PacketMetadata:
     indices: List[int]
     packet_file: str = ""
     packet_sha256: str = ""
+    # One retrievability MAC per challenge polynomial; empty when the proof is off.
+    macs: List[np.ndarray] = field(default_factory=list)
 
 
 @dataclass
@@ -67,6 +69,9 @@ class EncodingMetadata:
             metadata.packet_root_hash = ""
         if not hasattr(metadata, "chunks"):
             metadata.chunks = None
+        for packet in metadata.packets:
+            if not hasattr(packet, "macs"):
+                packet.macs = []
         if metadata.chunks is not None:
             for chunk in metadata.chunks:
                 if not hasattr(chunk, "codec"):
@@ -78,5 +83,7 @@ class EncodingMetadata:
                 for packet in chunk.packets:
                     if not hasattr(packet, "packet_sha256"):
                         packet.packet_sha256 = ""
+                    if not hasattr(packet, "macs"):
+                        packet.macs = []
 
         return metadata
