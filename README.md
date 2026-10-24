@@ -90,10 +90,21 @@ losing 20% of a chunk's packets).
 
 ### Proof of retrievability
 
-By default, `encode` generates one set of 40 primitive challenge polynomials of
-degree 127 for the whole file and stores, for every packet, its remainder
-modulo each polynomial (a polynomial MAC over GF(2)). Polynomials are checked
-for primitivity because Hy-SAIL's 2-universal hashing argument depends on it.
+`encode` supports two proof schemes, chosen with `--proof-scheme`:
+
+- `compact` (default): unbounded audits in the style of Shacham and Waters'
+  private-key PoR. The client keeps a secret primitive polynomial P of degree
+  127, a PRF key and a file id. Each server stores, next to every packet, the
+  tag `(packet mod P) xor PRF(file, chunk, ESI)`. An audit sends random
+  coefficients; the server answers with the combination of the sampled packets
+  and of their tags, and the client checks it with P, which never leaves the
+  client. Decoding checks every downloaded packet against its tag.
+- `bounded`: Hy-SAIL's original model. The client stores one MAC per packet
+  for each of 40 primitive challenge polynomials. Each audit round reveals one
+  unused polynomial, which is never reused, because a server that knows it
+  could keep only the remainders. The set therefore supports 40 challenges
+  (audits and decodes) per encode. Aggregates are weighted by secret powers of
+  x so that packets corrupted with the same error cannot cancel out.
 
 Audit the stored packets without downloading them:
 
@@ -103,34 +114,32 @@ hybolt audit \
   output/hello_metadata.pkl
 ```
 
-Each audit round reveals one unused polynomial, asks every server for the
-aggregate remainder of a random sample of its packets (`--sample-size`, all
-packets by default) and compares it with the stored MACs. Each packet in the
-aggregate is weighted by a secret power of x, so packets corrupted with the
-same error pattern cannot cancel each other out. When an aggregate fails, the
+Each round challenges a random sample of every server's packets
+(`--sample-size`, all packets by default). When a server's answer fails, the
 sampled packets are checked individually to locate the corrupted ones. A server
 fails when it holds more than `--tau-maximum` corrupted packets (default `0`),
 and a chunk is at risk when it has more corrupted packets than repair packets.
 The command exits with status 1 when it finds corruption.
-
-Revealed polynomials are recorded in the metadata file and never reused,
-because a server that knows a polynomial could keep only the remainders and
-discard the data. The set therefore supports 40 challenges per encode (Hy-SAIL's
-bounded model). After that, re-encode the file to get a new set.
 
 Add `--redistribute` to rebuild the corrupted packets and move them to other
 servers. The affected chunk is decoded from its verified packets, re-encoded,
 and the packet with the same RaptorQ ESI is regenerated. Its stored SHA-256
 confirms the rebuild.
 
-`decode` also challenges every server before downloading a packet. A decode
-session spends a single polynomial, and packets that fail the challenge or
-their SHA-256 hash are skipped in favor of other redundant packets.
-
 Disable the proof with `--no-retrievability-proof` on `encode` or `decode`.
-Encoding without it skips the MAC computation (much faster on large files) and
-produces metadata that can be neither audited nor decoded with the proof
-enabled. The SHA-256 check after each download stays active either way.
+The SHA-256 check after each download stays active either way.
+
+### Hiding the code structure
+
+By default, packets are sealed before distribution. Each one is encrypted
+with a keystream bound to its file, chunk and ESI, and stored under an opaque
+name. Servers cannot read the RaptorQ header or the systematic source symbols,
+and cannot tell which packets belong to the same chunk. Without sealing, a
+server could destroy a file by corrupting `r + 1` packets of a single chunk.
+Use `--no-seal-packets` to store plain packets.
+
+The client must keep the metadata file private: it holds the challenge
+polynomials, the PRF key and the sealing key.
 
 Each `encode` appends `file_path`, `file_size` (bytes), total `runtime`
 (seconds) and average `block_size` (bytes) to `encode_runtime.json` in the log
