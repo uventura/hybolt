@@ -43,7 +43,29 @@ Segundo a convenção adotada, em que o primeiro bit corresponde ao coeficiente 
 
 
 \subsection{HySAIL e Codificação de Blocos}
-Empty
+O HySAIL \cite{amaral2013hysail,amaral2019hysail} é um protocolo de \acrshort{PoR} que combina códigos de apagamento, responsáveis pela disponibilidade, com um código de autenticação de mensagem (\emph{Message Authentication Code}, \acrshort{MAC}) homomórfico, responsável pela verificação de integridade. O protocolo envolve apenas duas entidades, o usuário, considerado confiável, e um conjunto de $N$ provedores de armazenamento sem distinção entre primários e secundários, e é organizado em cinco fases: Codificação, Distribuição, Decodificação, Auditoria e Redistribuição.
+
+Na fase de Codificação, o arquivo $F$ é dividido em $n$ blocos de mensagem $m_1, \ldots, m_n$, que são codificados com Online Codes, gerando blocos de verificação $c_j$, cada um resultante do XOR de um subconjunto de blocos de mensagem. Cada bloco de mensagem é interpretado como um polinômio $m_i(x)$ com coeficientes em $GF(2)$, e o usuário gera um conjunto de $l$ polinômios primitivos de grau $\lambda$, $P_1(x), \ldots, P_l(x)$, que funcionam como chaves de desafio. O \acrshort{MAC} do bloco $m_i$ em relação ao desafio $P_j$ é o resto da divisão polinomial
+
+\begin{equation}
+	h_{i,j}(x) = m_i(x) \bmod P_j(x).
+	\label{eq:hysail_mac}
+\end{equation}
+
+Após distribuir os blocos de verificação entre os provedores, o usuário descarta os blocos e mantém apenas os \acrshort{MAC}s, os polinômios de desafio e a relação entre cada bloco de verificação, os blocos de mensagem que o compõem e o provedor que o armazena.
+
+Como a soma em $GF(2)$ coincide com o XOR, a redução módulo $P_j(x)$ é linear e, portanto, o \acrshort{MAC} é homomórfico em relação ao XOR:
+
+\begin{equation}
+	\left[m_a(x) \bmod P_j(x)\right] \oplus \left[m_b(x) \bmod P_j(x)\right] = \left[m_a(x) \oplus m_b(x)\right] \bmod P_j(x).
+	\label{eq:hysail_homomorfismo}
+\end{equation}
+
+Essa propriedade permite ao usuário verificar qualquer bloco de verificação $c_e = m_a \oplus m_b$ armazenando somente os \acrshort{MAC}s dos blocos de mensagem: basta combinar $h_{a,j}$ e $h_{b,j}$ e compará-los com o resto que o provedor calcula sobre $c_e$. A memória exigida do usuário é, assim, de $n \cdot l$ \acrshort{MAC}s, independentemente do número de blocos de verificação gerados.
+
+Na fase de Auditoria, o usuário escolhe um polinômio $P_j$ e um subconjunto aleatório de blocos de verificação armazenados em um provedor, que responde com $\left(\bigoplus_\eta c_\eta(x)\right) \bmod P_j(x)$. A resposta é comparada com a combinação dos \acrshort{MAC}s correspondentes e, havendo divergência, o usuário pode auditar outro provedor ou iniciar a fase de Redistribuição, na qual o bloco corrompido é reconstruído a partir de outros blocos de verificação e enviado a outro provedor, sem que o arquivo inteiro precise ser transferido. O HySAIL admite os modelos limitado, em que o número de auditorias é restrito ao conjunto de polinômios gerados na codificação, e ilimitado \cite{amaral2019hysail}.
+
+A segurança do esquema apoia-se em dois resultados. O primeiro estabelece que a família de funções $h(m) = m(x) \bmod P(x)$, com $P(x)$ sorteado entre os polinômios primitivos de grau $\lambda$, é uma função de \emph{hash} 2-universal, de modo que a probabilidade de um provedor forjar a resposta a um desafio é de no máximo $2^{-\lambda}$; com $\lambda = 127$, essa probabilidade é desprezível. O segundo limita a fração de blocos que um adversário pode corromper sem comprometer a recuperação, a partir dos parâmetros do código de apagamento \cite{amaral2019hysail}.
 
 \subsection{LT Codes}
 Os códigos \emph{fountain} constituem a base do processo de codificação de blocos do HySAIL. Entre eles, os \textbf{LT Codes} (\emph{Luby Transform Codes}), propostos por Luby \cite{luby2002lt}, são a primeira realização prática dessa classe de códigos. Por não possuírem taxa fixa, permitem gerar, a partir de $k$ símbolos de origem, uma quantidade potencialmente ilimitada de símbolos codificados, dos quais qualquer subconjunto com pouco mais de $k$ elementos basta para reconstruir os dados, sem necessidade de retransmissão seletiva.
