@@ -15,7 +15,7 @@ HySAIL é dividido em diferentes fases para o seu processo funcionamento, são e
 \item \textit{Fase de Decodificação:} os blocos são recuperados e decodificados para reconstruir os dados originais.
 \end{itemize}
 
-O presente trabalho realiza uma substituição no processo de Codificação, passando a utilizar RaptorQ Codes em vez dos Online Codes originalmente empregados no HySAIL. A substituição, contudo, não é transparente para as demais fases: o \acrshort{MAC} homomórfico, o dimensionamento da redundância e a Redistribuição foram concebidos em função da estrutura dos Online Codes, em que todo bloco de verificação é o XOR de blocos de mensagem. As seções a seguir analisam o impacto da mudança sobre cada um desses elementos e descrevem as adaptações propostas para que as garantias de integridade e disponibilidade do HySAIL sejam preservadas.
+O presente trabalho realiza uma substituição no processo de Codificação, passando a utilizar RaptorQ Codes em vez dos Online Codes originalmente empregados no HySAIL. A substituição, contudo, não é transparente para as demais fases: o \acrshort{MAC} homomórfico, o dimensionamento da redundância e a Redistribuição foram concebidos em função da estrutura dos Online Codes, em que todo bloco de verificação é o XOR de blocos de mensagem. As seções a seguir identificam os problemas de realizar a substituição diretamente, descrevem as adaptações mínimas que mantêm o modelo limitado do HySAIL e, por fim, propõem um esquema compacto e ilimitado, inspirado em Shacham e Waters \cite{shacham2008compact}, e a ocultação da estrutura do código, que resolvem as limitações que essas adaptações mínimas não superam.
 
 \section{Substituição dos Online Codes pelos RaptorQ Codes}
 
@@ -29,11 +29,27 @@ Online Codes em HySAIL é utilizado em HySAIL da seguinte forma:
 
 Na proposta deste trabalho, cada bloco de tamanho limitado do arquivo (\emph{chunk}) é dividido em $K$ símbolos de origem e codificado com RaptorQ \cite{luby2011rfc6330}, que produz os $K$ símbolos de origem, emitidos de forma sistemática, seguidos de $r$ símbolos de reparo. Cada símbolo codificado, aqui denominado pacote, é identificado pelo seu \emph{Encoding Symbol Identifier} (\acrshort{ESI}) e substitui o bloco de verificação do HySAIL original nas fases de Distribuição, Auditoria e Redistribuição.
 
+\section{Problemas da Substituição Direta}
+\label{sec:problemas_substituicao}
+
+Substituir os Online Codes pelos RaptorQ Codes mantendo o restante do HySAIL inalterado compromete o protocolo em cinco aspectos, analisados a seguir e quantificados experimentalmente no Capítulo~5.
+
+\begin{enumerate}
+	\item \textit{Perda do MAC homomórfico sobre os blocos de mensagem:} os símbolos de reparo do RaptorQ não são o XOR de blocos de mensagem (Seção~\ref{sec:impacto_mac}), de modo que o usuário deixa de poder derivar o \acrshort{MAC} de um pacote a partir dos \acrshort{MAC}s dos blocos de mensagem. A alternativa direta, armazenar um \acrshort{MAC} por pacote e por desafio, exige do usuário $t \cdot l \cdot \lambda$ bits para $t$ pacotes. Para pacotes de $B$ bits, essa memória corresponde a uma fração $l \lambda / B$ do arquivo; com $l = 40$, $\lambda = 127$ e pacotes de 6.500 bytes, o usuário armazena cerca de 10\% do volume terceirizado, o que contraria o objetivo de uma \acrshort{PoR}, que é manter junto ao usuário apenas uma quantidade pequena de informação \cite{juels2007pors}.
+	\item \textit{Número limitado de auditorias:} como cada desafio $P_j$ é revelado ao provedor, ele só pode ser usado uma vez (Seção~\ref{sec:auditoria_limitada}). Um arquivo admite, portanto, $l$ auditorias, incluindo os desafios realizados durante a decodificação, após as quais precisa ser recodificado.
+	\item \textit{Ataque dirigido a um único \emph{chunk}:} a redundância do RaptorQ é calculada por \emph{chunk}, e a estrutura do código fica exposta aos provedores, pois o nome dos arquivos, o cabeçalho de cada pacote, que contém o número do bloco de origem e o \acrshort{ESI}, e os próprios símbolos de origem, emitidos de forma sistemática, são armazenados em claro. Um adversário pode, assim, corromper $r + 1$ pacotes de um mesmo \emph{chunk} e tornar o arquivo irrecuperável. Essa corrupção atinge apenas a fração $(r + 1) / T$ dos $T$ pacotes do arquivo, e uma auditoria que amostra $s$ pacotes a detecta com probabilidade de aproximadamente $1 - \left(1 - (r + 1)/T\right)^s$, valor desprezível para arquivos grandes. As \acrshort{PoR}s clássicas evitam esse ataque aplicando o código sobre todo o arquivo ou ocultando, por cifragem e permutação, quais símbolos pertencem a uma mesma palavra-código \cite{juels2007pors,bowers2009proofs}.
+	\item \textit{Cancelamento de erros na resposta agregada:} a resposta da Auditoria original, o XOR dos pacotes desafiados, permite que dois pacotes corrompidos com o mesmo padrão de erro se anulem, como detalhado na Seção~\ref{sec:auditoria_limitada}.
+	\item \textit{Redistribuição não local:} os símbolos de reparo do RaptorQ não podem ser reconstruídos a partir de outros pacotes sem decodificar o bloco de origem (Seção~\ref{sec:redistribuicao}).
+\end{enumerate}
+
+As Seções~\ref{sec:impacto_mac} a~\ref{sec:redistribuicao} descrevem as adaptações mínimas, que preservam o modelo limitado do HySAIL e resolvem os itens 4 e 5. Os itens 1 e 2 decorrem do próprio modelo limitado e são resolvidos pelo esquema compacto da Seção~\ref{sec:esquema_compacto}, e o item 3, pela ocultação da estrutura do código da Seção~\ref{sec:ocultacao}.
+
 \section{Impacto sobre o MAC Homomórfico}
+\label{sec:impacto_mac}
 
 A propriedade da Equação~\eqref{eq:hysail_homomorfismo} permite ao usuário do HySAIL calcular o \acrshort{MAC} esperado de qualquer bloco de verificação a partir dos \acrshort{MAC}s dos blocos de mensagem, porque cada bloco de verificação é o XOR de blocos de mensagem. Nos RaptorQ Codes, essa relação não se mantém. Os símbolos de reparo são combinações dos símbolos intermediários produzidos pela pré-codificação LDPC e HDPC, e parte dessas combinações envolve multiplicações por elementos de $GF(256)$ \cite{luby2011rfc6330}. A multiplicação de cada byte por uma constante de $GF(256)$ não é compatível com a interpretação do pacote inteiro como um polinômio de $GF(2)[x]$ reduzido módulo $P_j(x)$, de modo que não existe combinação dos valores $h_{i,j}$ que forneça o \acrshort{MAC} de um símbolo de reparo.
 
-A adaptação proposta consiste em calcular o \acrshort{MAC} diretamente sobre cada pacote. Sendo $c_\eta$ o pacote de \acrshort{ESI} $\eta$, o usuário armazena, para cada desafio $P_j$,
+A adaptação mínima, que preserva o modelo limitado do HySAIL, consiste em calcular o \acrshort{MAC} diretamente sobre cada pacote. Sendo $c_\eta$ o pacote de \acrshort{ESI} $\eta$, o usuário armazena, para cada desafio $P_j$,
 
 \begin{equation}
 	h_{\eta,j}(x) = c_\eta(x) \bmod P_j(x).
@@ -51,6 +67,7 @@ O teste de Rabin estabelece que um polinômio $f(x)$ de grau $\lambda$ sobre $GF
 Por fim, um único conjunto de $l$ polinômios é gerado para todo o arquivo e compartilhado por seus \emph{chunks}, como no HySAIL original, o que evita repetir o custo da geração em cada \emph{chunk} e permite controlar, para o arquivo como um todo, quais desafios já foram revelados.
 
 \section{Auditoria no Modelo Limitado}
+\label{sec:auditoria_limitada}
 
 No modelo limitado, cada polinômio de desafio pode ser utilizado em uma única rodada de auditoria. Uma vez que $P_j$ é revelado, um provedor desonesto pode armazenar apenas os restos $c_\eta(x) \bmod P_j(x)$ e descartar os pacotes, respondendo corretamente a desafios futuros com o mesmo polinômio sem possuir os dados. A proposta registra, nos metadados mantidos pelo usuário, os índices dos polinômios já revelados, e o registro é persistido antes de o polinômio ser enviado ao provedor, de modo que nem uma interrupção do processo leve à sua reutilização. Assim, um arquivo codificado com $l$ polinômios admite $l$ rodadas de auditoria, após as quais deve ser recodificado. O mesmo princípio aplica-se ao desafio realizado antes de cada transferência durante a decodificação, que consome um único polinômio por sessão.
 
@@ -80,3 +97,45 @@ A proposta define $r = \lceil \varepsilon K \rceil$, em que $\varepsilon > 0$ é
 Nos Online Codes, um bloco de verificação corrompido pode ser reconstruído pelo XOR de outros blocos de verificação, sem transferir o arquivo, graças à codificação local \cite{maymounkov2003rateless,amaral2019hysail}. Os símbolos de reparo do RaptorQ não admitem essa reconstrução local, pois dependem dos símbolos intermediários de todo o bloco de origem. A proposta reconstrói, por isso, apenas o \emph{chunk} afetado: o \emph{chunk} é decodificado a partir de seus pacotes íntegros, cuja integridade é confirmada pelo \emph{hash} SHA-256 armazenado, e recodificado. Como a codificação RaptorQ é determinística para os mesmos dados e parâmetros, o pacote com o mesmo \acrshort{ESI} do pacote corrompido é reproduzido de forma idêntica ao original, o que permite confirmar a reconstrução pelo seu \emph{hash} e manter válidos os \acrshort{MAC}s já armazenados. O pacote reconstruído é então enviado a um provedor diferente daquele em que a corrupção foi detectada.
 
 A divisão do arquivo em \emph{chunks} de, por padrão, no máximo $\lambda \cdot 512$ bytes (65.024 bytes para $\lambda = 127$) limita o volume transferido em cada Redistribuição a um único \emph{chunk}, independentemente do tamanho do arquivo. Essa é a principal concessão da substituição em relação ao HySAIL original: a Redistribuição deixa de ser estritamente local, mas seu custo permanece limitado e independente do tamanho de $F$.
+
+\section{Esquema Compacto e Ilimitado}
+\label{sec:esquema_compacto}
+
+As adaptações anteriores mantêm duas limitações inerentes ao modelo limitado: a memória do usuário cresce com o arquivo, e o número de auditorias é fixado na codificação. Ambas decorrem de o polinômio de desafio ser revelado ao provedor. Shacham e Waters \cite{shacham2008compact} propuseram uma \acrshort{PoR} em que o provedor armazena, junto a cada bloco, uma etiqueta autenticada que combina um \acrshort{MAC} linear com uma função pseudoaleatória, e responde a desafios com combinações lineares dos blocos e das etiquetas, de modo que o usuário verifica as respostas sem revelar sua chave e mantém apenas essa chave. Este trabalho propõe instanciar essa construção com o \acrshort{MAC} polinomial do HySAIL.
+
+O usuário gera um único polinômio primitivo secreto $P(x)$ de grau $\lambda$, uma chave $K$ para uma função pseudoaleatória $f_K$, implementada com HMAC-SHA-256 truncado a $\lambda$ bits, e um identificador aleatório $id_F$ do arquivo. Para o pacote $c_\eta$ do \emph{chunk} $i$, a etiqueta armazenada pelo provedor é
+
+\begin{equation}
+	\sigma_\eta = \left(c_\eta(x) \bmod P(x)\right) + f_K(id_F, i, \eta),
+	\label{eq:etiqueta_compacta}
+\end{equation}
+
+\noindent em que a soma é realizada em $GF(2)$. A máscara pseudoaleatória torna a etiqueta indistinguível de um valor aleatório para quem não conhece $K$, de modo que as etiquetas não revelam informação sobre $P(x)$, e o vínculo com $(id_F, i, \eta)$ impede que etiquetas sejam trocadas entre posições ou entre arquivos.
+
+Em uma auditoria, o usuário escolhe um conjunto $Q$ de pacotes do provedor e coeficientes aleatórios $\nu_\eta$, polinômios de grau menor que $\lambda$. O provedor, sem conhecer $P(x)$, calcula em $GF(2)[x]$, sem redução modular,
+
+\begin{equation}
+	\mu(x) = \sum_{\eta \in Q} \nu_\eta(x) \, c_\eta(x), \qquad \tau(x) = \sum_{\eta \in Q} \nu_\eta(x) \, \sigma_\eta(x),
+	\label{eq:resposta_compacta}
+\end{equation}
+
+\noindent e o usuário aceita a resposta se
+
+\begin{equation}
+	\left(\mu(x) + \tau(x) + \sum_{\eta \in Q} \nu_\eta(x) \, f_K(id_F, i_\eta, \eta)\right) \bmod P(x) = 0.
+	\label{eq:verificacao_compacta}
+\end{equation}
+
+A correção decorre da linearidade da redução módulo $P(x)$: como $\sigma_\eta \equiv c_\eta + f_K(id_F, i_\eta, \eta) \pmod{P(x)}$, tem-se $\tau \equiv \mu + \sum_\eta \nu_\eta f_K(id_F, i_\eta, \eta)$, e a soma em $GF(2)$ de um termo consigo mesmo é nula.
+
+Como $P(x)$ nunca é transmitido, um mesmo polinômio pode ser utilizado em um número ilimitado de auditorias, e a memória do usuário reduz-se a $P(x)$, $K$ e $id_F$, que ocupam 64 bytes, independentemente do tamanho do arquivo. Para que um provedor responda $(\mu', \tau') \neq (\mu, \tau)$ e ainda seja aceito, a diferença $\delta(x) = (\mu' - \mu) + (\tau' - \tau)$ deve ser divisível por $P(x)$. Um polinômio não nulo de grau $d$ possui no máximo $d / \lambda$ fatores irredutíveis distintos de grau $\lambda$, entre os aproximadamente $2^\lambda / \lambda$ polinômios irredutíveis desse grau, de modo que, para $P(x)$ uniforme e desconhecido pelo provedor, a probabilidade de aceitação de uma resposta incorreta fixada é limitada por cerca de $d / 2^\lambda$, desprezível para $\lambda = 127$. Os coeficientes aleatórios $\nu_\eta$ também eliminam o cancelamento de erros idênticos: dois pacotes alterados pelo mesmo erro $e(x)$ só se anulam se $P(x)$ dividir $(\nu_a + \nu_b)\, e(x)$, o que ocorre com a mesma probabilidade desprezível. A garantia de extração, isto é, de que respostas aceitas com probabilidade não desprezível permitem reconstruir os pacotes por álgebra linear sobre respostas a desafios distintos, segue o argumento de Shacham e Waters para o esquema de chave privada \cite{shacham2008compact} e deve ser formalizada para a instanciação aqui proposta.
+
+O custo da construção desloca-se do usuário para o provedor e para a rede. O provedor armazena uma etiqueta de $\lambda$ bits por pacote, cerca de 0,2\% de um pacote de 6.500 bytes, e a resposta passa a ter aproximadamente o tamanho de um pacote, em vez de $\lambda$ bits, mas permanece independente do tamanho do arquivo e do número de pacotes desafiados. Na codificação, é calculada uma única divisão polinomial por pacote, em vez de $l$. A decodificação também se beneficia: cada pacote transferido é verificado contra sua etiqueta, sem consumir desafios.
+
+\section{Ocultação da Estrutura do Código}
+\label{sec:ocultacao}
+
+Para impedir o ataque dirigido a um único \emph{chunk}, a proposta oculta dos provedores quais pacotes pertencem a uma mesma palavra-código, seguindo a abordagem de Juels e Kaliski \cite{juels2007pors} e de Bowers, Juels e Oprea \cite{bowers2009proofs}. Antes da distribuição, cada pacote é cifrado com um fluxo de chave obtido da função SHAKE-256, parametrizada pela chave do usuário e pela posição $(id_F, i, \eta)$, e armazenado sob um nome pseudoaleatório derivado por HMAC-SHA-256. A cifragem oculta o cabeçalho RaptorQ e os símbolos de origem, que de outro modo seriam armazenados em claro por ser o código sistemático, e oferece, adicionalmente, confidencialidade aos dados. As etiquetas e os \emph{hashes} são calculados sobre os pacotes cifrados, que são o que os provedores armazenam, de modo que a Auditoria opera sem acesso ao conteúdo original.
+
+Sem conhecer a estrutura, um adversário que corrompe uma fração $\beta$ dos pacotes atinge cada \emph{chunk} de forma aproximadamente uniforme. Um \emph{chunk} só se torna irrecuperável quando mais de $r$ de seus $K + r$ pacotes são corrompidos, o que exige $\beta$ próximo de $\alpha = r/(K + r)$, e essa fração é detectada por uma auditoria de $s$ pacotes com probabilidade $1 - (1 - \beta)^s$. A ocultação não é completa: os provedores ainda observam o tamanho dos pacotes, que difere apenas no último \emph{chunk}, e a ordem em que os pacotes são recebidos. Esses canais podem ser eliminados pelo preenchimento do último \emph{chunk} e pelo embaralhamento global dos pacotes de todos os \emph{chunks} antes do envio, o que exige manter o arquivo codificado em memória ou em armazenamento temporário durante a distribuição.
+
