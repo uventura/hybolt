@@ -1,3 +1,5 @@
+import hashlib
+import json
 import pickle
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -54,6 +56,28 @@ class EncodingMetadata:
         self, server: str, packet_index: int, degree: int, indices: List[int]
     ):
         self.packets.append(PacketMetadata(server, packet_index, degree, indices))
+
+    def all_packets(self) -> List[PacketMetadata]:
+        if self.chunks is None:
+            return list(self.packets)
+        return [packet for chunk in self.chunks for packet in chunk.packets]
+
+    def compute_packet_root(self) -> str:
+        serialized_packets = [
+            {
+                "server": packet.server,
+                "packet_index": packet.packet_index,
+                "degree": packet.degree,
+                "indices": packet.indices,
+                "packet_file": packet.packet_file,
+                "packet_sha256": packet.packet_sha256,
+            }
+            for packet in sorted(
+                self.all_packets(), key=lambda item: (item.server, item.packet_file)
+            )
+        ]
+        payload = json.dumps(serialized_packets, sort_keys=True).encode("utf-8")
+        return hashlib.sha256(payload).hexdigest()
 
     def save(self, file_path: Path):
         with open(file_path, "wb") as f:

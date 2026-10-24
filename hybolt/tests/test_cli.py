@@ -377,3 +377,35 @@ def test_given_audit_error_when_auditing_then_reports_click_error(
 
     assert result.exit_code == 1
     assert "Error: Audit requires metadata encoded with the proof" in result.output
+
+
+@pytest.mark.parametrize("succeeded", [True, False])
+def test_given_redistribute_flag_when_audit_finds_corruption_then_redistributes(
+    tmp_path, monkeypatch, succeeded
+):
+    from hybolt.audit.audit import PacketLocation
+    from hybolt.audit.redistribution import MovedPacket, RedistributionReport
+
+    corrupted = [PacketLocation(0, 2, "server_1", "input_chunk_0_packet_2.pkl")]
+    captured = {}
+
+    class StubRedistribution:
+        def __init__(self, *args):
+            captured["corrupted"] = args[2]
+
+        def run(self):
+            return RedistributionReport(
+                moved=[MovedPacket(0, 2, "server_1", "server_2")],
+                failed_chunks={} if succeeded else {1: "Insufficient packets"},
+            )
+
+    monkeypatch.setattr("hybolt.hybolt.Redistribution", StubRedistribution)
+
+    result, _ = _invoke_audit(
+        tmp_path, monkeypatch, _audit_report(False, corrupted), ["--redistribute"]
+    )
+
+    assert captured["corrupted"] == corrupted
+    assert "packet 2 of chunk 0: server_1 -> server_2" in result.output
+    assert "Redistributed 1 packets" in result.output
+    assert result.exit_code == (0 if succeeded else 1)

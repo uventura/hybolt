@@ -1,5 +1,4 @@
 import hashlib
-import json
 import math
 import time
 from pathlib import Path
@@ -14,7 +13,6 @@ from hybolt.encryption.encoding_metadata import (
     BlockMetadata,
     ChunkMetadata,
     EncodingMetadata,
-    PacketMetadata,
 )
 from hybolt.encryption.digest import Digest
 from hybolt.encryption.retrievability import create_retrievability_proof
@@ -171,9 +169,7 @@ class HyboltEncode:
             original_file_hash=self._sha256_file(input_path),
             chunks=chunks,
         )
-        metadata.packet_root_hash = self._compute_packet_root(
-            [packet for chunk in chunks for packet in chunk.packets]
-        )
+        metadata.packet_root_hash = metadata.compute_packet_root()
         metadata_file = (
             Path(self.metadata_output) / f"{Path(self.input_file).stem}_metadata.pkl"
         )
@@ -183,26 +179,6 @@ class HyboltEncode:
             f"Metadata written: path={metadata_file}, "
             f"blocks={len(metadata.blocks)}, packets={len(metadata.packets)}"
         )
-
-    def _compute_packet_root(self, packets: list[PacketMetadata]) -> str:
-        serialized_packets = [
-            {
-                "server": packet.server,
-                "packet_index": packet.packet_index,
-                "degree": packet.degree,
-                "indices": packet.indices,
-                "packet_file": packet.packet_file,
-                "packet_sha256": packet.packet_sha256,
-            }
-            for packet in sorted(
-                packets, key=lambda item: (item.server, item.packet_file)
-            )
-        ]
-        payload = json.dumps(serialized_packets, sort_keys=True).encode("utf-8")
-        return self._sha256_hex(payload)
-
-    def _sha256_hex(self, payload: bytes) -> str:
-        return hashlib.sha256(payload).hexdigest()
 
     def _sha256_file(self, input_path: Path) -> str:
         digest = hashlib.sha256()

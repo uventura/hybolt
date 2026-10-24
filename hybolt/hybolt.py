@@ -13,6 +13,7 @@ from rich.progress import (
 )
 
 from hybolt.audit.audit import Audit
+from hybolt.audit.redistribution import Redistribution
 from hybolt.hybolt_decode import HyboltDecode
 from hybolt.hybolt_encode import HyboltEncode
 from hybolt.constant import DEFAULT_REDUNDANCY, MAX_MAC_THREADS
@@ -236,13 +237,20 @@ def decode_command(
     help="Corrupted packets tolerated per server before it fails the audit",
 )
 @click.option(
+    "--redistribute",
+    is_flag=True,
+    help="Rebuild corrupted packets and store them on other servers",
+)
+@click.option(
     "--log-dir",
     type=click.Path(file_okay=False, dir_okay=True),
     default="logs",
     show_default=True,
     help="Directory where execution.log is written",
 )
-def audit_command(metadata_file, server_file, sample_size, tau_maximum, log_dir):
+def audit_command(
+    metadata_file, server_file, sample_size, tau_maximum, redistribute, log_dir
+):
     execution_logger.set_log_directory(log_dir)
     try:
         report = Audit(metadata_file, server_file, sample_size, tau_maximum).run()
@@ -275,7 +283,27 @@ def audit_command(metadata_file, server_file, sample_size, tau_maximum, log_dir)
     click.echo(
         f"Audit found {len(report.corrupted_packets)} corrupted packets", err=True
     )
-    raise SystemExit(1)
+    if not redistribute or not report.corrupted_packets:
+        raise SystemExit(1)
+
+    try:
+        redistribution = Redistribution(
+            metadata_file, server_file, report.corrupted_packets
+        ).run()
+    except ValueError as error:
+        raise click.ClickException(str(error)) from error
+
+    for moved in redistribution.moved:
+        click.echo(
+            f"  packet {moved.packet_index} of chunk {moved.chunk_index}: "
+            f"{moved.from_server} -> {moved.to_server}"
+        )
+    for chunk_index, reason in redistribution.failed_chunks.items():
+        click.echo(f"  chunk {chunk_index} not redistributed: {reason}", err=True)
+
+    click.echo(f"Redistributed {len(redistribution.moved)} packets")
+    if not redistribution.succeeded:
+        raise SystemExit(1)
 
 
 @main.command("plot")
