@@ -8,8 +8,11 @@ from hybolt.encryption.encoding_metadata import PacketMetadata
 
 
 class PacketSaver:
-    def __init__(self, packets, input_path, server_list=None, chunk_index=None):
+    def __init__(
+        self, packets, input_path, server_list=None, chunk_index=None, sealer=None
+    ):
         self.packets = packets
+        self.sealer = sealer
         self.input_path = input_path
         self.server_list = server_list
         self.chunk_index = chunk_index
@@ -68,6 +71,8 @@ class PacketSaver:
         advance_progress(self.progress, task_id)
 
     def _packet_file_name(self, packet_index):
+        if self.sealer is not None:
+            return self.sealer.packet_file(self.chunk_index or 0, packet_index)
         if self.chunk_index is None:
             return f"{self.input_path.stem}_packet_{packet_index}.pkl"
         return (

@@ -15,6 +15,7 @@ from hybolt.encryption.encoding_metadata import (
     EncodingMetadata,
 )
 from hybolt.encryption.digest import Digest
+from hybolt.encryption.sealing import SealingKeys
 from hybolt.encryption.retrievability import (
     COMPACT_SCHEME,
     create_retrievability_proof,
@@ -41,6 +42,7 @@ class HyboltEncode:
         retrievability_proof: bool = True,
         redundancy: float = DEFAULT_REDUNDANCY,
         proof_scheme: str = COMPACT_SCHEME,
+        seal_packets: bool = True,
     ):
         self.input_file = input_file
         self.block_size = block_size
@@ -51,6 +53,7 @@ class HyboltEncode:
         self.retrievability_proof = retrievability_proof
         self.redundancy = redundancy
         self.proof_scheme = proof_scheme
+        self.seal_packets = seal_packets
         self.average_chunk_encode_seconds = 0.0
         self.average_block_size = 0.0
         self.average_polynomial_division_seconds = 0.0
@@ -65,7 +68,8 @@ class HyboltEncode:
             f"chunks={Digest(input_path, chunk_count=self.chunk_count).chunk_count}, "
             f"servers={len(self.server_list or [])}, max_threads={self.max_threads}, "
             f"retrievability_proof={self.retrievability_proof}, "
-            f"redundancy={self.redundancy}, proof_scheme={self.proof_scheme}"
+            f"redundancy={self.redundancy}, proof_scheme={self.proof_scheme}, "
+            f"seal_packets={self.seal_packets}"
         )
         digest = Digest(input_path, chunk_count=self.chunk_count)
         chunks = []
@@ -79,6 +83,7 @@ class HyboltEncode:
             max_threads=self.max_threads,
             scheme=self.proof_scheme,
         )
+        sealer = SealingKeys.generate() if self.seal_packets else None
         progress = get_progress()
         chunk_task_id = create_progress_task(
             progress,
@@ -100,12 +105,13 @@ class HyboltEncode:
                 proof,
                 self.redundancy,
                 chunk_index,
+                sealer,
             )
             chunk_encode_durations.append(time.perf_counter() - encode_started_at)
             total_block_bytes += encoded.total_block_bytes
             block_count += encoded.num_blocks
             saver = PacketSaver(
-                encoded.packets, input_path, self.server_list, chunk_index
+                encoded.packets, input_path, self.server_list, chunk_index, sealer
             )
             saver.save()
             chunks.append(
@@ -128,7 +134,7 @@ class HyboltEncode:
                 / proof.polynomial_division_count
             )
         execution_logger.debug("Starting metadata write")
-        self._save_packet_metadata(input_path, chunks, proof)
+        self._save_packet_metadata(input_path, chunks, proof, sealer)
         execution_logger.debug("Encoding completed successfully")
         return packet_count
 
@@ -171,12 +177,13 @@ class HyboltEncode:
         return self.block_size
 
     def _save_packet_metadata(
-        self, input_path: Path, chunks: list[ChunkMetadata], proof
+        self, input_path: Path, chunks: list[ChunkMetadata], proof, sealer
     ):
         metadata = EncodingMetadata(
             polynomials=proof.polynomials,
             proof_scheme=proof.scheme,
             compact_keys=getattr(proof, "keys", None),
+            sealing_keys=sealer,
             blocks=[],
             packets=[],
             original_filename=input_path.name,

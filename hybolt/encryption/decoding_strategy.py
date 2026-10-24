@@ -16,10 +16,11 @@ class DecodingStrategy(ABC):
 
     codec = ""
 
-    def __init__(self, metadata, server_cache, proof: RetrievabilityProof):
+    def __init__(self, metadata, server_cache, proof: RetrievabilityProof, sealer=None):
         self._metadata = metadata
         self._server_cache = server_cache
         self._proof = proof
+        self._sealer = sealer
         if self._proof.enabled and self._proof.requires_client_macs:
             self._validate_proof_metadata()
 
@@ -75,9 +76,9 @@ class LtDecodingStrategy(DecodingStrategy):
 
     codec = "lt"
 
-    def __init__(self, metadata, server_cache, proof):
+    def __init__(self, metadata, server_cache, proof, sealer=None):
         self._local_mac = self._build_local_mac(metadata)
-        super().__init__(metadata, server_cache, proof)
+        super().__init__(metadata, server_cache, proof, sealer)
         self._local_blocks = self._build_local_blocks(metadata)
 
     def decode(self):
@@ -299,6 +300,10 @@ class RaptorQDecodingStrategy(DecodingStrategy):
             )
             if packet_data is None:
                 continue
+            if self._sealer is not None:
+                packet_data = self._sealer.open(
+                    self._metadata.chunk_index, packet.packet_index, packet_data
+                )
 
             decoded = decoder.decode(packet_data)
             if decoded is not None:
@@ -324,9 +329,11 @@ DECODING_STRATEGIES = {
 }
 
 
-def create_decoding_strategy(metadata, server_cache, proof) -> DecodingStrategy:
+def create_decoding_strategy(
+    metadata, server_cache, proof, sealer=None
+) -> DecodingStrategy:
     codec = getattr(metadata, "codec", LtDecodingStrategy.codec)
     strategy = DECODING_STRATEGIES.get(codec)
     if strategy is None:
         raise ValueError(f"Unsupported codec: {codec}")
-    return strategy(metadata, server_cache, proof)
+    return strategy(metadata, server_cache, proof, sealer)

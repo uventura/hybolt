@@ -91,8 +91,9 @@ class Redistribution:
                 if packet.packet_index not in corrupted_indices
             ],
         )
+        sealer = self._metadata.sealing_keys
         data = RaptorQDecodingStrategy(
-            healthy, self._servers, DisabledRetrievabilityProof()
+            healthy, self._servers, DisabledRetrievabilityProof(), sealer
         ).decode()
         packets = Encoder.with_defaults(data, chunk.symbol_size).get_encoded_packets(
             chunk.repair_packets
@@ -104,6 +105,10 @@ class Redistribution:
                 continue
 
             packet_data = packets[packet.packet_index]
+            if sealer is not None:
+                packet_data = sealer.seal(
+                    chunk.chunk_index, packet.packet_index, packet_data
+                )
             if hashlib.sha256(packet_data).hexdigest() != packet.packet_sha256:
                 raise ValueError(
                     f"rebuilt packet {packet.packet_index} does not match its hash"

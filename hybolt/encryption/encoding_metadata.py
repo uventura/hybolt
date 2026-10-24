@@ -55,6 +55,8 @@ class EncodingMetadata:
     proof_scheme: str = ""
     # CompactKeys of the compact scheme; the client must keep them secret.
     compact_keys: object | None = None
+    # SealingKeys that encrypt and name packets; None when packets are plain.
+    sealing_keys: object | None = None
 
     def add_packet(
         self, server: str, packet_index: int, degree: int, indices: List[int]
@@ -106,6 +108,8 @@ class EncodingMetadata:
         # whether an older pickle stored these fields.
         if "compact_keys" not in vars(metadata):
             metadata.compact_keys = None
+        if "sealing_keys" not in vars(metadata):
+            metadata.sealing_keys = None
         if "proof_scheme" not in vars(metadata):
             has_polynomials = bool(metadata.polynomials) or any(
                 chunk.polynomials for chunk in metadata.chunks or []

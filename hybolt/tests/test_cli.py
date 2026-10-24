@@ -469,3 +469,45 @@ def test_given_compact_audit_when_auditing_then_reports_unbounded_challenges(
 
     assert result.exit_code == 0, result.output
     assert "Compact audit (unbounded challenges)" in result.output
+
+
+@pytest.mark.parametrize(
+    ("flag", "expected"), [([], True), (["--no-seal-packets"], False)]
+)
+def test_given_seal_option_when_encoding_then_forwards_flag(
+    tmp_path, monkeypatch, flag, expected
+):
+    input_file = tmp_path / "input.txt"
+    input_file.write_text("HyBolt", encoding="utf-8")
+    server_list = tmp_path / "servers.json"
+    server_list.write_text(
+        json.dumps({"servers": [{"id": 1, "storage_location": str(tmp_path)}]}),
+        encoding="utf-8",
+    )
+    captured = {}
+
+    class StubHyboltEncode:
+        average_chunk_encode_seconds = 0.25
+        average_block_size = 1.0
+        average_polynomial_division_seconds = 0.01
+
+        def __init__(self, *args):
+            captured["seal_packets"] = args[9]
+
+        def encode(self):
+            return 1
+
+    monkeypatch.setattr("hybolt.hybolt.HyboltEncode", StubHyboltEncode)
+    monkeypatch.setattr(
+        "hybolt.hybolt.execution_logger.set_log_directory", lambda log_dir: None
+    )
+    monkeypatch.setattr(
+        "hybolt.hybolt.append_runtime_record", lambda *args, **kwargs: None
+    )
+
+    result = CliRunner().invoke(
+        main, ["encode", str(input_file), "--server-list", str(server_list), *flag]
+    )
+
+    assert result.exit_code == 0, result.output
+    assert captured["seal_packets"] is expected

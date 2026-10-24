@@ -21,6 +21,7 @@ class Encode:
         proof: RetrievabilityProof | None = None,
         redundancy: float = DEFAULT_REDUNDANCY,
         chunk_index: int = 0,
+        sealer=None,
     ):
         if not data:
             raise ValueError("Data cannot be empty")
@@ -60,6 +61,10 @@ class Encode:
         self._proof = proof or DisabledRetrievabilityProof()
 
         self._packets = self._encode()
+        if sealer is not None:
+            # MACs, tags and hashes cover the sealed bytes the servers store.
+            for packet in self._packets:
+                packet.data = sealer.seal(chunk_index, packet.index, packet.data)
         self._packet_macs = self._proof.tag_packets(self._packets)
         self._proof.attach_server_tags(self._packets, chunk_index)
 

@@ -62,7 +62,10 @@ class Decode:
 
     def _create_strategy(self, metadata):
         proof = self._create_proof(metadata)
-        return create_decoding_strategy(metadata, self._server_cache, proof), proof
+        strategy = create_decoding_strategy(
+            metadata, self._server_cache, proof, self._metadata.sealing_keys
+        )
+        return strategy, proof
 
     def _create_proof(self, metadata):
         if self._retrievability_proof and self._metadata.proof_scheme == COMPACT_SCHEME:

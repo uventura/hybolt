@@ -99,6 +99,13 @@ def main():
     "bounded: Hy-SAIL's single-use challenges with client-side MACs",
 )
 @click.option(
+    "--seal-packets/--no-seal-packets",
+    default=True,
+    show_default=True,
+    help="Encrypt packets and give them opaque names so servers cannot see "
+    "which packets belong to the same chunk",
+)
+@click.option(
     "--redundancy",
     type=click.FloatRange(min=0, min_open=True),
     default=DEFAULT_REDUNDANCY,
@@ -126,6 +133,7 @@ def encode_command(
     chunk_count,
     retrievability_proof,
     proof_scheme,
+    seal_packets,
     redundancy,
     debug,
     log_dir,
@@ -154,6 +162,7 @@ def encode_command(
             retrievability_proof,
             redundancy,
             proof_scheme,
+            seal_packets,
         )
         encode_started_at = time.perf_counter()
         packet_count = hybolt_encode.encode()
