@@ -5,7 +5,7 @@ import pytest
 
 import hybolt.utils.galois as ga
 from hybolt.encryption.block import Block
-from hybolt.server.server import Server
+from hybolt.server.server import Server, StoredPacket
 
 
 def test_given_storage_location_when_initializing_server_then_creates_location(tmp_path):
@@ -158,3 +158,16 @@ def test_given_stored_packet_when_removing_then_deletes_file(tmp_path):
     server.remove_packet("a.pkl")
 
     assert not path.exists()
+
+
+def test_given_packet_when_storing_then_keeps_only_data_and_tag(tmp_path):
+    server = Server(str(tmp_path / "storage"))
+    packet = Block(9, 3, [1, 4, 7], b"\x07\x08")
+    packet.tag = 0b1011
+    packet.set_server(server)
+
+    path = server.store_packet(packet, "opaque.pkl")
+
+    with open(path, "rb") as file:
+        stored = pickle.load(file)
+    assert stored == StoredPacket(b"\x07\x08", 0b1011)

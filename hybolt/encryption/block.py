@@ -20,6 +20,8 @@ class Block:
         self.indices = list(indices)
         self.data = data
         self.server = None
+        # Server-side retrievability tag, set when the compact proof is enabled.
+        self.tag = None
 
     def __str__(self):
         return f"Block(index={self.index}, degree={self.degree}, indices={self.indices}, data={self.data}, server={self.server})"

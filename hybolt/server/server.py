@@ -1,9 +1,22 @@
 import glob
 import pickle
 import shutil
+from dataclasses import dataclass
 from pathlib import Path
 
 import hybolt.utils.galois as ga
+
+
+@dataclass
+class StoredPacket:
+    """What a server keeps for a packet: its bytes and, optionally, its tag.
+
+    The packet's ESI, source indices and owner are left out so the server
+    learns nothing about the code structure from the stored object.
+    """
+
+    data: bytes
+    tag: int | None = None
 
 
 class Server:
@@ -18,8 +31,9 @@ class Server:
 
     def store_packet(self, packet, packet_file) -> Path:
         packet_path = Path(self._storage_location) / packet_file
+        stored = StoredPacket(packet.data, getattr(packet, "tag", None))
         with open(packet_path, "wb") as file:
-            pickle.dump(packet, file)
+            pickle.dump(stored, file)
         return packet_path
 
     def download_block(self, block_index, packet_file=""):
