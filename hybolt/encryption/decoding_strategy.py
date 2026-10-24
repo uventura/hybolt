@@ -287,11 +287,20 @@ class RaptorQDecodingStrategy(DecodingStrategy):
                     f"RaptorQ packet {packet.packet_index} has no integrity hash"
                 )
 
+            server = self._server_cache.get(packet.server)
+            if server is None:
+                # The packet's server left the deployment: treat it as an erasure.
+                execution_logger.error(
+                    f"Server {packet.server} unavailable for packet "
+                    f"{packet.packet_index}"
+                )
+                continue
+
             block = LocalBlock(
                 index=packet.packet_index,
                 degree=packet.degree,
                 indices=list(packet.indices),
-                server=self._server_for(packet),
+                server=server,
                 packet_file=packet.packet_file,
                 packet_sha256=packet.packet_sha256,
             )

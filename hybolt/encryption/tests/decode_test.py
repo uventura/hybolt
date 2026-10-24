@@ -322,3 +322,28 @@ def test_given_metadata_saved_before_proof_schemes_when_loading_then_infers_sche
 
     assert loaded.proof_scheme == "bounded"
     assert loaded.compact_keys is None
+
+
+def test_given_server_missing_from_server_file_when_decoding_then_uses_other_packets(
+    tmp_path,
+):
+    input_file = tmp_path / "input.txt"
+    input_file.write_bytes(b"A server can leave the deployment. " * 4)
+    servers = [
+        {"id": index, "storage_location": str(tmp_path / f"server_{index}")}
+        for index in range(3)
+    ]
+    HyboltEncode(
+        str(input_file),
+        block_size=8,
+        server_list=servers,
+        metadata_output=str(tmp_path),
+        redundancy=1.0,
+    ).encode()
+    remaining = _write_server_file(
+        tmp_path, [tmp_path / "server_0", tmp_path / "server_1"]
+    )
+
+    decoded = Decode(tmp_path / "input_metadata.pkl", remaining).decode()
+
+    assert decoded == input_file.read_bytes()
