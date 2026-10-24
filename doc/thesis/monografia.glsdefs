@@ -110,3 +110,59 @@ parent={},%
 %
 }%
 
+\glsdefs@newdocentry{MAC}%
+{%
+name={\acronymfont {\glsentryshort {MAC}}},%
+sort={MAC},%
+type={acronym},%
+first={MAC},%
+firstplural={MACs},%
+text={MAC},%
+plural={MACs},%
+description={\emph {Message Authentication Code}},%
+descriptionplural={\emph {Message Authentication Code}},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={\protect \emph  {Message Authentication Code}},%
+longplural={\protect \emph  {Message Authentication Code}s},%
+short={MAC},%
+shortplural={MACs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{ESI}%
+{%
+name={\acronymfont {\glsentryshort {ESI}}},%
+sort={ESI},%
+type={acronym},%
+first={ESI},%
+firstplural={ESIs},%
+text={ESI},%
+plural={ESIs},%
+description={\emph {Encoding Symbol Identifier}},%
+descriptionplural={\emph {Encoding Symbol Identifier}},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={\protect \emph  {Encoding Symbol Identifier}},%
+longplural={\protect \emph  {Encoding Symbol Identifier}s},%
+short={ESI},%
+shortplural={ESIs},%
+counter={page},%
+parent={},%
+%
+}%
+

@@ -185,4 +185,31 @@
 \newblock \btxjournalfont {IEEE Transactions on Dependable and Secure
   Computing}, 21(4), 2024.
 
+\bibitem {luby2011rfc6330}
+\btxnamefont {\btxlastnamefont {Luby}, Michael}, \btxnamefont {Amin
+  \btxlastnamefont {Shokrollahi}}, \btxnamefont {Mark \btxlastnamefont
+  {Watson}}, \btxnamefont {Thomas \btxlastnamefont {Stockhammer}}\btxandcomma
+  {} \btxandlong {}\ \btxnamefont {Lorenz \btxlastnamefont
+  {Minder}}\btxauthorcolon\ \btxtitlefont {\btxifchangecase {Raptorq forward
+  error correction scheme for object delivery}{RaptorQ Forward Error Correction
+  Scheme for Object Delivery}}.
+\newblock \Btxtechreplong {}\ RFC 6330, Internet Engineering Task Force (IETF),
+  2011.
+\newblock {\latintext \btxurlfont{https://www.rfc-editor.org/rfc/rfc6330}},
+  Acesso em: 24 out. 2026.
+
+\bibitem {rabin1980probabilistic}
+\btxnamefont {\btxlastnamefont {Rabin}, Michael\btxfnamespacelong
+  O.}\btxauthorcolon\ \btxjtitlefont {\btxifchangecase {Probabilistic
+  algorithms in finite fields}{Probabilistic Algorithms in Finite Fields}}.
+\newblock \btxjournalfont {SIAM Journal on Computing}, 9(2):273--280, 1980.
+
+\bibitem {menezes1997handbook}
+\btxnamefont {\btxlastnamefont {Menezes}, Alfred\btxfnamespacelong J.},
+  \btxnamefont {Paul\btxfnamespacelong C. van \btxlastnamefont
+  {Oorschot}}\btxandcomma {} \btxandlong {}\ \btxnamefont
+  {Scott\btxfnamespacelong A. \btxlastnamefont {Vanstone}}\btxauthorcolon\
+  \btxtitlefont {Handbook of Applied Cryptography}.
+\newblock \btxpublisherfont {CRC Press}, Boca Raton, FL, 1997.
+
 \end{thebibliography}
