@@ -70,7 +70,7 @@ def _write_lt_metadata(tmp_path, source_blocks):
     return server_dir, metadata_file, _write_server_file(tmp_path, [server_dir])
 
 
-def _encode_raptorq(tmp_path, retrievability_proof):
+def _encode_raptorq(tmp_path, retrievability_proof, proof_scheme="bounded"):
     input_file = tmp_path / "input.txt"
     input_file.write_bytes(b"HyBolt proves retrievability before downloads.")
     server_dirs = [tmp_path / f"server_{index}" for index in range(2)]
@@ -84,6 +84,7 @@ def _encode_raptorq(tmp_path, retrievability_proof):
         server_list=servers,
         metadata_output=str(tmp_path),
         retrievability_proof=retrievability_proof,
+        proof_scheme=proof_scheme,
     ).encode()
     return (
         input_file,
@@ -252,3 +253,72 @@ def test_given_exhausted_challenge_set_when_decoding_with_proof_then_raises(tmp_
 
     with pytest.raises(ChallengeSetExhaustedError):
         Decode(metadata_file, server_file).decode()
+
+
+def test_given_compact_encoding_when_decoding_then_verifies_tags_without_spending_challenges(
+    tmp_path, monkeypatch
+):
+    input_file, metadata_file, server_file = _encode_raptorq(
+        tmp_path, True, proof_scheme="compact"
+    )
+    checked = []
+    original_download_tag = Server.download_tag
+
+    def record(self, packet_file):
+        checked.append(packet_file)
+        return original_download_tag(self, packet_file)
+
+    monkeypatch.setattr(Server, "download_tag", record)
+    _forbid_challenges(monkeypatch)
+
+    decoded = Decode(metadata_file, server_file).decode()
+
+    assert decoded == input_file.read_bytes()
+    assert checked
+    assert EncodingMetadata.load(metadata_file).used_polynomial_indices == []
+
+
+def test_given_compact_packet_tampered_on_disk_when_decoding_then_tag_rejects_it(
+    tmp_path,
+):
+    input_file, metadata_file, server_file = _encode_raptorq(
+        tmp_path, True, proof_scheme="compact"
+    )
+    packet_metadata = EncodingMetadata.load(metadata_file).chunks[0].packets[0]
+    path = f"{packet_metadata.server}/{packet_metadata.packet_file}"
+    with open(path, "rb") as file:
+        stored = pickle.load(file)
+    stored.data = bytes(len(stored.data))
+    with open(path, "wb") as file:
+        pickle.dump(stored, file)
+
+    assert Decode(metadata_file, server_file).decode() == input_file.read_bytes()
+
+
+def test_given_compact_metadata_without_keys_when_decoding_with_proof_then_raises(
+    tmp_path,
+):
+    _, metadata_file, server_file = _encode_raptorq(
+        tmp_path, True, proof_scheme="compact"
+    )
+    metadata = EncodingMetadata.load(metadata_file)
+    metadata.compact_keys = None
+    metadata.save(metadata_file)
+
+    with pytest.raises(ValueError, match="missing client keys"):
+        Decode(metadata_file, server_file).decode()
+
+
+def test_given_metadata_saved_before_proof_schemes_when_loading_then_infers_scheme(
+    tmp_path,
+):
+    metadata = EncodingMetadata(polynomials=[POLYNOMIAL], blocks=[], packets=[])
+    del metadata.proof_scheme
+    del metadata.compact_keys
+    metadata_file = tmp_path / "legacy_metadata.pkl"
+    metadata.save(metadata_file)
+
+    loaded = EncodingMetadata.load(metadata_file)
+
+    assert loaded.proof_scheme == "bounded"
+    assert loaded.compact_keys is None

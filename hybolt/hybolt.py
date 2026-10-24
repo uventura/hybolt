@@ -18,6 +18,7 @@ from hybolt.hybolt_decode import HyboltDecode
 from hybolt.hybolt_encode import HyboltEncode
 from hybolt.constant import DEFAULT_REDUNDANCY, MAX_MAC_THREADS
 from hybolt.encryption.digest import Digest
+from hybolt.encryption.retrievability import BOUNDED_SCHEME, COMPACT_SCHEME
 from hybolt.logger.logger import execution_logger
 from hybolt.logger.progress import set_progress
 from hybolt.utils.debug import set_debugging
@@ -90,6 +91,14 @@ def main():
     help="Compute per-packet polynomial MACs so servers can be challenged before downloads",
 )
 @click.option(
+    "--proof-scheme",
+    type=click.Choice([COMPACT_SCHEME, BOUNDED_SCHEME]),
+    default=COMPACT_SCHEME,
+    show_default=True,
+    help="compact: unbounded audits with server-side tags; "
+    "bounded: Hy-SAIL's single-use challenges with client-side MACs",
+)
+@click.option(
     "--redundancy",
     type=click.FloatRange(min=0, min_open=True),
     default=DEFAULT_REDUNDANCY,
@@ -116,6 +125,7 @@ def encode_command(
     max_threads,
     chunk_count,
     retrievability_proof,
+    proof_scheme,
     redundancy,
     debug,
     log_dir,
@@ -143,6 +153,7 @@ def encode_command(
             chunk_count,
             retrievability_proof,
             redundancy,
+            proof_scheme,
         )
         encode_started_at = time.perf_counter()
         packet_count = hybolt_encode.encode()

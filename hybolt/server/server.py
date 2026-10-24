@@ -62,6 +62,27 @@ class Server:
 
         return ga.aggregate_remainders(remainders, polynomial, shifts)
 
+    def download_tag(self, packet_file):
+        return getattr(
+            self._read_payload(Path(self._storage_location) / packet_file), "tag", None
+        )
+
+    def receive_compact_challenge(self, packet_files, coefficients):
+        """Answer mu = sum(nu * c) and tau = sum(nu * sigma) over GF(2)[x]."""
+        mu = 0
+        tau = 0
+        for packet_file, coefficient in zip(packet_files, coefficients, strict=True):
+            block_path = self._find_check_block(None, packet_file)
+            if block_path is None:
+                raise ValueError(f"Check block not found: {packet_file}")
+            payload = self._read_payload(block_path)
+            tag = getattr(payload, "tag", None)
+            if tag is None:
+                raise ValueError(f"Check block has no tag: {packet_file}")
+            mu ^= ga.gf2_clmul(ga.bytes_to_poly_int(payload.data), coefficient)
+            tau ^= ga.gf2_clmul(tag, coefficient)
+        return mu, tau
+
     def remove_packet(self, packet_file):
         Path(self._storage_location, packet_file).unlink(missing_ok=True)
 
@@ -82,14 +103,18 @@ class Server:
         return ga.gf2_poly_mod(coefs, polynomial)
 
     def _read_block_data(self, block_path):
-        with open(block_path, "rb") as file:
-            try:
-                payload = pickle.load(file)
-            except (pickle.UnpicklingError, EOFError):
-                file.seek(0)
-                return file.read()
-
+        payload = self._read_payload(block_path)
         if hasattr(payload, "data"):
             return payload.data
 
         return payload
+
+    def _read_payload(self, block_path):
+        if not Path(block_path).is_file():
+            return None
+        with open(block_path, "rb") as file:
+            try:
+                return pickle.load(file)
+            except (pickle.UnpicklingError, EOFError):
+                file.seek(0)
+                return file.read()

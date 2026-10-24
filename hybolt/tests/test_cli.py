@@ -409,3 +409,46 @@ def test_given_redistribute_flag_when_audit_finds_corruption_then_redistributes(
     assert "packet 2 of chunk 0: server_1 -> server_2" in result.output
     assert "Redistributed 1 packets" in result.output
     assert result.exit_code == (0 if succeeded else 1)
+
+
+@pytest.mark.parametrize(
+    ("flag", "expected"),
+    [([], "compact"), (["--proof-scheme", "bounded"], "bounded")],
+)
+def test_given_proof_scheme_option_when_encoding_then_forwards_scheme(
+    tmp_path, monkeypatch, flag, expected
+):
+    input_file = tmp_path / "input.txt"
+    input_file.write_text("HyBolt", encoding="utf-8")
+    server_list = tmp_path / "servers.json"
+    server_list.write_text(
+        json.dumps({"servers": [{"id": 1, "storage_location": str(tmp_path)}]}),
+        encoding="utf-8",
+    )
+    captured = {}
+
+    class StubHyboltEncode:
+        average_chunk_encode_seconds = 0.25
+        average_block_size = 1.0
+        average_polynomial_division_seconds = 0.01
+
+        def __init__(self, *args):
+            captured["proof_scheme"] = args[8]
+
+        def encode(self):
+            return 1
+
+    monkeypatch.setattr("hybolt.hybolt.HyboltEncode", StubHyboltEncode)
+    monkeypatch.setattr(
+        "hybolt.hybolt.execution_logger.set_log_directory", lambda log_dir: None
+    )
+    monkeypatch.setattr(
+        "hybolt.hybolt.append_runtime_record", lambda *args, **kwargs: None
+    )
+
+    result = CliRunner().invoke(
+        main, ["encode", str(input_file), "--server-list", str(server_list), *flag]
+    )
+
+    assert result.exit_code == 0, result.output
+    assert captured["proof_scheme"] == expected

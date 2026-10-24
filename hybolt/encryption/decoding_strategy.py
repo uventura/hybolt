@@ -20,7 +20,7 @@ class DecodingStrategy(ABC):
         self._metadata = metadata
         self._server_cache = server_cache
         self._proof = proof
-        if self._proof.enabled:
+        if self._proof.enabled and self._proof.requires_client_macs:
             self._validate_proof_metadata()
 
     @abstractmethod
@@ -45,6 +45,9 @@ class DecodingStrategy(ABC):
             data = block.server.download_block(block.index, block.packet_file)
         else:
             data = block.server.download_block(block.index)
+
+        if not self._proof.verify_download(block.server, block, data):
+            return None
 
         if not block.packet_sha256:
             execution_logger.warning(

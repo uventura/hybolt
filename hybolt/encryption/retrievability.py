@@ -1,8 +1,11 @@
+import hashlib
+import hmac
 import random
 import secrets
 import time
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -12,8 +15,18 @@ from hybolt.logger.logger import execution_logger
 from hybolt.logger.progress import advance_progress, create_progress_task, get_progress
 
 
+BOUNDED_SCHEME = "bounded"
+COMPACT_SCHEME = "compact"
+
+
 class RetrievabilityProof(ABC):
     """Strategy for proving that a server still holds a packet before downloading it."""
+
+    scheme = ""
+    # The client keeps one MAC per packet and polynomial (Hy-SAIL's bounded model).
+    requires_client_macs = False
+    # Revealing a challenge lets the server forge future answers to it.
+    single_use_challenges = False
 
     def __init__(self):
         self.polynomial_division_total_seconds = 0.0
@@ -37,8 +50,21 @@ class RetrievabilityProof(ABC):
     def verify(self, server, block, expected_mac) -> bool:
         """Challenge `server` for `block`; `expected_mac(j)` gives the MAC for polynomial j."""
 
+    def attach_server_tags(self, packets, chunk_index):
+        """Set the tag each server stores next to a packet; none by default."""
+
+    def verify_download(self, server, block, data) -> bool:
+        """Check downloaded bytes against the server-side tag; nothing by default."""
+        return True
+
 
 class PolynomialRetrievabilityProof(RetrievabilityProof):
+    """Hy-SAIL's bounded scheme: client-side MACs and single-use public challenges."""
+
+    scheme = BOUNDED_SCHEME
+    requires_client_macs = True
+    single_use_challenges = True
+
     def __init__(
         self, polynomials=None, max_threads=MAX_MAC_THREADS, challenge_index=None
     ):
@@ -152,11 +178,124 @@ class DisabledRetrievabilityProof(RetrievabilityProof):
         return True
 
 
+@dataclass
+class CompactKeys:
+    """Client secrets of the compact scheme: O(1) state, whatever the file size."""
+
+    polynomial: np.ndarray
+    prf_key: bytes
+    file_id: bytes
+
+    @classmethod
+    def generate(cls):
+        return cls(
+            polynomial=ga.generate_challenge_polynomial(),
+            prf_key=secrets.token_bytes(32),
+            file_id=secrets.token_bytes(16),
+        )
+
+    @property
+    def modulus(self) -> int:
+        return ga._poly_coeffs_to_int(self.polynomial)
+
+    @property
+    def degree(self) -> int:
+        return self.modulus.bit_length() - 1
+
+    def mask(self, chunk_index, packet_index) -> int:
+        """f_K(file, chunk, ESI): binds a tag to one position of one file."""
+        message = (
+            self.file_id
+            + chunk_index.to_bytes(8, "big")
+            + packet_index.to_bytes(8, "big")
+        )
+        digest = hmac.new(self.prf_key, message, hashlib.sha256).digest()
+        return int.from_bytes(digest, "big") & ((1 << self.degree) - 1)
+
+    def tag(self, chunk_index, packet_index, data) -> int:
+        remainder = ga.gf2_mod(ga.bytes_to_poly_int(data), self.modulus)
+        return remainder ^ self.mask(chunk_index, packet_index)
+
+
+class CompactRetrievabilityProof(RetrievabilityProof):
+    """Unbounded scheme in the style of Shacham and Waters' private-key PoR.
+
+    Servers store sigma = (c mod P) xor f_K(file, chunk, ESI) next to each packet.
+    A challenge sends random coefficients nu; the server answers
+    mu = sum(nu * c) and tau = sum(nu * sigma) without knowing P, and the client
+    accepts when (mu xor tau xor sum(nu * f_K)) mod P = 0. P is never revealed,
+    so challenges can be repeated indefinitely, and the client keeps only P,
+    the PRF key and the file id.
+    """
+
+    scheme = COMPACT_SCHEME
+
+    def __init__(self, keys: CompactKeys | None = None, chunk_index=None):
+        super().__init__()
+        self.keys = keys or CompactKeys.generate()
+        self._chunk_index = chunk_index
+
+    @property
+    def enabled(self):
+        return True
+
+    @property
+    def polynomials(self):
+        return []
+
+    def tag_packets(self, packets):
+        return {}
+
+    def attach_server_tags(self, packets, chunk_index):
+        for packet in packets:
+            started_at = time.perf_counter()
+            packet.tag = self.keys.tag(chunk_index, packet.index, packet.data)
+            self.polynomial_division_total_seconds += time.perf_counter() - started_at
+            self.polynomial_division_count += 1
+
+    def verify(self, server, block, expected_mac):
+        # Nothing is revealed before a download; the tag is checked afterwards.
+        return True
+
+    def verify_download(self, server, block, data):
+        tag = server.download_tag(block.packet_file)
+        verified = tag is not None and tag == self.keys.tag(
+            self._chunk_index, block.index, data
+        )
+        if not verified:
+            execution_logger.error(f"Tag verification failed for block {block.index}")
+        return verified
+
+    def challenge(self, server, packets) -> bool:
+        """Audit `packets`, a list of (chunk_index, packet_index, packet_file)."""
+        coefficients = [
+            secrets.randbits(self.keys.degree) | 1 for _ in range(len(packets))
+        ]
+        mu, tau = server.receive_compact_challenge(
+            [packet_file for _, _, packet_file in packets], coefficients
+        )
+        masks = 0
+        for coefficient, (chunk_index, packet_index, _) in zip(coefficients, packets):
+            masks ^= ga.gf2_clmul(
+                coefficient, self.keys.mask(chunk_index, packet_index)
+            )
+        return ga.gf2_mod(mu ^ tau ^ masks, self.keys.modulus) == 0
+
+
 def create_retrievability_proof(
-    enabled: bool, polynomials=None, max_threads=MAX_MAC_THREADS
+    enabled: bool,
+    polynomials=None,
+    max_threads=MAX_MAC_THREADS,
+    scheme=BOUNDED_SCHEME,
+    keys=None,
+    chunk_index=None,
 ) -> RetrievabilityProof:
     if not enabled:
         return DisabledRetrievabilityProof()
+    if scheme == COMPACT_SCHEME:
+        return CompactRetrievabilityProof(keys, chunk_index)
+    if scheme != BOUNDED_SCHEME:
+        raise ValueError(f"Unknown retrievability proof scheme: {scheme}")
 
     return PolynomialRetrievabilityProof(polynomials, max_threads)
 

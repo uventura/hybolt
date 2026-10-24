@@ -32,6 +32,7 @@ def encoded(tmp_path, monkeypatch):
         metadata_output=str(tmp_path),
         chunk_count=2,
         redundancy=0.5,
+        proof_scheme="bounded",
     ).encode()
     return tmp_path / "input_metadata.pkl", server_file
 

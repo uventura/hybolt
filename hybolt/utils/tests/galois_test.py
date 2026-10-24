@@ -6,6 +6,9 @@ from hybolt.utils.galois import (
     _prime_factors,
     aggregate_remainders,
     bytes_to_poly_coeffs,
+    bytes_to_poly_int,
+    gf2_clmul,
+    gf2_mod,
     gf2_poly_mod,
     generate_challenge_polynomial,
     is_irreducible,
@@ -175,3 +178,20 @@ def test_given_equal_errors_when_aggregating_with_distinct_shifts_then_they_do_n
 
     assert not plain.any()
     assert weighted.any()
+
+
+@pytest.mark.parametrize("size", [1, 15, 16, 17, 300])
+def test_given_bytes_when_reducing_as_integer_then_matches_coefficient_division(size):
+    polynomial = generate_challenge_polynomial(127)
+    message = bytes(index % 256 for index in range(size))
+
+    remainder = gf2_mod(bytes_to_poly_int(message), _poly_coeffs_to_int(polynomial))
+
+    expected = gf2_poly_mod(bytes_to_poly_coeffs(message), polynomial)
+    assert remainder == _poly_coeffs_to_int(expected)
+
+
+def test_given_polynomials_when_carry_less_multiplying_then_returns_gf2_product():
+    # (x + 1)(x^2 + x + 1) = x^3 + 1 over GF(2)
+    assert gf2_clmul(0b11, 0b111) == 0b1001
+    assert gf2_clmul(0, 0b111) == 0

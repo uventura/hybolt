@@ -8,6 +8,8 @@ from hybolt.encryption.encoding_metadata import EncodingMetadata
 from hybolt.encryption.retrievability import (
     ChallengeLedger,
     ChallengeSetExhaustedError,
+    CompactKeys,
+    CompactRetrievabilityProof,
     DisabledRetrievabilityProof,
     PolynomialRetrievabilityProof,
     create_retrievability_proof,
@@ -191,3 +193,138 @@ def test_given_fixed_challenge_index_when_verifying_then_always_uses_it():
         )
 
     assert all(np.array_equal(call[0], second_polynomial) for call in server.calls)
+
+
+# --- Compact (unbounded) scheme ---------------------------------------------
+
+
+class CompactServer:
+    """Stores packets with their tags and answers compact challenges honestly."""
+
+    def __init__(self, packets):
+        self.packets = {f"p{packet.index}": packet for packet in packets}
+        self.challenges = []
+
+    def receive_compact_challenge(self, packet_files, coefficients):
+        self.challenges.append((list(packet_files), list(coefficients)))
+        mu = tau = 0
+        for packet_file, coefficient in zip(packet_files, coefficients):
+            packet = self.packets[packet_file]
+            mu ^= ga.gf2_clmul(ga.bytes_to_poly_int(packet.data), coefficient)
+            tau ^= ga.gf2_clmul(packet.tag, coefficient)
+        return mu, tau
+
+    def download_tag(self, packet_file):
+        return self.packets[packet_file].tag
+
+
+def _compact_packets(chunk_index=0, count=4):
+    proof = CompactRetrievabilityProof(chunk_index=chunk_index)
+    packets = [Block(index, 0, [], bytes([index + 1]) * 32) for index in range(count)]
+    proof.attach_server_tags(packets, chunk_index)
+    return proof, packets
+
+
+def _refs(packets, chunk_index=0):
+    return [(chunk_index, packet.index, f"p{packet.index}") for packet in packets]
+
+
+def test_given_compact_keys_when_tagging_then_tag_is_remainder_masked_by_position():
+    keys = CompactKeys.generate()
+    data = b"Hy-SAIL compact tag"
+
+    tag = keys.tag(2, 5, data)
+
+    remainder = ga.gf2_mod(ga.bytes_to_poly_int(data), keys.modulus)
+    assert tag == remainder ^ keys.mask(2, 5)
+    assert tag.bit_length() <= keys.degree
+    assert keys.mask(2, 5) != keys.mask(2, 6)
+    assert keys.mask(2, 5) != keys.mask(3, 5)
+    assert keys.mask(2, 5) != CompactKeys.generate().mask(2, 5)
+
+
+def test_given_generated_compact_keys_when_inspecting_then_polynomial_is_primitive():
+    keys = CompactKeys.generate()
+
+    assert keys.degree == POLYNOMIAL_LAMBDA
+    assert ga.is_primitive(keys.polynomial)
+    assert len(keys.prf_key) == 32
+    assert len(keys.file_id) == 16
+
+
+def test_given_packets_when_attaching_server_tags_then_tags_every_packet():
+    proof, packets = _compact_packets()
+
+    assert all(
+        packet.tag == proof.keys.tag(0, packet.index, packet.data) for packet in packets
+    )
+    assert proof.polynomial_division_count == len(packets)
+    assert proof.tag_packets(packets) == {}
+    assert proof.polynomials == []
+
+
+def test_given_honest_server_when_challenging_repeatedly_then_always_accepts():
+    proof, packets = _compact_packets()
+    server = CompactServer(packets)
+
+    assert all(proof.challenge(server, _refs(packets)) for _ in range(50))
+    assert len({tuple(coefficients) for _, coefficients in server.challenges}) == 50
+
+
+def test_given_corrupted_packet_when_challenging_then_rejects():
+    proof, packets = _compact_packets()
+    packets[2].data = bytes(len(packets[2].data))
+
+    assert proof.challenge(CompactServer(packets), _refs(packets)) is False
+
+
+def test_given_two_packets_with_identical_errors_when_challenging_then_rejects():
+    proof, packets = _compact_packets()
+    for packet in packets[:2]:
+        packet.data = bytes(byte ^ 0xFF for byte in packet.data)
+
+    assert proof.challenge(CompactServer(packets), _refs(packets)) is False
+
+
+def test_given_tags_swapped_between_positions_when_challenging_then_rejects():
+    proof, packets = _compact_packets()
+    packets[0].data, packets[1].data = packets[1].data, packets[0].data
+    packets[0].tag, packets[1].tag = packets[1].tag, packets[0].tag
+
+    assert proof.challenge(CompactServer(packets), _refs(packets)) is False
+
+
+def test_given_packets_of_another_chunk_when_challenging_then_rejects():
+    proof, packets = _compact_packets(chunk_index=0)
+
+    assert proof.challenge(CompactServer(packets), _refs(packets, 1)) is False
+
+
+def test_given_downloaded_data_when_verifying_then_checks_server_tag():
+    proof, packets = _compact_packets()
+    proof._chunk_index = 0
+    server = CompactServer(packets)
+    block = LocalBlock(index=1, degree=0, indices=[], server=server, packet_file="p1")
+
+    assert proof.verify_download(server, block, packets[1].data) is True
+    assert proof.verify_download(server, block, packets[2].data) is False
+    packets[1].tag = None
+    assert proof.verify_download(server, block, packets[1].data) is False
+
+
+def test_given_compact_scheme_when_creating_proof_then_returns_compact_proof():
+    keys = CompactKeys.generate()
+
+    proof = create_retrievability_proof(
+        True, scheme="compact", keys=keys, chunk_index=3
+    )
+
+    assert isinstance(proof, CompactRetrievabilityProof)
+    assert proof.keys is keys
+    assert not proof.requires_client_macs
+    assert not proof.single_use_challenges
+
+
+def test_given_unknown_scheme_when_creating_proof_then_raises():
+    with pytest.raises(ValueError, match="Unknown"):
+        create_retrievability_proof(True, scheme="sentinels")

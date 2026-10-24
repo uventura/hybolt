@@ -20,6 +20,7 @@ class Encode:
         max_threads=MAX_MAC_THREADS,
         proof: RetrievabilityProof | None = None,
         redundancy: float = DEFAULT_REDUNDANCY,
+        chunk_index: int = 0,
     ):
         if not data:
             raise ValueError("Data cannot be empty")
@@ -60,6 +61,7 @@ class Encode:
 
         self._packets = self._encode()
         self._packet_macs = self._proof.tag_packets(self._packets)
+        self._proof.attach_server_tags(self._packets, chunk_index)
 
     @property
     def packets(self):

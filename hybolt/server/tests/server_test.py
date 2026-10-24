@@ -171,3 +171,28 @@ def test_given_packet_when_storing_then_keeps_only_data_and_tag(tmp_path):
     with open(path, "rb") as file:
         stored = pickle.load(file)
     assert stored == StoredPacket(b"\x07\x08", 0b1011)
+
+
+def test_given_tagged_packets_when_answering_compact_challenge_then_combines_data_and_tags(
+    tmp_path,
+):
+    server = Server(str(tmp_path / "storage"))
+    first, second = Block(0, 0, [], b"\x01\x02"), Block(1, 0, [], b"\xf0\x0f")
+    first.tag, second.tag = 0b101, 0b011
+    server.store_packet(first, "a.pkl")
+    server.store_packet(second, "b.pkl")
+
+    mu, tau = server.receive_compact_challenge(["a.pkl", "b.pkl"], [0b11, 0b10])
+
+    assert mu == ga.gf2_clmul(0x0102, 0b11) ^ ga.gf2_clmul(0xF00F, 0b10)
+    assert tau == ga.gf2_clmul(0b101, 0b11) ^ ga.gf2_clmul(0b011, 0b10)
+    assert server.download_tag("a.pkl") == 0b101
+
+
+def test_given_untagged_packet_when_answering_compact_challenge_then_raises(tmp_path):
+    server = Server(str(tmp_path / "storage"))
+    server.store_packet(Block(0, 0, [], b"\x01"), "a.pkl")
+
+    with pytest.raises(ValueError, match="no tag"):
+        server.receive_compact_challenge(["a.pkl"], [1])
+    assert server.download_tag("missing.pkl") is None

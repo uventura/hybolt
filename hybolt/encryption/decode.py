@@ -4,6 +4,7 @@ from pathlib import Path
 from hybolt.encryption.decoding_strategy import create_decoding_strategy
 from hybolt.encryption.encoding_metadata import EncodingMetadata
 from hybolt.encryption.retrievability import (
+    COMPACT_SCHEME,
     ChallengeLedger,
     create_retrievability_proof,
 )
@@ -60,14 +61,29 @@ class Decode:
         return b"".join(decoded_chunks)
 
     def _create_strategy(self, metadata):
-        proof = create_retrievability_proof(
+        proof = self._create_proof(metadata)
+        return create_decoding_strategy(metadata, self._server_cache, proof), proof
+
+    def _create_proof(self, metadata):
+        if self._retrievability_proof and self._metadata.proof_scheme == COMPACT_SCHEME:
+            if self._metadata.compact_keys is None:
+                raise ValueError(
+                    "compact metadata cannot back the retrievability proof: "
+                    "missing client keys"
+                )
+            return create_retrievability_proof(
+                True,
+                scheme=COMPACT_SCHEME,
+                keys=self._metadata.compact_keys,
+                chunk_index=getattr(metadata, "chunk_index", 0),
+            )
+        return create_retrievability_proof(
             self._retrievability_proof, metadata.polynomials
         )
-        return create_decoding_strategy(metadata, self._server_cache, proof), proof
 
     def _reveal_one_challenge(self, proofs):
         """Spend a single polynomial for the whole session (bounded model)."""
-        if not self._retrievability_proof or not proofs:
+        if not proofs or not proofs[0].single_use_challenges:
             return
 
         ledger = ChallengeLedger(

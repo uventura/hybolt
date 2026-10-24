@@ -15,7 +15,10 @@ from hybolt.encryption.encoding_metadata import (
     EncodingMetadata,
 )
 from hybolt.encryption.digest import Digest
-from hybolt.encryption.retrievability import create_retrievability_proof
+from hybolt.encryption.retrievability import (
+    COMPACT_SCHEME,
+    create_retrievability_proof,
+)
 from hybolt.logger.logger import execution_logger
 from hybolt.logger.progress import (
     advance_progress,
@@ -37,6 +40,7 @@ class HyboltEncode:
         chunk_count: int | None = None,
         retrievability_proof: bool = True,
         redundancy: float = DEFAULT_REDUNDANCY,
+        proof_scheme: str = COMPACT_SCHEME,
     ):
         self.input_file = input_file
         self.block_size = block_size
@@ -46,6 +50,7 @@ class HyboltEncode:
         self.chunk_count = chunk_count
         self.retrievability_proof = retrievability_proof
         self.redundancy = redundancy
+        self.proof_scheme = proof_scheme
         self.average_chunk_encode_seconds = 0.0
         self.average_block_size = 0.0
         self.average_polynomial_division_seconds = 0.0
@@ -60,7 +65,7 @@ class HyboltEncode:
             f"chunks={Digest(input_path, chunk_count=self.chunk_count).chunk_count}, "
             f"servers={len(self.server_list or [])}, max_threads={self.max_threads}, "
             f"retrievability_proof={self.retrievability_proof}, "
-            f"redundancy={self.redundancy}"
+            f"redundancy={self.redundancy}, proof_scheme={self.proof_scheme}"
         )
         digest = Digest(input_path, chunk_count=self.chunk_count)
         chunks = []
@@ -70,7 +75,9 @@ class HyboltEncode:
         block_count = 0
         # One challenge set per file, as in Hy-SAIL; chunks share it.
         proof = create_retrievability_proof(
-            self.retrievability_proof, max_threads=self.max_threads
+            self.retrievability_proof,
+            max_threads=self.max_threads,
+            scheme=self.proof_scheme,
         )
         progress = get_progress()
         chunk_task_id = create_progress_task(
@@ -87,7 +94,12 @@ class HyboltEncode:
             )
             encode_started_at = time.perf_counter()
             encoded = Encode(
-                chunk_data, block_size, self.max_threads, proof, self.redundancy
+                chunk_data,
+                block_size,
+                self.max_threads,
+                proof,
+                self.redundancy,
+                chunk_index,
             )
             chunk_encode_durations.append(time.perf_counter() - encode_started_at)
             total_block_bytes += encoded.total_block_bytes
@@ -116,7 +128,7 @@ class HyboltEncode:
                 / proof.polynomial_division_count
             )
         execution_logger.debug("Starting metadata write")
-        self._save_packet_metadata(input_path, chunks, proof.polynomials)
+        self._save_packet_metadata(input_path, chunks, proof)
         execution_logger.debug("Encoding completed successfully")
         return packet_count
 
@@ -159,10 +171,12 @@ class HyboltEncode:
         return self.block_size
 
     def _save_packet_metadata(
-        self, input_path: Path, chunks: list[ChunkMetadata], polynomials
+        self, input_path: Path, chunks: list[ChunkMetadata], proof
     ):
         metadata = EncodingMetadata(
-            polynomials=polynomials,
+            polynomials=proof.polynomials,
+            proof_scheme=proof.scheme,
+            compact_keys=getattr(proof, "keys", None),
             blocks=[],
             packets=[],
             original_filename=input_path.name,

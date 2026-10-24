@@ -88,6 +88,39 @@ def gf2_poly_mod(m_coeffs, p_coeffs):
     return _int_to_poly_coeffs(current_dividend, remainder_width)
 
 
+def bytes_to_poly_int(message_block):
+    """Integer form of bytes_to_poly_coeffs: bit i holds the coefficient of x^i."""
+    return int.from_bytes(message_block, "big")
+
+
+def gf2_mod(value, modulus):
+    """value(x) mod modulus(x) over GF(2), both given as integers."""
+    degree = modulus.bit_length() - 1
+    if degree < 8:
+        return _gf2_reduce(value, modulus)
+
+    table = _byte_reduction_table(modulus, degree)
+    mask = (1 << degree) - 1
+    remainder = 0
+    for byte in value.to_bytes((value.bit_length() + 7) // 8, "big"):
+        top_byte = remainder >> (degree - 8)
+        remainder = ((remainder << 8) & mask) ^ table[top_byte] ^ byte
+    return remainder
+
+
+def gf2_clmul(left, right):
+    """Carry-less product of two GF(2)[x] polynomials given as integers."""
+    if left.bit_length() < right.bit_length():
+        left, right = right, left
+    product = 0
+    while right:
+        if right & 1:
+            product ^= left
+        left <<= 1
+        right >>= 1
+    return product
+
+
 def polynomial_degree(p_coeffs):
     return _poly_coeffs_to_int(p_coeffs).bit_length() - 1
 
