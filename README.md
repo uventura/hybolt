@@ -79,6 +79,22 @@ Use `--chunk-count` to divide a file into an exact number of balanced chunks,
 for example `hybolt encode --chunk-count 8 ...`. The command prints the
 average MAC-and-packet-generation time per chunk after encoding completes.
 
+### Proof of retrievability
+
+By default, `encode` generates a set of challenge polynomials per chunk and
+stores, for every packet, its remainder modulo each polynomial (a polynomial
+MAC over GF(2)). Before `decode` downloads a packet, it challenges the server
+with a random polynomial and only downloads the packet when the server's
+remainder matches the stored MAC; the downloaded bytes are then checked against
+the packet's SHA-256 hash. Packets that fail either check are skipped, and
+decoding continues with the remaining redundant packets.
+
+Disable the proof with `--no-retrievability-proof` on either command. Encoding
+without it skips the MAC computation (much faster on large files) and produces
+metadata that can only be decoded with `--no-retrievability-proof`; decoding
+such metadata with the proof enabled fails with an explicit error. The SHA-256
+check after each download stays active either way.
+
 Each `encode` appends `file_path`, `file_size` (bytes), total `runtime`
 (seconds) and average `block_size` (bytes) to `encode_runtime.json` in the log
 directory (`logs/` by default). Plot runtime against file size with:
