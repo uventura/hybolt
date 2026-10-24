@@ -10,7 +10,10 @@ from hybolt.audit.audit import PacketLocation
 from hybolt.encryption.block import Block
 from hybolt.encryption.decoding_strategy import RaptorQDecodingStrategy
 from hybolt.encryption.encoding_metadata import EncodingMetadata
-from hybolt.encryption.retrievability import DisabledRetrievabilityProof
+from hybolt.encryption.retrievability import (
+    COMPACT_SCHEME,
+    DisabledRetrievabilityProof,
+)
 from hybolt.logger.logger import execution_logger
 from hybolt.server.server import Server
 
@@ -109,6 +112,10 @@ class Redistribution:
             source = self._servers[packet.server]
             target = self._pick_target(packet.server)
             block = Block(packet.packet_index, 0, [], packet_data)
+            if self._metadata.proof_scheme == COMPACT_SCHEME:
+                block.tag = self._metadata.compact_keys.tag(
+                    chunk.chunk_index, packet.packet_index, packet_data
+                )
             block.set_server(target)
             target.store_packet(block, packet.packet_file)
             if target is not source:

@@ -268,10 +268,13 @@ def audit_command(
     except ValueError as error:
         raise click.ClickException(str(error)) from error
 
-    click.echo(
-        f"Challenge polynomial {report.polynomial_index} "
-        f"({report.remaining_challenges} challenges remaining)"
-    )
+    if report.polynomial_index is None:
+        click.echo(f"{report.scheme.capitalize()} audit (unbounded challenges)")
+    else:
+        click.echo(
+            f"Challenge polynomial {report.polynomial_index} "
+            f"({report.remaining_challenges} challenges remaining)"
+        )
     for server in report.servers:
         status = "OK" if server.passed else "FAILED"
         click.echo(

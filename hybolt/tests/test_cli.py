@@ -299,7 +299,11 @@ def _audit_report(passed, corrupted=()):
         chunk_index=0, packets=4, tolerated_losses=1, corrupted=len(corrupted)
     )
     report = AuditReport(
-        polynomial_index=3, remaining_challenges=39, servers=[server], chunks=[chunk]
+        scheme="bounded",
+        servers=[server],
+        chunks=[chunk],
+        polynomial_index=3,
+        remaining_challenges=39,
     )
     assert report.passed is passed
     return report
@@ -452,3 +456,16 @@ def test_given_proof_scheme_option_when_encoding_then_forwards_scheme(
 
     assert result.exit_code == 0, result.output
     assert captured["proof_scheme"] == expected
+
+
+def test_given_compact_audit_when_auditing_then_reports_unbounded_challenges(
+    tmp_path, monkeypatch
+):
+    from hybolt.audit.audit import AuditReport
+
+    report = AuditReport(scheme="compact", servers=[], chunks=[])
+
+    result, _ = _invoke_audit(tmp_path, monkeypatch, report)
+
+    assert result.exit_code == 0, result.output
+    assert "Compact audit (unbounded challenges)" in result.output

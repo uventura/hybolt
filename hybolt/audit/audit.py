@@ -1,5 +1,6 @@
 import json
 import secrets
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -7,7 +8,12 @@ import numpy as np
 
 import hybolt.utils.galois as ga
 from hybolt.encryption.encoding_metadata import EncodingMetadata
-from hybolt.encryption.retrievability import ChallengeLedger
+from hybolt.encryption.retrievability import (
+    BOUNDED_SCHEME,
+    COMPACT_SCHEME,
+    ChallengeLedger,
+    CompactRetrievabilityProof,
+)
 from hybolt.logger.logger import execution_logger
 from hybolt.server.server import Server
 
@@ -55,10 +61,12 @@ class ChunkAudit:
 
 @dataclass
 class AuditReport:
-    polynomial_index: int
-    remaining_challenges: int
+    scheme: str
     servers: list[ServerAudit]
     chunks: list[ChunkAudit]
+    # Bounded scheme only: the polynomial revealed in this round and those left.
+    polynomial_index: int | None = None
+    remaining_challenges: int | None = None
 
     @property
     def corrupted_packets(self) -> list[PacketLocation]:
@@ -71,16 +79,71 @@ class AuditReport:
         )
 
 
-class Audit:
-    """Hy-SAIL Auditing phase (Algorithm 2) in the bounded model.
+class AuditChallenge(ABC):
+    """Strategy for one round's challenge over a sample of (chunk, packet) pairs."""
 
-    Each round reveals one unused challenge polynomial P_j. Every server is asked
-    for (sum of x^k_eta * c_eta) mod P_j over a random sample of its packets; the answer
-    is compared with the XOR of the stored MACs. Each packet is weighted by a
-    secret x^k_eta so that equal corruptions cannot cancel in the XOR (see
-    galois.aggregate_remainders). When the aggregate fails, the
-    sampled packets are checked one by one with the same, already revealed, P_j
-    to locate the corrupted ones.
+    polynomial_index = None
+    remaining_challenges = None
+
+    @abstractmethod
+    def check(self, server, sample) -> bool:
+        pass
+
+
+class BoundedAuditChallenge(AuditChallenge):
+    """Hy-SAIL Algorithm 2 with a single-use public polynomial P_j.
+
+    The server answers (sum of x^k_eta * c_eta) mod P_j and the client compares it
+    with the same combination of its stored MACs. The secret x^k_eta weights stop
+    equal corruptions from cancelling in the XOR (see galois.aggregate_remainders).
+    """
+
+    def __init__(self, metadata, metadata_file, random):
+        ledger = ChallengeLedger(metadata, metadata_file, len(metadata.polynomials))
+        self.polynomial_index = ledger.draw()
+        self.remaining_challenges = len(ledger.remaining)
+        self._polynomial = metadata.polynomials[self.polynomial_index]
+        self._random = random
+
+    def check(self, server, sample):
+        shifts = (
+            self._random.sample(range(1, _MAX_SHIFT), len(sample))
+            if len(sample) > 1
+            else None
+        )
+        expected = ga.aggregate_remainders(
+            [packet.macs[self.polynomial_index] for _, packet in sample],
+            self._polynomial,
+            shifts,
+        )
+        answer = server.receive_aggregate_challenge(
+            self._polynomial, [packet.packet_file for _, packet in sample], shifts
+        )
+        return np.array_equal(expected, answer)
+
+
+class CompactAuditChallenge(AuditChallenge):
+    """Unbounded challenge: the secret polynomial never leaves the client."""
+
+    def __init__(self, keys):
+        self._proof = CompactRetrievabilityProof(keys)
+
+    def check(self, server, sample):
+        return self._proof.challenge(
+            server,
+            [
+                (chunk_index, packet.packet_index, packet.packet_file)
+                for chunk_index, packet in sample
+            ],
+        )
+
+
+class Audit:
+    """Hy-SAIL Auditing phase over a random sample of each server's packets.
+
+    The challenge itself is an AuditChallenge chosen by the metadata's proof
+    scheme. When a server's aggregate answer fails, the sampled packets are
+    challenged one by one, in the same round, to locate the corrupted ones.
     """
 
     def __init__(self, metadata_file, server_file, sample_size=None, tau_maximum=0):
@@ -98,12 +161,10 @@ class Audit:
         self._validate_metadata()
 
     def run(self) -> AuditReport:
-        polynomials = self._metadata.polynomials
-        ledger = ChallengeLedger(self._metadata, self._metadata_file, len(polynomials))
-        polynomial_index = ledger.draw()
-        polynomial = polynomials[polynomial_index]
+        challenge = self._create_challenge()
         execution_logger.debug(
-            f"Audit round with challenge polynomial {polynomial_index}"
+            f"Audit round: scheme={self._metadata.proof_scheme}, "
+            f"polynomial={challenge.polynomial_index}"
         )
 
         chunks = {
@@ -116,21 +177,25 @@ class Audit:
         }
         server_audits = []
         for storage_location, packets in self._packets_by_server().items():
-            audit = self._audit_server(
-                storage_location, packets, polynomial, polynomial_index
-            )
+            audit = self._audit_server(storage_location, packets, challenge)
             for location in audit.corrupted:
                 chunks[location.chunk_index].corrupted += 1
             server_audits.append(audit)
 
         return AuditReport(
-            polynomial_index=polynomial_index,
-            remaining_challenges=len(ledger.remaining),
+            scheme=self._metadata.proof_scheme,
             servers=server_audits,
             chunks=sorted(chunks.values(), key=lambda chunk: chunk.chunk_index),
+            polynomial_index=challenge.polynomial_index,
+            remaining_challenges=challenge.remaining_challenges,
         )
 
-    def _audit_server(self, storage_location, packets, polynomial, polynomial_index):
+    def _create_challenge(self) -> AuditChallenge:
+        if self._metadata.proof_scheme == COMPACT_SCHEME:
+            return CompactAuditChallenge(self._metadata.compact_keys)
+        return BoundedAuditChallenge(self._metadata, self._metadata_file, self._random)
+
+    def _audit_server(self, storage_location, packets, challenge):
         sample_size = min(self._sample_size or len(packets), len(packets))
         sample = self._random.sample(packets, sample_size)
         audit = ServerAudit(
@@ -146,25 +211,13 @@ class Audit:
                 f"Server not found for storage location: {storage_location}"
             )
 
-        shifts = self._random_shifts(len(sample))
-        expected = ga.aggregate_remainders(
-            [packet.macs[polynomial_index] for _, packet in sample], polynomial, shifts
-        )
-        try:
-            answer = server.receive_aggregate_challenge(
-                polynomial, [packet.packet_file for _, packet in sample], shifts
-            )
-            if np.array_equal(expected, answer):
-                return audit
-        except ValueError as error:
-            execution_logger.error(
-                f"Aggregate challenge failed on {storage_location}: {error}"
-            )
+        if self._answers(server, sample, challenge):
+            return audit
 
         audit.corrupted = [
             self._location(chunk_index, packet)
             for chunk_index, packet in sample
-            if not self._packet_answers(server, packet, polynomial, polynomial_index)
+            if not self._answers(server, [(chunk_index, packet)], challenge)
         ]
         execution_logger.error(
             f"Server {storage_location}: {audit.tau_provider} corrupted packets "
@@ -172,19 +225,15 @@ class Audit:
         )
         return audit
 
-    def _random_shifts(self, count):
-        """Distinct secret exponents k_eta for the x^k_eta weights of a challenge."""
-        return self._random.sample(range(1, _MAX_SHIFT), count)
-
-    def _packet_answers(self, server, packet, polynomial, polynomial_index):
+    def _answers(self, server, sample, challenge):
         try:
-            answer = server.receive_aggregate_challenge(
-                polynomial, [packet.packet_file]
+            return challenge.check(server, sample)
+        except ValueError as error:
+            # A missing packet or tag is an erasure: the server cannot answer.
+            execution_logger.error(
+                f"Challenge failed on {server._storage_location}: {error}"
             )
-        except ValueError:
             return False
-        expected = ga.aggregate_remainders([packet.macs[polynomial_index]], polynomial)
-        return np.array_equal(expected, answer)
 
     def _location(self, chunk_index, packet):
         return PacketLocation(
@@ -205,12 +254,21 @@ class Audit:
         return packets
 
     def _validate_metadata(self):
-        polynomial_count = len(self._metadata.polynomials)
-        if self._metadata.chunks is None or polynomial_count == 0:
+        scheme = self._metadata.proof_scheme
+        if self._metadata.chunks is None or scheme not in (
+            BOUNDED_SCHEME,
+            COMPACT_SCHEME,
+        ):
             raise ValueError(
                 "Audit requires metadata encoded with the retrievability proof; "
                 "re-encode the file with --retrievability-proof"
             )
+        if scheme == COMPACT_SCHEME:
+            if self._metadata.compact_keys is None:
+                raise ValueError("Compact metadata is missing the client keys")
+            return
+
+        polynomial_count = len(self._metadata.polynomials)
         for unit in self._units():
             for packet in unit.packets:
                 if len(packet.macs) != polynomial_count:
