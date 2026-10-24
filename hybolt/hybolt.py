@@ -259,7 +259,14 @@ def decode_command(
 @click.option(
     "--redistribute",
     is_flag=True,
-    help="Rebuild corrupted packets and store them on other servers",
+    help="Replace corrupted packets with fresh repair packets on other servers",
+)
+@click.option(
+    "--extra-repair",
+    type=click.IntRange(0),
+    default=0,
+    show_default=True,
+    help="Additional repair packets added to each redistributed chunk",
 )
 @click.option(
     "--log-dir",
@@ -269,7 +276,13 @@ def decode_command(
     help="Directory where execution.log is written",
 )
 def audit_command(
-    metadata_file, server_file, sample_size, tau_maximum, redistribute, log_dir
+    metadata_file,
+    server_file,
+    sample_size,
+    tau_maximum,
+    redistribute,
+    extra_repair,
+    log_dir,
 ):
     execution_logger.set_log_directory(log_dir)
     try:
@@ -311,20 +324,29 @@ def audit_command(
 
     try:
         redistribution = Redistribution(
-            metadata_file, server_file, report.corrupted_packets
+            metadata_file, server_file, report.corrupted_packets, extra_repair
         ).run()
     except ValueError as error:
         raise click.ClickException(str(error)) from error
 
-    for moved in redistribution.moved:
+    for replaced in redistribution.replaced:
         click.echo(
-            f"  packet {moved.packet_index} of chunk {moved.chunk_index}: "
-            f"{moved.from_server} -> {moved.to_server}"
+            f"  chunk {replaced.chunk_index}: packet {replaced.old_packet_index} "
+            f"({replaced.from_server}) replaced by new packet "
+            f"{replaced.new_packet_index} ({replaced.to_server})"
+        )
+    for added in redistribution.added:
+        click.echo(
+            f"  chunk {added.chunk_index}: added packet {added.packet_index} "
+            f"({added.server})"
         )
     for chunk_index, reason in redistribution.failed_chunks.items():
         click.echo(f"  chunk {chunk_index} not redistributed: {reason}", err=True)
 
-    click.echo(f"Redistributed {len(redistribution.moved)} packets")
+    click.echo(
+        f"Replaced {len(redistribution.replaced)} packets and added "
+        f"{len(redistribution.added)} repair packets"
+    )
     if not redistribution.succeeded:
         raise SystemExit(1)
 

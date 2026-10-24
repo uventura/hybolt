@@ -165,6 +165,8 @@ class HyboltEncode:
             transfer_length=encoded.total_block_bytes,
             symbol_size=encoded.symbol_size,
             repair_packets=encoded.repair_packets,
+            source_packets=len(encoded.packets) - encoded.repair_packets,
+            next_packet_index=len(encoded.packets),
         )
 
     def _determine_block_size(self, file_size: int) -> int:

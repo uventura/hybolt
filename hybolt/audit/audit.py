@@ -207,9 +207,13 @@ class Audit:
 
         server = self._servers.get(storage_location)
         if server is None:
-            raise ValueError(
-                f"Server not found for storage location: {storage_location}"
-            )
+            # A server that left the deployment holds nothing retrievable.
+            execution_logger.error(f"Server {storage_location} is unavailable")
+            audit.checked_packets = len(packets)
+            audit.corrupted = [
+                self._location(chunk_index, packet) for chunk_index, packet in packets
+            ]
+            return audit
 
         if self._answers(server, sample, challenge):
             return audit

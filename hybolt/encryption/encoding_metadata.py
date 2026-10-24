@@ -37,7 +37,12 @@ class ChunkMetadata:
     codec: str = "raptorq"
     transfer_length: int = 0
     symbol_size: int = 0
+    # Packets that can be lost: len(packets) - source_packets.
     repair_packets: int = 0
+    # K, the RaptorQ source packets needed to decode the chunk.
+    source_packets: int = 0
+    # Next unused ESI; repairs create fresh packets instead of reusing ESIs.
+    next_packet_index: int = 0
 
 
 @dataclass
@@ -128,6 +133,12 @@ class EncodingMetadata:
                     chunk.symbol_size = 0
                 if not hasattr(chunk, "repair_packets"):
                     chunk.repair_packets = 0
+                if "source_packets" not in vars(chunk):
+                    chunk.source_packets = len(chunk.packets) - chunk.repair_packets
+                if "next_packet_index" not in vars(chunk):
+                    chunk.next_packet_index = 1 + max(
+                        (packet.packet_index for packet in chunk.packets), default=-1
+                    )
                 for packet in chunk.packets:
                     if not hasattr(packet, "packet_sha256"):
                         packet.packet_sha256 = ""
