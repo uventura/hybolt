@@ -63,8 +63,10 @@ class HyboltEncode:
         chunk_encode_durations = []
         total_block_bytes = 0
         block_count = 0
-        polynomial_division_total_seconds = 0.0
-        polynomial_division_count = 0
+        # One challenge set per file, as in Hy-SAIL; chunks share it.
+        proof = create_retrievability_proof(
+            self.retrievability_proof, max_threads=self.max_threads
+        )
         progress = get_progress()
         chunk_task_id = create_progress_task(
             progress,
@@ -79,17 +81,10 @@ class HyboltEncode:
                 f"bytes={len(chunk_data)}, block_size={block_size}"
             )
             encode_started_at = time.perf_counter()
-            proof = create_retrievability_proof(
-                self.retrievability_proof, max_threads=self.max_threads
-            )
             encoded = Encode(chunk_data, block_size, self.max_threads, proof)
             chunk_encode_durations.append(time.perf_counter() - encode_started_at)
             total_block_bytes += encoded.total_block_bytes
             block_count += encoded.num_blocks
-            polynomial_division_total_seconds += (
-                encoded.polynomial_division_total_seconds
-            )
-            polynomial_division_count += encoded.polynomial_division_count
             saver = PacketSaver(
                 encoded.packets, input_path, self.server_list, chunk_index
             )
@@ -108,12 +103,13 @@ class HyboltEncode:
             )
         if block_count:
             self.average_block_size = total_block_bytes / block_count
-        if polynomial_division_count:
+        if proof.polynomial_division_count:
             self.average_polynomial_division_seconds = (
-                polynomial_division_total_seconds / polynomial_division_count
+                proof.polynomial_division_total_seconds
+                / proof.polynomial_division_count
             )
         execution_logger.debug("Starting metadata write")
-        self._save_packet_metadata(input_path, chunks)
+        self._save_packet_metadata(input_path, chunks, proof.polynomials)
         execution_logger.debug("Encoding completed successfully")
         return packet_count
 
@@ -154,9 +150,11 @@ class HyboltEncode:
 
         return self.block_size
 
-    def _save_packet_metadata(self, input_path: Path, chunks: list[ChunkMetadata]):
+    def _save_packet_metadata(
+        self, input_path: Path, chunks: list[ChunkMetadata], polynomials
+    ):
         metadata = EncodingMetadata(
-            polynomials=[],
+            polynomials=polynomials,
             blocks=[],
             packets=[],
             original_filename=input_path.name,
