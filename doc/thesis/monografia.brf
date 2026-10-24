@@ -44,10 +44,11 @@
 \backcite {menezes1997handbook}{{19}{4.5}{section.4.5}}
 \backcite {amaral2019hysail}{{21}{4.7}{section.4.7}}
 \backcite {luby2011rfc6330}{{21}{4.7}{section.4.7}}
-\backcite {maymounkov2003rateless,amaral2019hysail}{{21}{4.8}{section.4.8}}
-\backcite {shacham2008compact}{{22}{4.9}{section.4.9}}
-\backcite {shacham2008compact}{{23}{4.9}{equation.4.9.5}}
+\backcite {maymounkov2003rateless,amaral2019hysail}{{22}{4.8}{section.4.8}}
+\backcite {luby2011rfc6330}{{22}{4.8}{section.4.8}}
+\backcite {shacham2008compact}{{23}{4.9}{section.4.9}}
+\backcite {shacham2008compact}{{24}{4.9}{equation.4.9.6}}
 \backcite {juels2007pors}{{24}{4.10}{section.4.10}}
 \backcite {bowers2009proofs}{{24}{4.10}{section.4.10}}
 \backcite {luby2011rfc6330}{{25}{5.1}{section.5.1}}
-\backcite {amaral2019hysail}{{29}{5.6}{section.5.6}}
+\backcite {amaral2019hysail}{{30}{5.6}{section.5.6}}

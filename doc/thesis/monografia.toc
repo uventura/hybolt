@@ -31,7 +31,7 @@
 \contentsline {section}{\numberline {4.5}Escolha dos Polinômios de Desafio}{19}{section.4.5}%
 \contentsline {section}{\numberline {4.6}Auditoria no Modelo Limitado}{20}{section.4.6}%
 \contentsline {section}{\numberline {4.7}Redundância}{21}{section.4.7}%
-\contentsline {section}{\numberline {4.8}Redistribuição}{21}{section.4.8}%
+\contentsline {section}{\numberline {4.8}Redistribuição}{22}{section.4.8}%
 \contentsline {section}{\numberline {4.9}Esquema Compacto e Ilimitado}{22}{section.4.9}%
 \contentsline {section}{\numberline {4.10}Ocultação da Estrutura do Código}{24}{section.4.10}%
 \contentsline {chapter}{\numberline {5}Implementação}{25}{chapter.5}%
