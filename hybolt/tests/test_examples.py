@@ -62,7 +62,7 @@ def test_given_encoding_when_logging_then_records_phase_and_block_progress(
 
     assert any(message.startswith("Encoding input:") for message in messages)
     assert any(
-        message.startswith("Generating ") and "RaptorQ packets" in message
+        message.startswith("Generating ") and "Raptor R10 packets" in message
         for message in messages
     )
     assert "Packet distribution completed" in messages

@@ -9,8 +9,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+from hybolt.encryption import raptor
 from hybolt.encryption.encode import Encode
-from raptorq import Decoder
 
 
 DEFAULT_SIZES = (1024, 4096, 16384, 65536, 262144, 1048576)
@@ -34,18 +34,18 @@ def benchmark(size: int, samples: int, loss_count: int) -> tuple[float, float]:
         encoded = Encode(payload, symbol_size)
         encode_durations.append(time.perf_counter() - encode_started_at)
 
-        decoder = Decoder.with_defaults(encoded.total_block_bytes, encoded.symbol_size)
+        decoder = raptor.Decoder(encoded.total_block_bytes, encoded.symbol_size)
         decoded = None
         decode_started_at = time.perf_counter()
         for packet in encoded.packets[loss_count:]:
-            decoded = decoder.decode(packet.data)
+            decoded = decoder.add(packet.index, packet.data)
             if decoded is not None:
                 break
         decode_durations.append(time.perf_counter() - decode_started_at)
 
         if decoded is None or decoded != payload:
             raise RuntimeError(
-                f"RaptorQ recovery failed for {size} bytes after dropping "
+                f"Raptor R10 recovery failed for {size} bytes after dropping "
                 f"{loss_count} packets"
             )
 
@@ -54,7 +54,7 @@ def benchmark(size: int, samples: int, loss_count: int) -> tuple[float, float]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Benchmark HyBolt's RaptorQ fountain-code implementation."
+        description="Benchmark HyBolt's Raptor R10 fountain-code implementation."
     )
     parser.add_argument(
         "--sizes",
@@ -80,7 +80,7 @@ def main() -> int:
     figure, axis = plt.subplots()
     axis.plot(args.sizes, encode_times, marker="o", label="encode")
     axis.plot(args.sizes, decode_times, marker="o", label="decode after loss")
-    axis.set_title("RaptorQ runtime by payload size")
+    axis.set_title("Raptor R10 runtime by payload size")
     axis.set_xlabel("payload size (bytes)")
     axis.set_ylabel("average runtime (s)")
     axis.set_xscale("log", base=2)
@@ -89,7 +89,7 @@ def main() -> int:
     figure.tight_layout()
     figure.savefig(args.output)
     plt.close(figure)
-    print(f"RaptorQ runtime plot written to {args.output}")
+    print(f"Raptor R10 runtime plot written to {args.output}")
     return 0
 
 

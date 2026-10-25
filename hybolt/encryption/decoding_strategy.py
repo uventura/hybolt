@@ -1,8 +1,7 @@
 import hashlib
 from abc import ABC, abstractmethod
 
-from raptorq import Decoder as RaptorQDecoder
-
+from hybolt.encryption import raptor
 from hybolt.encryption.block import Block, LocalBlock
 from hybolt.encryption.local_mac import LocalMac
 from hybolt.encryption.retrievability import RetrievabilityProof, xor_macs
@@ -269,22 +268,22 @@ class LtDecodingStrategy(DecodingStrategy):
         return local_mac
 
 
-class RaptorQDecodingStrategy(DecodingStrategy):
-    """Feeds verified packets to a RaptorQ decoder; each packet carries its own MACs."""
+class Raptor10DecodingStrategy(DecodingStrategy):
+    """Feeds verified packets to a Raptor R10 decoder; each packet carries its own MACs."""
 
-    codec = "raptorq"
+    codec = "r10"
 
     def decode(self):
         transfer_length = getattr(self._metadata, "transfer_length", 0)
         symbol_size = getattr(self._metadata, "symbol_size", 0)
         if transfer_length <= 0 or symbol_size <= 0:
-            raise ValueError("RaptorQ metadata is missing transfer parameters")
+            raise ValueError("R10 metadata is missing transfer parameters")
 
-        decoder = RaptorQDecoder.with_defaults(transfer_length, symbol_size)
+        decoder = raptor.Decoder(transfer_length, symbol_size)
         for packet in self._metadata.packets:
             if not getattr(packet, "packet_sha256", ""):
                 raise ValueError(
-                    f"RaptorQ packet {packet.packet_index} has no integrity hash"
+                    f"R10 packet {packet.packet_index} has no integrity hash"
                 )
 
             server = self._server_cache.get(packet.server)
@@ -314,11 +313,11 @@ class RaptorQDecodingStrategy(DecodingStrategy):
                     self._metadata.chunk_index, packet.packet_index, packet_data
                 )
 
-            decoded = decoder.decode(packet_data)
+            decoded = decoder.add(packet.packet_index, packet_data)
             if decoded is not None:
                 return decoded
 
-        raise ValueError("Insufficient valid RaptorQ packets to reconstruct data")
+        raise ValueError("Insufficient valid R10 packets to reconstruct data")
 
     def _validate_proof_metadata(self):
         polynomial_count = len(self._metadata.polynomials)
@@ -334,7 +333,7 @@ class RaptorQDecodingStrategy(DecodingStrategy):
 
 DECODING_STRATEGIES = {
     strategy.codec: strategy
-    for strategy in (LtDecodingStrategy, RaptorQDecodingStrategy)
+    for strategy in (LtDecodingStrategy, Raptor10DecodingStrategy)
 }
 
 

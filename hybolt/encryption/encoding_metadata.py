@@ -34,12 +34,12 @@ class ChunkMetadata:
     polynomials: List[np.ndarray]
     blocks: List[BlockMetadata]
     packets: List[PacketMetadata]
-    codec: str = "raptorq"
+    codec: str = "r10"
     transfer_length: int = 0
     symbol_size: int = 0
     # Packets that can be lost: len(packets) - source_packets.
     repair_packets: int = 0
-    # K, the RaptorQ source packets needed to decode the chunk.
+    # K, the R10 source symbols of the chunk.
     source_packets: int = 0
     # Next unused ESI; repairs create fresh packets instead of reusing ESIs.
     next_packet_index: int = 0

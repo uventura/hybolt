@@ -7,7 +7,7 @@ import hybolt.utils.galois as ga
 from hybolt.encryption.block import Block, LocalBlock
 from hybolt.encryption.decoding_strategy import (
     LtDecodingStrategy,
-    RaptorQDecodingStrategy,
+    Raptor10DecodingStrategy,
     create_decoding_strategy,
 )
 from hybolt.encryption.encode import Encode
@@ -268,10 +268,10 @@ def test_given_lt_metadata_without_macs_when_proof_enabled_then_raises():
         LtDecodingStrategy(metadata, {}, _proof())
 
 
-# --- RaptorQ -----------------------------------------------------------------
+# --- Raptor R10 -----------------------------------------------------------------
 
 
-def _raptorq_chunk(original, block_size, proof, server_for_packet):
+def _r10_chunk(original, block_size, proof, server_for_packet):
     """Encode `original`, returning chunk metadata and a server per packet."""
     encoded = Encode(original, block_size, proof=proof)
     servers = {}
@@ -298,20 +298,20 @@ def _raptorq_chunk(original, block_size, proof, server_for_packet):
         polynomials=encoded.polynomials,
         blocks=[],
         packets=packets,
-        codec="raptorq",
+        codec="r10",
         transfer_length=encoded.total_block_bytes,
         symbol_size=encoded.symbol_size,
     )
     return chunk, servers
 
 
-def test_given_honest_raptorq_servers_when_decoding_with_proof_then_reconstructs_data():
-    original = b"RaptorQ packets carry their own MACs."
-    chunk, servers = _raptorq_chunk(
+def test_given_honest_r10_servers_when_decoding_with_proof_then_reconstructs_data():
+    original = b"R10 packets carry their own MACs here."
+    chunk, servers = _r10_chunk(
         original, 8, _proof(), lambda packet: FakeServer(packet.data)
     )
 
-    strategy = RaptorQDecodingStrategy(chunk, servers, _proof())
+    strategy = Raptor10DecodingStrategy(chunk, servers, _proof())
 
     assert strategy.decode() == original
     challenged = [server for server in servers.values() if server.challenge_calls]
@@ -319,9 +319,9 @@ def test_given_honest_raptorq_servers_when_decoding_with_proof_then_reconstructs
     assert all(server.download_calls == 1 for server in challenged)
 
 
-def test_given_raptorq_server_failing_challenge_when_decoding_then_skips_packet_and_uses_repair():
-    original = b"RaptorQ packets carry their own MACs."
-    chunk, servers = _raptorq_chunk(
+def test_given_r10_server_failing_challenge_when_decoding_then_skips_packet_and_uses_repair():
+    original = b"R10 packets carry their own MACs here."
+    chunk, servers = _r10_chunk(
         original,
         8,
         _proof(),
@@ -330,16 +330,16 @@ def test_given_raptorq_server_failing_challenge_when_decoding_then_skips_packet_
         ),
     )
 
-    strategy = RaptorQDecodingStrategy(chunk, servers, _proof())
+    strategy = Raptor10DecodingStrategy(chunk, servers, _proof())
 
     assert strategy.decode() == original
     assert servers["server_0"].challenge_calls == 1
     assert servers["server_0"].download_calls == 0
 
 
-def test_given_raptorq_server_swapping_data_after_challenge_when_decoding_then_hash_rejects_packet():
-    original = b"RaptorQ packets carry their own MACs."
-    chunk, servers = _raptorq_chunk(
+def test_given_r10_server_swapping_data_after_challenge_when_decoding_then_hash_rejects_packet():
+    original = b"R10 packets carry their own MACs here."
+    chunk, servers = _r10_chunk(
         original,
         8,
         _proof(),
@@ -349,51 +349,51 @@ def test_given_raptorq_server_swapping_data_after_challenge_when_decoding_then_h
         ),
     )
 
-    strategy = RaptorQDecodingStrategy(chunk, servers, _proof())
+    strategy = Raptor10DecodingStrategy(chunk, servers, _proof())
 
     assert strategy.decode() == original
     assert servers["server_0"].download_calls == 1
 
 
-def test_given_all_raptorq_servers_dishonest_when_decoding_then_raises_insufficient_packets():
-    original = b"RaptorQ packets carry their own MACs."
-    chunk, servers = _raptorq_chunk(
+def test_given_all_r10_servers_dishonest_when_decoding_then_raises_insufficient_packets():
+    original = b"R10 packets carry their own MACs here."
+    chunk, servers = _r10_chunk(
         original, 8, _proof(), lambda packet: FakeServer(b"\x00" * len(packet.data))
     )
 
-    strategy = RaptorQDecodingStrategy(chunk, servers, _proof())
+    strategy = Raptor10DecodingStrategy(chunk, servers, _proof())
 
-    with pytest.raises(ValueError, match="Insufficient valid RaptorQ packets"):
+    with pytest.raises(ValueError, match="Insufficient valid R10 packets"):
         strategy.decode()
     assert all(server.download_calls == 0 for server in servers.values())
 
 
-def test_given_raptorq_metadata_without_macs_when_proof_enabled_then_raises():
-    chunk, servers = _raptorq_chunk(
+def test_given_r10_metadata_without_macs_when_proof_enabled_then_raises():
+    chunk, servers = _r10_chunk(
         b"no macs here", 4, DisabledRetrievabilityProof(), lambda p: FakeServer(p.data)
     )
     chunk.polynomials = [POLYNOMIAL]
 
     with pytest.raises(ValueError, match="no MAC for every polynomial"):
-        RaptorQDecodingStrategy(chunk, servers, _proof())
+        Raptor10DecodingStrategy(chunk, servers, _proof())
 
 
-def test_given_raptorq_metadata_without_polynomials_when_proof_enabled_then_raises():
-    chunk, servers = _raptorq_chunk(
+def test_given_r10_metadata_without_polynomials_when_proof_enabled_then_raises():
+    chunk, servers = _r10_chunk(
         b"no macs here", 4, DisabledRetrievabilityProof(), lambda p: FakeServer(p.data)
     )
 
     with pytest.raises(ValueError, match="no challenge polynomials"):
-        RaptorQDecodingStrategy(chunk, servers, _proof())
+        Raptor10DecodingStrategy(chunk, servers, _proof())
 
 
-def test_given_raptorq_metadata_without_macs_when_proof_disabled_then_decodes_without_challenge():
+def test_given_r10_metadata_without_macs_when_proof_disabled_then_decodes_without_challenge():
     original = b"no macs here"
-    chunk, servers = _raptorq_chunk(
+    chunk, servers = _r10_chunk(
         original, 4, DisabledRetrievabilityProof(), lambda p: FakeServer(p.data)
     )
 
-    strategy = RaptorQDecodingStrategy(chunk, servers, DisabledRetrievabilityProof())
+    strategy = Raptor10DecodingStrategy(chunk, servers, DisabledRetrievabilityProof())
 
     assert strategy.decode() == original
     assert all(server.challenge_calls == 0 for server in servers.values())
@@ -404,7 +404,7 @@ def test_given_raptorq_metadata_without_macs_when_proof_disabled_then_decodes_wi
 
 @pytest.mark.parametrize(
     ("codec", "expected"),
-    [("lt", LtDecodingStrategy), ("raptorq", RaptorQDecodingStrategy)],
+    [("lt", LtDecodingStrategy), ("r10", Raptor10DecodingStrategy)],
 )
 def test_given_codec_when_creating_strategy_then_selects_matching_strategy(
     codec, expected

@@ -6,7 +6,7 @@ from pathlib import Path
 SCRIPT = Path(__file__).parents[2] / "scripts" / "fountain_codes_tests.py"
 
 
-def test_given_small_sizes_when_benchmarking_then_writes_raptorq_plot(tmp_path):
+def test_given_small_sizes_when_benchmarking_then_writes_r10_plot(tmp_path):
     output = tmp_path / "fountain_codes_runtime.png"
 
     result = subprocess.run(
@@ -30,4 +30,4 @@ def test_given_small_sizes_when_benchmarking_then_writes_raptorq_plot(tmp_path):
     assert result.returncode == 0, result.stderr
     assert output.is_file()
     assert output.stat().st_size > 0
-    assert "RaptorQ runtime plot written to" in result.stdout
+    assert "Raptor R10 runtime plot written to" in result.stdout

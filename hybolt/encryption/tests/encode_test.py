@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
-from raptorq import Decoder
 
 import hybolt.utils.galois as ga
 from hybolt.constant import MAX_MAC_THREADS
+from hybolt.encryption import raptor
 from hybolt.encryption.encode import Encode
 from hybolt.encryption.retrievability import PolynomialRetrievabilityProof
 
@@ -17,24 +17,27 @@ def test_given_input_data_when_encoding_then_generates_source_and_repair_packets
     )
 
 
-def test_given_input_data_when_encoding_then_generates_raptorq_packets():
+def test_given_input_data_when_encoding_then_generates_headerless_r10_symbols():
     block_size = 2
     encoded = Encode(b"HelloWorld", block_size)
 
     for packet in encoded.packets:
         assert packet.degree == 0
         assert packet.indices == []
-        assert len(packet.data) == block_size + 4
+        assert len(packet.data) == block_size
+    assert b"".join(p.data for p in encoded.packets[: encoded.num_blocks]) == (
+        b"HelloWorld"
+    )
 
 
 def test_given_missing_source_packets_when_decoding_then_recovers_with_repair_packets():
-    original = b"RaptorQ recovers data after packet loss."
-    encoded = Encode(original, block_size=8)
-    decoder = Decoder.with_defaults(encoded.total_block_bytes, encoded.symbol_size)
+    original = b"Raptor R10 recovers data after packet loss."
+    encoded = Encode(original, block_size=8, redundancy=0.5)
+    decoder = raptor.Decoder(encoded.total_block_bytes, encoded.symbol_size)
 
     decoded = None
     for packet in encoded.packets[2:]:
-        decoded = decoder.decode(packet.data)
+        decoded = decoder.add(packet.index, packet.data)
         if decoded is not None:
             break
 
@@ -48,11 +51,12 @@ def test_given_input_data_when_encoding_then_generates_packet_data_as_bytes():
     assert all(isinstance(packet.data, bytes) for packet in encoded.packets)
 
 
-def test_given_single_small_block_when_encoding_then_preserves_transfer_length():
+def test_given_single_small_block_when_encoding_then_pads_to_four_source_symbols():
     encoded = Encode(b"A", block_size=10)
 
     assert encoded.total_block_bytes == 1
-    assert all(len(packet.data) == 14 for packet in encoded.packets)
+    assert encoded.num_blocks == 4
+    assert all(len(packet.data) == 10 for packet in encoded.packets)
 
 
 def test_given_input_data_when_encoding_then_blocks_preserve_source_bytes():
@@ -74,7 +78,7 @@ def test_given_out_of_range_max_threads_when_encoding_then_raises_value_error(
         Encode(b"HelloWorld", block_size=2, max_threads=max_threads)
 
 
-def test_given_raptorq_encoding_then_omits_incompatible_source_mac_metadata():
+def test_given_no_proof_when_encoding_then_omits_mac_metadata():
     encoded = Encode(b"HelloWorld", block_size=2)
 
     assert encoded.polynomials == []
@@ -119,14 +123,15 @@ def test_given_non_positive_redundancy_when_encoding_then_raises_value_error(
         Encode(b"HelloWorld", block_size=2, redundancy=redundancy)
 
 
-def test_given_redundancy_when_losing_as_many_packets_as_repairs_then_still_decodes():
+def test_given_redundancy_when_losing_half_the_repairs_then_still_decodes():
+    # R10 is not MDS: losing all r repairs' worth of packets can leave too few.
     original = bytes(range(256)) * 4
     encoded = Encode(original, block_size=64, redundancy=0.5)
-    decoder = Decoder.with_defaults(encoded.total_block_bytes, encoded.symbol_size)
+    decoder = raptor.Decoder(encoded.total_block_bytes, encoded.symbol_size)
 
     decoded = None
-    for packet in encoded.packets[encoded.repair_packets :]:
-        decoded = decoder.decode(packet.data)
+    for packet in encoded.packets[encoded.repair_packets // 2 :]:
+        decoded = decoder.add(packet.index, packet.data)
         if decoded is not None:
             break
 

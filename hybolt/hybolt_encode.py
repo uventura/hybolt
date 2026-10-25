@@ -161,7 +161,7 @@ class HyboltEncode:
             polynomials=encoded.polynomials,
             blocks=blocks,
             packets=packets,
-            codec="raptorq",
+            codec="r10",
             transfer_length=encoded.total_block_bytes,
             symbol_size=encoded.symbol_size,
             repair_packets=encoded.repair_packets,

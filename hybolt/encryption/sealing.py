@@ -10,8 +10,8 @@ class SealingKeys:
 
     Each packet is encrypted with a SHAKE-256 keystream bound to its file, chunk
     and ESI, and stored under a pseudorandom name. Servers then cannot read the
-    RaptorQ header, the systematic source symbols or the chunk a packet belongs
-    to, so they cannot concentrate corruption on a single chunk.
+    systematic source symbols or tell which chunk a packet belongs to, so they
+    cannot concentrate corruption on a single chunk.
     """
 
     key: bytes

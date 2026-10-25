@@ -1,5 +1,6 @@
 import json
 import pickle
+import random
 from pathlib import Path
 
 import pytest
@@ -11,9 +12,10 @@ from hybolt.encryption.encoding_metadata import EncodingMetadata
 from hybolt.hybolt_encode import HyboltEncode
 
 
-@pytest.fixture
-def encoded(tmp_path, monkeypatch):
-    monkeypatch.setattr("hybolt.encryption.retrievability.POLYNOMIAL_SET_SIZE", 6)
+def _encode(tmp_path, redundancy, seed=0):
+    # The seed fixes the packet layout; R10 is not MDS, so whether a given set
+    # of lost packets is recoverable depends on which packets they are.
+    random.seed(seed)
     input_file = tmp_path / "input.txt"
     input_file.write_bytes(b"Redistribution rebuilds corrupted packets. " * 6)
     servers = [
@@ -28,10 +30,16 @@ def encoded(tmp_path, monkeypatch):
         server_list=servers,
         metadata_output=str(tmp_path),
         chunk_count=2,
-        redundancy=0.5,
+        redundancy=redundancy,
         proof_scheme="bounded",
     ).encode()
     return input_file, tmp_path / "input_metadata.pkl", server_file
+
+
+@pytest.fixture
+def encoded(tmp_path, monkeypatch):
+    monkeypatch.setattr("hybolt.encryption.retrievability.POLYNOMIAL_SET_SIZE", 6)
+    return _encode(tmp_path, redundancy=1.0)
 
 
 def _corrupt(packet_metadata):
@@ -167,9 +175,12 @@ def test_given_consecutive_repairs_when_redistributing_then_never_reuses_an_esi(
 
 
 def test_given_server_that_left_when_auditing_and_redistributing_then_restores_chunks(
-    encoded, tmp_path
+    tmp_path, monkeypatch
 ):
-    input_file, metadata_file, server_file = encoded
+    # R10 needs a few packets beyond K, so losing a third of the packets takes
+    # more redundancy than the other tests use.
+    monkeypatch.setattr("hybolt.encryption.retrievability.POLYNOMIAL_SET_SIZE", 6)
+    input_file, metadata_file, server_file = _encode(tmp_path, redundancy=2.0)
     servers = json.loads(server_file.read_text())["servers"]
     gone = servers.pop()
     remaining_file = tmp_path / "remaining_servers.json"

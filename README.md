@@ -5,7 +5,7 @@ storage protocol. It encodes a file into redundant packets, distributes those
 packets across storage locations, and reconstructs the original data from the
 packet metadata.
 
-The implementation uses RaptorQ (RFC 6330) fountain coding, stores a SHA-256
+The implementation uses Raptor R10 (RFC 5053) fountain coding, stores a SHA-256
 integrity hash for every encoded packet, and implements Hy-SAIL's polynomial
 MAC proof of retrievability with auditing and redistribution of corrupted
 packets.
@@ -73,9 +73,22 @@ HyBolt reads a source file in independent chunks sized from the security
 parameter (`POLYNOMIAL_LAMBDA × 512` bytes; 65,024 bytes with the default
 lambda). Each chunk is encoded, distributed, and represented separately in
 metadata, allowing reconstruction to decode each chunk before joining them in
-their original order. Use `--block-size` on `encode` to select the RaptorQ
+their original order. Use `--block-size` on `encode` to select the R10
 symbol size inside each chunk. If omitted, HyBolt chooses a size equal to 10%
-of that chunk, with a minimum of one byte.
+of that chunk, with a minimum of one byte. R10 codes between 4 and 8,192 source
+symbols per block: shorter chunks are padded with zero symbols, and a block
+size that would need more than 8,192 symbols is rejected.
+
+### Raptor R10
+
+[`hybolt/encryption/raptor.py`](hybolt/encryption/raptor.py) implements the
+systematic Raptor code of RFC 5053. All of its constraints (LDPC, Half and LT)
+are XORs, so every packet, repair packets included, is the XOR of a subset of
+the chunk's source symbols, which `raptor.symbol_support(K, esi)` returns as a
+bit mask. Packets are stored without a header: the client metadata already
+holds each packet's ESI. Repair symbols match those of
+[gofountain](https://github.com/google/gofountain), an independent RFC 5053
+implementation.
 
 Use `--chunk-count` to divide a file into an exact number of balanced chunks,
 for example `hybolt encode --chunk-count 8 ...`. The command prints the
@@ -84,9 +97,11 @@ average MAC-and-packet-generation time per chunk after encoding completes.
 ### Redundancy
 
 Each chunk is encoded into its K source packets plus `ceil(redundancy * K)`
-RaptorQ repair packets, so a chunk survives the loss of that many packets. Set
-the ratio with `--redundancy` on `encode` (default `0.25`, which tolerates
-losing 20% of a chunk's packets).
+R10 repair packets. Set the ratio with `--redundancy` on `encode` (default
+`0.25`). Unlike RaptorQ, R10 is not close to an MDS code: K received packets
+decode a chunk only some of the time, and a few extra packets are needed for a
+reliable recovery, so a chunk does not always survive the loss of all of its
+repair packets.
 
 ### Proof of retrievability
 
@@ -123,7 +138,7 @@ The command exits with status 1 when it finds corruption.
 
 Add `--redistribute` to replace the corrupted or lost packets. The affected
 chunk is decoded from its verified packets and re-encoded, and each lost packet
-is replaced by a fresh RaptorQ repair packet with a never-used ESI, stored on
+is replaced by a fresh R10 repair packet with a never-used ESI, stored on
 the least-loaded server of the chunk. `--extra-repair N` adds N more repair
 packets to each repaired chunk to widen its margin. A server missing from the
 server file has all of its packets reported lost, and decoding continues
@@ -136,20 +151,11 @@ With packets balanced over N servers, losing f of them is tolerated while
 Disable the proof with `--no-retrievability-proof` on `encode` or `decode`.
 The SHA-256 check after each download stays active either way.
 
-### Linear MAC prototype
-
-[`hybolt/encryption/linear_mac.py`](hybolt/encryption/linear_mac.py) is a
-prototype MAC that is linear over RaptorQ's GF(256): each byte is embedded in
-GF(2^128) and the MAC is `sum(phi(c_i) * s^i)` at a secret point `s`. The MAC
-of any RaptorQ packet, including repair packets generated later, is derived
-from the MACs of the K source symbols by running the RaptorQ encoder over them
-(`derive_packet_macs`). It is not wired into `encode`, `audit` or `decode` yet.
-
 ### Hiding the code structure
 
 By default, packets are sealed before distribution. Each one is encrypted
 with a keystream bound to its file, chunk and ESI, and stored under an opaque
-name. Servers cannot read the RaptorQ header or the systematic source symbols,
+name. Servers cannot read the systematic source symbols,
 and cannot tell which packets belong to the same chunk. Without sealing, a
 server could destroy a file by corrupting `r + 1` packets of a single chunk.
 Use `--no-seal-packets` to store plain packets.
@@ -206,7 +212,7 @@ file-size/runtime and block-size/polynomial-division plots under `logs/`.
 encodes and decodes the generated executable, compares the binary bytes, then
 runs the decoded executable. A C compiler is required.
 
-Benchmark RaptorQ encoding and recovery after packet loss with:
+Benchmark R10 encoding and recovery after packet loss with:
 
 ```sh
 python scripts/fountain_codes_tests.py

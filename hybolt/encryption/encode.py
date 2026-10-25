@@ -1,7 +1,6 @@
 import math
 
-from raptorq import Encoder
-
+from hybolt.encryption import raptor
 from hybolt.encryption.block import Block
 from hybolt.encryption.retrievability import (
     DisabledRetrievabilityProof,
@@ -54,9 +53,10 @@ class Encode:
             f"({len(self._data)} bytes)"
         )
 
-        self._num_blocks = len(self._blocks)
+        self._encoder = raptor.Encoder(self._data, block_size)
+        # K counts the zero symbols that pad short chunks to R10's minimum.
+        self._num_blocks = self._encoder.source_symbols
         self._repair_packets = max(1, math.ceil(redundancy * self._num_blocks))
-        # RaptorQ packets are not XORs of source blocks, so MACs are kept per packet.
         self._mac_blocks = {}
         self._proof = proof or DisabledRetrievabilityProof()
 
@@ -113,25 +113,23 @@ class Encode:
         return self._proof.polynomial_division_count
 
     def _encode(self):
-        # Chunks fit in a single RaptorQ source block, so this is the chunk's total.
-        repair_packets_per_block = self._repair_packets
-        encoder = Encoder.with_defaults(self._data, self._block_size)
-        encoded_packets = encoder.get_encoded_packets(repair_packets_per_block)
+        # A chunk is a single R10 source block, so this is the chunk's total.
+        encoded_symbols = self._encoder.symbols(self._repair_packets)
         execution_logger.debug(
-            f"Generating {len(encoded_packets)} RaptorQ packets from "
+            f"Generating {len(encoded_symbols)} Raptor R10 packets from "
             f"{self._num_blocks} source symbols with "
-            f"{repair_packets_per_block} repair packets per source block"
+            f"{self._repair_packets} repair packets"
         )
 
         task_id = create_progress_task(
             self._progress,
             "Encoding packets",
-            total=len(encoded_packets),
+            total=len(encoded_symbols),
         )
 
         packets = []
-        for index, packet_data in enumerate(encoded_packets):
-            packets.append(Block(index, 0, [], packet_data))
+        for esi, symbol in encoded_symbols:
+            packets.append(Block(esi, 0, [], symbol))
             advance_progress(self._progress, task_id)
 
         return packets

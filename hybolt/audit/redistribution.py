@@ -4,11 +4,10 @@ import secrets
 from dataclasses import dataclass, field, replace
 from pathlib import Path
 
-from raptorq import Encoder
-
 from hybolt.audit.audit import PacketLocation
+from hybolt.encryption import raptor
 from hybolt.encryption.block import Block
-from hybolt.encryption.decoding_strategy import RaptorQDecodingStrategy
+from hybolt.encryption.decoding_strategy import Raptor10DecodingStrategy
 from hybolt.encryption.encoding_metadata import EncodingMetadata, PacketMetadata
 from hybolt.encryption.retrievability import (
     BOUNDED_SCHEME,
@@ -50,9 +49,8 @@ class RedistributionReport:
 class Redistribution:
     """Hy-SAIL Redistribution phase for packets an audit found corrupted or lost.
 
-    Online Codes can rebuild a check block from other check blocks; RaptorQ
-    repair symbols cannot, so the affected chunk (not the whole file) is decoded
-    from its verified packets first. Being a fountain code, RaptorQ can then
+    The affected chunk (not the whole file) is decoded from its verified
+    packets first. Being a fountain code, R10 can then
     emit as many new repair packets as needed: each lost packet is replaced by a
     packet with a fresh, never used ESI, stored on another server, and
     `extra_repair` further packets can be added to widen the chunk's margin.
@@ -77,7 +75,7 @@ class Redistribution:
         self._extra_repair = extra_repair
         self._random = secrets.SystemRandom()
         if self._metadata.chunks is None:
-            raise ValueError("Redistribution requires chunked RaptorQ metadata")
+            raise ValueError("Redistribution requires chunked R10 metadata")
 
     def run(self) -> RedistributionReport:
         report = RedistributionReport()
@@ -100,14 +98,14 @@ class Redistribution:
         return report
 
     def _repair_chunk(self, chunk, locations, report):
-        if chunk.codec != RaptorQDecodingStrategy.codec:
+        if chunk.codec != Raptor10DecodingStrategy.codec:
             raise ValueError(f"unsupported codec {chunk.codec}")
 
         lost_indices = {location.packet_index for location in locations}
         lost = [p for p in chunk.packets if p.packet_index in lost_indices]
         healthy = [p for p in chunk.packets if p.packet_index not in lost_indices]
         sealer = self._metadata.sealing_keys
-        data = RaptorQDecodingStrategy(
+        data = Raptor10DecodingStrategy(
             replace(chunk, packets=healthy),
             self._servers,
             DisabledRetrievabilityProof(),
@@ -161,12 +159,9 @@ class Redistribution:
         chunk.repair_packets = len(chunk.packets) - chunk.source_packets
 
     def _generate(self, chunk, data, highest_index):
-        """Emit packets up to ESI `highest_index`, keyed by the ESI in their header."""
+        """Emit the packets of every ESI up to `highest_index`."""
         repair = max(0, highest_index + 1 - chunk.source_packets)
-        packets = Encoder.with_defaults(data, chunk.symbol_size).get_encoded_packets(
-            repair
-        )
-        return {int.from_bytes(packet[1:4], "big"): packet for packet in packets}
+        return dict(raptor.Encoder(data, chunk.symbol_size).symbols(repair))
 
     def _seal(self, chunk, packet_index, packet_data):
         sealer = self._metadata.sealing_keys

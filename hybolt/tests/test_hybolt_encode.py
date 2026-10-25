@@ -83,10 +83,11 @@ def test_given_compact_scheme_when_encoding_then_client_keeps_only_keys_and_serv
             )
 
 
-def test_given_default_encoding_when_storing_then_hides_chunk_and_raptorq_header(
+def test_given_default_encoding_when_storing_then_hides_chunk_and_source_symbols(
     tmp_path,
 ):
     metadata = _encode(tmp_path, proof_scheme="compact")
+    original = (tmp_path / "input.txt").read_bytes()
 
     assert metadata.sealing_keys is not None
     names = {
@@ -95,13 +96,14 @@ def test_given_default_encoding_when_storing_then_hides_chunk_and_raptorq_header
     assert not any("chunk" in name or "input" in name for name in names)
     for chunk in metadata.chunks:
         for packet in chunk.packets:
+            if packet.packet_index >= chunk.source_packets:
+                continue
             stored = Server(packet.server).download_block(0, packet.packet_file)
-            plain_header = bytes([0]) + packet.packet_index.to_bytes(3, "big")
-            assert stored[:4] != plain_header
+            assert stored not in original
             opened = metadata.sealing_keys.open(
                 chunk.chunk_index, packet.packet_index, stored
             )
-            assert opened[:4] == plain_header
+            assert opened.rstrip(b"\0") in original
 
 
 def test_given_sealing_disabled_when_encoding_then_keeps_plain_packets(tmp_path):
@@ -120,4 +122,6 @@ def test_given_sealing_disabled_when_encoding_then_keeps_plain_packets(tmp_path)
     packet = metadata.chunks[0].packets[0]
     assert packet.packet_file.startswith("input_chunk_0_packet_")
     stored = Server(packet.server).download_block(0, packet.packet_file)
-    assert stored[:4] == bytes([0]) + packet.packet_index.to_bytes(3, "big")
+    if packet.packet_index < metadata.chunks[0].source_packets:
+        start = packet.packet_index * metadata.chunks[0].symbol_size
+        assert stored == input_file.read_bytes()[start : start + len(stored)]

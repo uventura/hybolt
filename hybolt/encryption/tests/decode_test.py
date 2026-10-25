@@ -70,7 +70,7 @@ def _write_lt_metadata(tmp_path, source_blocks):
     return server_dir, metadata_file, _write_server_file(tmp_path, [server_dir])
 
 
-def _encode_raptorq(tmp_path, retrievability_proof, proof_scheme="bounded"):
+def _encode_r10(tmp_path, retrievability_proof, proof_scheme="bounded"):
     input_file = tmp_path / "input.txt"
     input_file.write_bytes(b"HyBolt proves retrievability before downloads.")
     server_dirs = [tmp_path / f"server_{index}" for index in range(2)]
@@ -134,10 +134,10 @@ def test_given_lt_metadata_when_decoding_with_proof_disabled_then_skips_challeng
     assert decoder.decode() == b"ABCDWXYZ"
 
 
-def test_given_raptorq_encoded_with_proof_when_decoding_then_challenges_and_reconstructs(
+def test_given_r10_encoded_with_proof_when_decoding_then_challenges_and_reconstructs(
     tmp_path, monkeypatch
 ):
-    input_file, metadata_file, server_file = _encode_raptorq(tmp_path, True)
+    input_file, metadata_file, server_file = _encode_r10(tmp_path, True)
     challenged = []
     original_receive_challenge = Server.receive_challenge
 
@@ -153,10 +153,10 @@ def test_given_raptorq_encoded_with_proof_when_decoding_then_challenges_and_reco
     assert challenged
 
 
-def test_given_raptorq_packet_tampered_on_disk_when_decoding_then_uses_other_packets(
+def test_given_r10_packet_tampered_on_disk_when_decoding_then_uses_other_packets(
     tmp_path,
 ):
-    input_file, metadata_file, server_file = _encode_raptorq(tmp_path, True)
+    input_file, metadata_file, server_file = _encode_r10(tmp_path, True)
     metadata = EncodingMetadata.load(metadata_file)
     tampered = metadata.chunks[0].packets[0]
     tampered_path = f"{tampered.server}/{tampered.packet_file}"
@@ -171,19 +171,19 @@ def test_given_raptorq_packet_tampered_on_disk_when_decoding_then_uses_other_pac
     assert decoded == input_file.read_bytes()
 
 
-def test_given_raptorq_encoded_without_proof_when_decoding_with_proof_then_raises(
+def test_given_r10_encoded_without_proof_when_decoding_with_proof_then_raises(
     tmp_path,
 ):
-    _, metadata_file, server_file = _encode_raptorq(tmp_path, False)
+    _, metadata_file, server_file = _encode_r10(tmp_path, False)
 
     with pytest.raises(ValueError, match="cannot back the retrievability proof"):
         Decode(metadata_file, server_file).decode()
 
 
-def test_given_raptorq_encoded_without_proof_when_decoding_without_proof_then_reconstructs(
+def test_given_r10_encoded_without_proof_when_decoding_without_proof_then_reconstructs(
     tmp_path, monkeypatch
 ):
-    input_file, metadata_file, server_file = _encode_raptorq(tmp_path, False)
+    input_file, metadata_file, server_file = _encode_r10(tmp_path, False)
     _forbid_challenges(monkeypatch)
 
     decoded = Decode(metadata_file, server_file, retrievability_proof=False).decode()
@@ -219,7 +219,7 @@ def test_given_lt_metadata_when_loading_then_local_blocks_carry_packet_hashes(tm
 def test_given_decode_with_proof_when_decoding_then_reveals_a_single_polynomial(
     tmp_path, monkeypatch
 ):
-    _, metadata_file, server_file = _encode_raptorq(tmp_path, True)
+    _, metadata_file, server_file = _encode_r10(tmp_path, True)
     polynomials = []
     original_receive_challenge = Server.receive_challenge
 
@@ -238,7 +238,7 @@ def test_given_decode_with_proof_when_decoding_then_reveals_a_single_polynomial(
 def test_given_decode_without_proof_when_decoding_then_reveals_no_polynomial(
     tmp_path,
 ):
-    _, metadata_file, server_file = _encode_raptorq(tmp_path, True)
+    _, metadata_file, server_file = _encode_r10(tmp_path, True)
 
     Decode(metadata_file, server_file, retrievability_proof=False).decode()
 
@@ -246,7 +246,7 @@ def test_given_decode_without_proof_when_decoding_then_reveals_no_polynomial(
 
 
 def test_given_exhausted_challenge_set_when_decoding_with_proof_then_raises(tmp_path):
-    _, metadata_file, server_file = _encode_raptorq(tmp_path, True)
+    _, metadata_file, server_file = _encode_r10(tmp_path, True)
     metadata = EncodingMetadata.load(metadata_file)
     metadata.used_polynomial_indices = list(range(len(metadata.polynomials)))
     metadata.save(metadata_file)
@@ -258,7 +258,7 @@ def test_given_exhausted_challenge_set_when_decoding_with_proof_then_raises(tmp_
 def test_given_compact_encoding_when_decoding_then_verifies_tags_without_spending_challenges(
     tmp_path, monkeypatch
 ):
-    input_file, metadata_file, server_file = _encode_raptorq(
+    input_file, metadata_file, server_file = _encode_r10(
         tmp_path, True, proof_scheme="compact"
     )
     checked = []
@@ -281,7 +281,7 @@ def test_given_compact_encoding_when_decoding_then_verifies_tags_without_spendin
 def test_given_compact_packet_tampered_on_disk_when_decoding_then_tag_rejects_it(
     tmp_path,
 ):
-    input_file, metadata_file, server_file = _encode_raptorq(
+    input_file, metadata_file, server_file = _encode_r10(
         tmp_path, True, proof_scheme="compact"
     )
     packet_metadata = EncodingMetadata.load(metadata_file).chunks[0].packets[0]
@@ -298,9 +298,7 @@ def test_given_compact_packet_tampered_on_disk_when_decoding_then_tag_rejects_it
 def test_given_compact_metadata_without_keys_when_decoding_with_proof_then_raises(
     tmp_path,
 ):
-    _, metadata_file, server_file = _encode_raptorq(
-        tmp_path, True, proof_scheme="compact"
-    )
+    _, metadata_file, server_file = _encode_r10(tmp_path, True, proof_scheme="compact")
     metadata = EncodingMetadata.load(metadata_file)
     metadata.compact_keys = None
     metadata.save(metadata_file)
