@@ -23,10 +23,8 @@
 \@writefile{brf}{\backcite{maymounkov2002online}{{vii}{(document)}{Doc-Start}}}
 \@writefile{brf}{\backcite{luby2007rfc5053}{{vii}{(document)}{Doc-Start}}}
 \citation{amaral2013hysail}
-\citation{amaral2019hysail}
 \@writefile{brf}{\backcite{shacham2008compact}{{viii}{(document)}{Doc-Start}}}
 \@writefile{brf}{\backcite{amaral2013hysail}{{viii}{(document)}{Doc-Start}}}
-\@writefile{brf}{\backcite{amaral2019hysail}{{ix}{(document)}{Doc-Start}}}
 \citation{amaral2013hysail}
 \citation{amaral2019hysail}
 \citation{frontiersbigdata}
@@ -128,6 +126,7 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {2.3}{\ignorespaces Grafo bipartido do exemplo de LT Codes e ordem de recuperação pelo algoritmo de \emph  {peeling}. Cada aresta liga um símbolo codificado aos símbolos de origem que o compõem.}}{11}{figure.2.3}\protected@file@percent }
 \newlabel{fig:lt_grafo}{{2.3}{11}{Grafo bipartido do exemplo de LT Codes e ordem de recuperação pelo algoritmo de \emph {peeling}. Cada aresta liga um símbolo codificado aos símbolos de origem que o compõem}{figure.2.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.1.5}Online Codes}{11}{subsection.2.1.5}\protected@file@percent }
+\newlabel{sec:fundamentacao_online}{{2.1.5}{11}{Online Codes}{subsection.2.1.5}{}}
 \@writefile{brf}{\backcite{maymounkov2002online,maymounkov2003rateless}{{11}{2.1.5}{subsection.2.1.5}}}
 \citation{maymounkov2002online}
 \newlabel{eq:online_auxiliar}{{2.10}{12}{Online Codes}{equation.2.1.10}{}}
@@ -278,6 +277,7 @@
 \@writefile{brf}{\backcite{bowers2009proofs}{{31}{4.11}{section.4.11}}}
 \citation{luby2007rfc5053}
 \citation{gofountain}
+\citation{maymounkov2002online}
 \@writefile{toc}{\contentsline {chapter}{\numberline {5}Implementação}{33}{chapter.5}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
@@ -285,100 +285,97 @@
 \@writefile{toc}{\contentsline {section}{\numberline {5.1}Visão Geral}{33}{section.5.1}\protected@file@percent }
 \@writefile{brf}{\backcite{luby2007rfc5053}{{33}{5.1}{section.5.1}}}
 \@writefile{brf}{\backcite{gofountain}{{33}{5.1}{section.5.1}}}
+\@writefile{brf}{\backcite{maymounkov2002online}{{34}{5.1}{section.5.1}}}
 \@writefile{lot}{\contentsline {table}{\numberline {5.1}{\ignorespaces Correspondência entre as fases do HySAIL e os comandos do HyBolt}}{34}{table.5.1}\protected@file@percent }
 \newlabel{tab:fases_comandos}{{5.1}{34}{Correspondência entre as fases do HySAIL e os comandos do HyBolt}{table.5.1}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5.2}Fluxo das Fases}{34}{section.5.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2.1}Codificação e Distribuição}{34}{subsection.5.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5.2}Fluxo das Fases}{35}{section.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2.1}Codificação e Distribuição}{35}{subsection.5.2.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.2.2}Auditoria}{35}{subsection.5.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2.3}Redistribuição}{35}{subsection.5.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2.4}Decodificação}{35}{subsection.5.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2.3}Redistribuição}{36}{subsection.5.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2.4}Decodificação}{36}{subsection.5.2.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {5.3}Organização do Código}{36}{section.5.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {5.1}{\ignorespaces Principais classes do HyBolt. As setas com triângulo indicam a realização de uma interface, e as setas tracejadas, dependências.}}{36}{figure.5.1}\protected@file@percent }
-\newlabel{fig:estrutura_codigo}{{5.1}{36}{Principais classes do HyBolt. As setas com triângulo indicam a realização de uma interface, e as setas tracejadas, dependências}{figure.5.1}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5.4}Metadados do Usuário}{37}{section.5.4}\protected@file@percent }
-\newlabel{sec:metadados}{{5.4}{37}{Metadados do Usuário}{section.5.4}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {5.2}{\ignorespaces Conteúdo dos metadados mantidos pelo usuário}}{37}{table.5.2}\protected@file@percent }
-\newlabel{tab:metadados}{{5.2}{37}{Conteúdo dos metadados mantidos pelo usuário}{table.5.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.1}{\ignorespaces Principais classes do HyBolt. As setas com triângulo indicam a realização de uma interface, e as setas tracejadas, dependências.}}{37}{figure.5.1}\protected@file@percent }
+\newlabel{fig:estrutura_codigo}{{5.1}{37}{Principais classes do HyBolt. As setas com triângulo indicam a realização de uma interface, e as setas tracejadas, dependências}{figure.5.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.4}Metadados do Usuário}{38}{section.5.4}\protected@file@percent }
+\newlabel{sec:metadados}{{5.4}{38}{Metadados do Usuário}{section.5.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5.2}{\ignorespaces Conteúdo dos metadados mantidos pelo usuário}}{38}{table.5.2}\protected@file@percent }
+\newlabel{tab:metadados}{{5.2}{38}{Conteúdo dos metadados mantidos pelo usuário}{table.5.2}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {5.5}Problemas Observados na Substituição Direta}{38}{section.5.5}\protected@file@percent }
 \newlabel{sec:problemas_observados}{{5.5}{38}{Problemas Observados na Substituição Direta}{section.5.5}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {5.3}{\ignorespaces Comparação entre o esquema limitado e o esquema compacto para um arquivo de 1~MiB}}{38}{table.5.3}\protected@file@percent }
-\newlabel{tab:comparacao_esquemas}{{5.3}{38}{Comparação entre o esquema limitado e o esquema compacto para um arquivo de 1~MiB}{table.5.3}{}}
 \citation{amaral2019hysail}
+\@writefile{lot}{\contentsline {table}{\numberline {5.3}{\ignorespaces Comparação entre o esquema limitado e o esquema compacto para um arquivo de 1~MiB}}{39}{table.5.3}\protected@file@percent }
+\newlabel{tab:comparacao_esquemas}{{5.3}{39}{Comparação entre o esquema limitado e o esquema compacto para um arquivo de 1~MiB}{table.5.3}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {5.6}Simplificações}{39}{section.5.6}\protected@file@percent }
 \@writefile{brf}{\backcite{amaral2019hysail}{{39}{5.6}{section.5.6}}}
-\@writefile{toc}{\contentsline {section}{\numberline {5.7}Validação}{39}{section.5.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5.7}Validação}{40}{section.5.7}\protected@file@percent }
 \citation{amaral2013hysail}
 \citation{amaral2019hysail}
-\@writefile{toc}{\contentsline {chapter}{\numberline {6}Resultados}{41}{chapter.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {6}Resultados}{42}{chapter.6}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\newlabel{6_Resultados}{{6}{41}{Resultados}{chapter.6}{}}
-\@writefile{brf}{\backcite{amaral2013hysail,amaral2019hysail}{{41}{6}{chapter.6}}}
-\@writefile{toc}{\contentsline {section}{\numberline {6.1}Ambiente Experimental}{41}{section.6.1}\protected@file@percent }
-\newlabel{sec:ambiente_experimental}{{6.1}{41}{Ambiente Experimental}{section.6.1}{}}
+\newlabel{6_Resultados}{{6}{42}{Resultados}{chapter.6}{}}
+\@writefile{brf}{\backcite{amaral2013hysail,amaral2019hysail}{{42}{6}{chapter.6}}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.1}Ambiente Experimental}{42}{section.6.1}\protected@file@percent }
+\newlabel{sec:ambiente_experimental}{{6.1}{42}{Ambiente Experimental}{section.6.1}{}}
 \citation{maymounkov2002online}
 \citation{luby2011rfc6330}
+\citation{maymounkov2002online}
+\@writefile{toc}{\contentsline {section}{\numberline {6.2}Recuperação e \emph  {Overhead} de Recepção}{43}{section.6.2}\protected@file@percent }
+\newlabel{sec:resultados_overhead}{{6.2}{43}{Recuperação e \emph {Overhead} de Recepção}{section.6.2}{}}
+\@writefile{brf}{\backcite{maymounkov2002online}{{43}{6.2}{section.6.2}}}
 \citation{amaral2019hysail}
-\@writefile{toc}{\contentsline {section}{\numberline {6.2}Recuperação e \emph  {Overhead} de Recepção}{42}{section.6.2}\protected@file@percent }
-\newlabel{sec:resultados_overhead}{{6.2}{42}{Recuperação e \emph {Overhead} de Recepção}{section.6.2}{}}
-\@writefile{brf}{\backcite{maymounkov2002online}{{42}{6.2}{section.6.2}}}
-\@writefile{brf}{\backcite{luby2011rfc6330}{{42}{6.2}{figure.6.1}}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6.1}{\ignorespaces Fração das decodificações concluídas em função do número de símbolos recebidos, normalizado por $K$, para Raptor R10, RaptorQ, Online Codes e LT Codes.}}{43}{figure.6.1}\protected@file@percent }
-\newlabel{fig:reception_overhead}{{6.1}{43}{Fração das decodificações concluídas em função do número de símbolos recebidos, normalizado por $K$, para Raptor R10, RaptorQ, Online Codes e LT Codes}{figure.6.1}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {6.1}{\ignorespaces Símbolos adicionais necessários à recuperação, em porcentagem de $K$}}{43}{table.6.1}\protected@file@percent }
-\newlabel{tab:overhead}{{6.1}{43}{Símbolos adicionais necessários à recuperação, em porcentagem de $K$}{table.6.1}{}}
-\citation{amaral2013hysail}
-\citation{amaral2019hysail}
-\citation{amaral2013hysail}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.1}{\ignorespaces Fração das decodificações concluídas em função do número de símbolos recebidos, normalizado por $K$, para Raptor R10, RaptorQ, Online Codes e LT Codes.}}{44}{figure.6.1}\protected@file@percent }
+\newlabel{fig:reception_overhead}{{6.1}{44}{Fração das decodificações concluídas em função do número de símbolos recebidos, normalizado por $K$, para Raptor R10, RaptorQ, Online Codes e LT Codes}{figure.6.1}{}}
+\@writefile{brf}{\backcite{luby2011rfc6330}{{44}{6.2}{figure.6.1}}}
+\@writefile{brf}{\backcite{maymounkov2002online}{{44}{6.2}{figure.6.1}}}
 \@writefile{brf}{\backcite{amaral2019hysail}{{44}{6.2}{table.6.1}}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6.2}{\ignorespaces \emph  {Chunks} de $K = 100$ símbolos recuperados em função da fração de pacotes perdidos, para quatro valores de redundância. As linhas verticais indicam $r / (K + r)$, a densidade de corrupção que um código MDS toleraria.}}{44}{figure.6.2}\protected@file@percent }
-\newlabel{fig:loss_tolerance}{{6.2}{44}{\emph {Chunks} de $K = 100$ símbolos recuperados em função da fração de pacotes perdidos, para quatro valores de redundância. As linhas verticais indicam $r / (K + r)$, a densidade de corrupção que um código MDS toleraria}{figure.6.2}{}}
-\@writefile{brf}{\backcite{amaral2013hysail}{{44}{6.2}{figure.6.2}}}
-\@writefile{brf}{\backcite{amaral2019hysail}{{44}{6.2}{figure.6.2}}}
+\@writefile{lot}{\contentsline {table}{\numberline {6.1}{\ignorespaces Símbolos adicionais necessários à recuperação, em porcentagem de $K$}}{45}{table.6.1}\protected@file@percent }
+\newlabel{tab:overhead}{{6.1}{45}{Símbolos adicionais necessários à recuperação, em porcentagem de $K$}{table.6.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.2}{\ignorespaces \emph  {Chunks} de $K = 100$ símbolos recuperados em função da fração de pacotes perdidos, para quatro valores de redundância. As linhas verticais indicam $r / (K + r)$, a densidade de corrupção que um código MDS toleraria.}}{45}{figure.6.2}\protected@file@percent }
+\newlabel{fig:loss_tolerance}{{6.2}{45}{\emph {Chunks} de $K = 100$ símbolos recuperados em função da fração de pacotes perdidos, para quatro valores de redundância. As linhas verticais indicam $r / (K + r)$, a densidade de corrupção que um código MDS toleraria}{figure.6.2}{}}
 \citation{amaral2013hysail}
 \citation{amaral2013hysail}
 \citation{amaral2013hysail}
-\@writefile{toc}{\contentsline {section}{\numberline {6.3}Custo do MAC Polinomial}{45}{section.6.3}\protected@file@percent }
-\newlabel{sec:resultados_mac}{{6.3}{45}{Custo do MAC Polinomial}{section.6.3}{}}
-\@writefile{brf}{\backcite{amaral2013hysail}{{45}{6.3}{section.6.3}}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6.3}{\ignorespaces Tempo de cálculo de $m(x) \bmod  P(x)$, com $\deg P = 127$, em função do tamanho do bloco. Os valores do HySAIL foram extraídos da Figura~5.5 de \cite  {amaral2013hysail}.}}{45}{figure.6.3}\protected@file@percent }
-\@writefile{brf}{\backcite{amaral2013hysail}{{45}{6.3}{figure.6.3}}}
-\newlabel{fig:mac_runtime}{{6.3}{45}{Tempo de cálculo de $m(x) \bmod P(x)$, com $\deg P = 127$, em função do tamanho do bloco. Os valores do HySAIL foram extraídos da Figura~5.5 de \cite {amaral2013hysail}}{figure.6.3}{}}
-\@writefile{brf}{\backcite{amaral2013hysail}{{45}{6.3}{figure.6.3}}}
-\@writefile{toc}{\contentsline {section}{\numberline {6.4}Codificação e Decodificação}{45}{section.6.4}\protected@file@percent }
-\newlabel{sec:resultados_codificacao}{{6.4}{45}{Codificação e Decodificação}{section.6.4}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6.4}{\ignorespaces Tempo de codificação e distribuição em função do tamanho do arquivo, para os esquemas compacto e limitado e sem prova de recuperabilidade.}}{46}{figure.6.4}\protected@file@percent }
-\newlabel{fig:encode_runtime}{{6.4}{46}{Tempo de codificação e distribuição em função do tamanho do arquivo, para os esquemas compacto e limitado e sem prova de recuperabilidade}{figure.6.4}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6.5}{\ignorespaces Tempo de decodificação em função do tamanho do arquivo. Nos esquemas com prova, cada pacote transferido é verificado antes de ser entregue ao decodificador.}}{47}{figure.6.5}\protected@file@percent }
-\newlabel{fig:decode_runtime}{{6.5}{47}{Tempo de decodificação em função do tamanho do arquivo. Nos esquemas com prova, cada pacote transferido é verificado antes de ser entregue ao decodificador}{figure.6.5}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6.6}{\ignorespaces Decomposição do tempo de codificação de um arquivo de 1~MiB por etapa. A etapa ``outros'' reúne a leitura do arquivo, a geração das chaves e dos polinômios e o cálculo do \emph  {hash} do arquivo.}}{47}{figure.6.6}\protected@file@percent }
-\newlabel{fig:encode_stages}{{6.6}{47}{Decomposição do tempo de codificação de um arquivo de 1~MiB por etapa. A etapa ``outros'' reúne a leitura do arquivo, a geração das chaves e dos polinômios e o cálculo do \emph {hash} do arquivo}{figure.6.6}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6.5}Auditoria}{48}{section.6.5}\protected@file@percent }
-\newlabel{sec:resultados_auditoria}{{6.5}{48}{Auditoria}{section.6.5}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6.7}{\ignorespaces Tempo de uma rodada de auditoria sobre três provedores, com todos os pacotes ou com $s = 50$ pacotes por provedor.}}{48}{figure.6.7}\protected@file@percent }
-\newlabel{fig:audit_runtime}{{6.7}{48}{Tempo de uma rodada de auditoria sobre três provedores, com todos os pacotes ou com $s = 50$ pacotes por provedor}{figure.6.7}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6.8}{\ignorespaces Fração das rodadas de auditoria que detectaram corrupção em função do número de pacotes amostrados por provedor, para 1,0\% (3 pacotes) e 5,1\% (15 pacotes) de pacotes corrompidos.}}{49}{figure.6.8}\protected@file@percent }
-\newlabel{fig:audit_detection}{{6.8}{49}{Fração das rodadas de auditoria que detectaram corrupção em função do número de pacotes amostrados por provedor, para 1,0\% (3 pacotes) e 5,1\% (15 pacotes) de pacotes corrompidos}{figure.6.8}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6.6}Memória do Usuário e Armazenamento}{49}{section.6.6}\protected@file@percent }
-\newlabel{sec:resultados_memoria}{{6.6}{49}{Memória do Usuário e Armazenamento}{section.6.6}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6.9}{\ignorespaces Metadados mantidos pelo usuário, em porcentagem do tamanho do arquivo. A linha pontilhada indica o valor que os $n \cdot l$ \acrshort {MAC}s do esquema limitado ocupariam empacotados em bits.}}{50}{figure.6.9}\protected@file@percent }
-\newlabel{fig:metadata_size}{{6.9}{50}{Metadados mantidos pelo usuário, em porcentagem do tamanho do arquivo. A linha pontilhada indica o valor que os $n \cdot l$ \acrshort {MAC}s do esquema limitado ocupariam empacotados em bits}{figure.6.9}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6.7}Ocultação da Estrutura e Ataque Dirigido}{50}{section.6.7}\protected@file@percent }
-\newlabel{sec:resultados_ocultacao}{{6.7}{50}{Ocultação da Estrutura e Ataque Dirigido}{section.6.7}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6.10}{\ignorespaces Probabilidade de perda do arquivo em função da fração de pacotes corrompidos, com ocultação (corrupção uniforme) e sem ocultação (linhas pontilhadas: os sete pacotes que contêm um símbolo de origem de um único \emph  {chunk}), para arquivos de 1~MiB, 64~MiB e 1~GiB.}}{51}{figure.6.10}\protected@file@percent }
-\newlabel{fig:targeted_attack}{{6.10}{51}{Probabilidade de perda do arquivo em função da fração de pacotes corrompidos, com ocultação (corrupção uniforme) e sem ocultação (linhas pontilhadas: os sete pacotes que contêm um símbolo de origem de um único \emph {chunk}), para arquivos de 1~MiB, 64~MiB e 1~GiB}{figure.6.10}{}}
-\citation{amaral2019hysail}
-\citation{amaral2019hysail}
-\citation{amaral2019hysail}
-\citation{amaral2019hysail}
-\citation{amaral2019hysail}
-\@writefile{toc}{\contentsline {section}{\numberline {6.8}Comparação com o HySAIL}{52}{section.6.8}\protected@file@percent }
-\newlabel{sec:comparacao_hysail}{{6.8}{52}{Comparação com o HySAIL}{section.6.8}{}}
-\@writefile{brf}{\backcite{amaral2019hysail}{{52}{6.8}{section.6.8}}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6.11}{\ignorespaces Tempos de codificação e decodificação do HySAIL, segundo as Figuras 5 e 6 de \cite  {amaral2019hysail}, e do HyBolt para arquivos de 50, 100 e 500~MB. A decodificação não possui etapa R10 isolada.}}{52}{figure.6.11}\protected@file@percent }
-\@writefile{brf}{\backcite{amaral2019hysail}{{52}{6.11}{figure.6.11}}}
-\newlabel{fig:hysail_comparison}{{6.11}{52}{Tempos de codificação e decodificação do HySAIL, segundo as Figuras 5 e 6 de \cite {amaral2019hysail}, e do HyBolt para arquivos de 50, 100 e 500~MB. A decodificação não possui etapa R10 isolada}{figure.6.11}{}}
 \citation{amaral2013hysail}
+\@writefile{toc}{\contentsline {section}{\numberline {6.3}Custo do MAC Polinomial}{46}{section.6.3}\protected@file@percent }
+\newlabel{sec:resultados_mac}{{6.3}{46}{Custo do MAC Polinomial}{section.6.3}{}}
+\@writefile{brf}{\backcite{amaral2013hysail}{{46}{6.3}{section.6.3}}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.3}{\ignorespaces Tempo de cálculo de $m(x) \bmod  P(x)$, com $\deg P = 127$, em função do tamanho do bloco. Os valores do HySAIL foram extraídos da Figura~5.5 de \cite  {amaral2013hysail}.}}{46}{figure.6.3}\protected@file@percent }
+\@writefile{brf}{\backcite{amaral2013hysail}{{46}{6.3}{figure.6.3}}}
+\newlabel{fig:mac_runtime}{{6.3}{46}{Tempo de cálculo de $m(x) \bmod P(x)$, com $\deg P = 127$, em função do tamanho do bloco. Os valores do HySAIL foram extraídos da Figura~5.5 de \cite {amaral2013hysail}}{figure.6.3}{}}
+\@writefile{brf}{\backcite{amaral2013hysail}{{46}{6.3}{figure.6.3}}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.4}Codificação e Decodificação}{47}{section.6.4}\protected@file@percent }
+\newlabel{sec:resultados_codificacao}{{6.4}{47}{Codificação e Decodificação}{section.6.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.4}{\ignorespaces Tempo de codificação e distribuição em função do tamanho do arquivo, para os esquemas compacto e limitado e sem prova de recuperabilidade.}}{47}{figure.6.4}\protected@file@percent }
+\newlabel{fig:encode_runtime}{{6.4}{47}{Tempo de codificação e distribuição em função do tamanho do arquivo, para os esquemas compacto e limitado e sem prova de recuperabilidade}{figure.6.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.5}{\ignorespaces Tempo de decodificação em função do tamanho do arquivo. Nos esquemas com prova, cada pacote transferido é verificado antes de ser entregue ao decodificador.}}{48}{figure.6.5}\protected@file@percent }
+\newlabel{fig:decode_runtime}{{6.5}{48}{Tempo de decodificação em função do tamanho do arquivo. Nos esquemas com prova, cada pacote transferido é verificado antes de ser entregue ao decodificador}{figure.6.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.6}{\ignorespaces Decomposição do tempo de codificação de um arquivo de 1~MiB por etapa. A etapa ``outros'' reúne a leitura do arquivo, a geração das chaves e dos polinômios e o cálculo do \emph  {hash} do arquivo.}}{48}{figure.6.6}\protected@file@percent }
+\newlabel{fig:encode_stages}{{6.6}{48}{Decomposição do tempo de codificação de um arquivo de 1~MiB por etapa. A etapa ``outros'' reúne a leitura do arquivo, a geração das chaves e dos polinômios e o cálculo do \emph {hash} do arquivo}{figure.6.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.5}Auditoria}{49}{section.6.5}\protected@file@percent }
+\newlabel{sec:resultados_auditoria}{{6.5}{49}{Auditoria}{section.6.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.7}{\ignorespaces Tempo de uma rodada de auditoria sobre três provedores, com todos os pacotes ou com $s = 50$ pacotes por provedor.}}{49}{figure.6.7}\protected@file@percent }
+\newlabel{fig:audit_runtime}{{6.7}{49}{Tempo de uma rodada de auditoria sobre três provedores, com todos os pacotes ou com $s = 50$ pacotes por provedor}{figure.6.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.8}{\ignorespaces Fração das rodadas de auditoria que detectaram corrupção em função do número de pacotes amostrados por provedor, para 1,0\% (3 pacotes) e 5,1\% (15 pacotes) de pacotes corrompidos.}}{50}{figure.6.8}\protected@file@percent }
+\newlabel{fig:audit_detection}{{6.8}{50}{Fração das rodadas de auditoria que detectaram corrupção em função do número de pacotes amostrados por provedor, para 1,0\% (3 pacotes) e 5,1\% (15 pacotes) de pacotes corrompidos}{figure.6.8}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.6}Memória do Usuário e Armazenamento}{50}{section.6.6}\protected@file@percent }
+\newlabel{sec:resultados_memoria}{{6.6}{50}{Memória do Usuário e Armazenamento}{section.6.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.9}{\ignorespaces Metadados mantidos pelo usuário, em porcentagem do tamanho do arquivo. A linha pontilhada indica o valor que os $n \cdot l$ \acrshort {MAC}s do esquema limitado ocupariam empacotados em bits.}}{51}{figure.6.9}\protected@file@percent }
+\newlabel{fig:metadata_size}{{6.9}{51}{Metadados mantidos pelo usuário, em porcentagem do tamanho do arquivo. A linha pontilhada indica o valor que os $n \cdot l$ \acrshort {MAC}s do esquema limitado ocupariam empacotados em bits}{figure.6.9}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.7}Ocultação da Estrutura e Ataque Dirigido}{52}{section.6.7}\protected@file@percent }
+\newlabel{sec:resultados_ocultacao}{{6.7}{52}{Ocultação da Estrutura e Ataque Dirigido}{section.6.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.10}{\ignorespaces Probabilidade de perda do arquivo em função da fração de pacotes corrompidos, com ocultação (corrupção uniforme) e sem ocultação (linhas pontilhadas: os sete pacotes que contêm um símbolo de origem de um único \emph  {chunk}), para arquivos de 1~MiB, 64~MiB e 1~GiB.}}{52}{figure.6.10}\protected@file@percent }
+\newlabel{fig:targeted_attack}{{6.10}{52}{Probabilidade de perda do arquivo em função da fração de pacotes corrompidos, com ocultação (corrupção uniforme) e sem ocultação (linhas pontilhadas: os sete pacotes que contêm um símbolo de origem de um único \emph {chunk}), para arquivos de 1~MiB, 64~MiB e 1~GiB}{figure.6.10}{}}
+\citation{amaral2019hysail}
+\@writefile{toc}{\contentsline {section}{\numberline {6.8}Comparação entre Online Codes e Raptor R10}{53}{section.6.8}\protected@file@percent }
+\newlabel{sec:comparacao_hysail}{{6.8}{53}{Comparação entre Online Codes e Raptor R10}{section.6.8}{}}
+\@writefile{brf}{\backcite{amaral2019hysail}{{53}{6.8}{section.6.8}}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.11}{\ignorespaces Tempos de codificação e decodificação do HyBolt com Raptor R10 e com Online Codes, medidos na mesma máquina, para arquivos de 50, 100 e 500~MB: tempo do código isolado, tempo total sem prova de recuperabilidade e sem ocultação e tempo total com o esquema compacto e a ocultação.}}{54}{figure.6.11}\protected@file@percent }
+\newlabel{fig:hysail_comparison}{{6.11}{54}{Tempos de codificação e decodificação do HyBolt com Raptor R10 e com Online Codes, medidos na mesma máquina, para arquivos de 50, 100 e 500~MB: tempo do código isolado, tempo total sem prova de recuperabilidade e sem ocultação e tempo total com o esquema compacto e a ocultação}{figure.6.11}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {6.2}{\ignorespaces Tempos de codificação e decodificação, em segundos, do HyBolt com Raptor R10 e com Online Codes na mesma máquina}}{54}{table.6.2}\protected@file@percent }
+\newlabel{tab:comparacao_hysail}{{6.2}{54}{Tempos de codificação e decodificação, em segundos, do HyBolt com Raptor R10 e com Online Codes na mesma máquina}{table.6.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.12}{\ignorespaces \emph  {Chunks} de $K = 100$ símbolos recuperados em função da fração de pacotes perdidos, com Raptor R10 e com Online Codes, para $\varepsilon = 0{,}25$ e $\varepsilon = 0{,}5$, estimados por 4.000 ordens aleatórias dos pacotes armazenados.}}{55}{figure.6.12}\protected@file@percent }
+\newlabel{fig:codec_loss}{{6.12}{55}{\emph {Chunks} de $K = 100$ símbolos recuperados em função da fração de pacotes perdidos, com Raptor R10 e com Online Codes, para $\varepsilon = 0{,}25$ e $\varepsilon = 0{,}5$, estimados por 4.000 ordens aleatórias dos pacotes armazenados}{figure.6.12}{}}
 \citation{juels2007pors}
 \citation{shacham2008compact}
 \citation{amaral2013hysail}
@@ -386,27 +383,22 @@
 \citation{amaral2019hysail}
 \citation{armknecht2021outsourcing}
 \citation{shen2024public}
-\@writefile{lot}{\contentsline {table}{\numberline {6.2}{\ignorespaces Tempos de codificação e decodificação, em segundos, do HySAIL e do HyBolt}}{53}{table.6.2}\protected@file@percent }
-\newlabel{tab:comparacao_hysail}{{6.2}{53}{Tempos de codificação e decodificação, em segundos, do HySAIL e do HyBolt}{table.6.2}{}}
-\@writefile{brf}{\backcite{amaral2019hysail}{{53}{6.2}{table.6.2}}}
-\@writefile{brf}{\backcite{amaral2019hysail}{{53}{6.8}{table.6.2}}}
-\@writefile{brf}{\backcite{amaral2013hysail}{{53}{6.8}{table.6.2}}}
-\@writefile{toc}{\contentsline {section}{\numberline {6.9}Comparação com Outros Esquemas de PoR}{53}{section.6.9}\protected@file@percent }
-\newlabel{sec:comparacao_por}{{6.9}{53}{Comparação com Outros Esquemas de PoR}{section.6.9}{}}
-\@writefile{brf}{\backcite{juels2007pors}{{53}{6.9}{section.6.9}}}
-\@writefile{brf}{\backcite{shacham2008compact}{{53}{6.9}{section.6.9}}}
-\@writefile{brf}{\backcite{amaral2013hysail}{{53}{6.9}{section.6.9}}}
-\@writefile{lot}{\contentsline {table}{\numberline {6.3}{\ignorespaces Comparação qualitativa entre esquemas de \acrshort {PoR}. $n$ é o número de blocos de mensagem e $l$ o número de desafios do modelo limitado}}{54}{table.6.3}\protected@file@percent }
-\newlabel{tab:comparacao_por}{{6.3}{54}{Comparação qualitativa entre esquemas de \acrshort {PoR}. $n$ é o número de blocos de mensagem e $l$ o número de desafios do modelo limitado}{table.6.3}{}}
-\@writefile{brf}{\backcite{amaral2019hysail}{{54}{6.3}{table.6.3}}}
-\@writefile{brf}{\backcite{amaral2019hysail}{{54}{6.9}{table.6.3}}}
-\@writefile{brf}{\backcite{armknecht2021outsourcing,shen2024public}{{54}{6.9}{table.6.3}}}
-\@writefile{toc}{\contentsline {section}{\numberline {6.10}Síntese}{54}{section.6.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6.9}Comparação com Outros Esquemas de PoR}{56}{section.6.9}\protected@file@percent }
+\newlabel{sec:comparacao_por}{{6.9}{56}{Comparação com Outros Esquemas de PoR}{section.6.9}{}}
+\@writefile{brf}{\backcite{juels2007pors}{{56}{6.9}{section.6.9}}}
+\@writefile{brf}{\backcite{shacham2008compact}{{56}{6.9}{section.6.9}}}
+\@writefile{brf}{\backcite{amaral2013hysail}{{56}{6.9}{section.6.9}}}
+\@writefile{lot}{\contentsline {table}{\numberline {6.3}{\ignorespaces Comparação qualitativa entre esquemas de \acrshort {PoR}. $n$ é o número de blocos de mensagem e $l$ o número de desafios do modelo limitado}}{56}{table.6.3}\protected@file@percent }
+\newlabel{tab:comparacao_por}{{6.3}{56}{Comparação qualitativa entre esquemas de \acrshort {PoR}. $n$ é o número de blocos de mensagem e $l$ o número de desafios do modelo limitado}{table.6.3}{}}
+\@writefile{brf}{\backcite{amaral2019hysail}{{56}{6.3}{table.6.3}}}
+\@writefile{brf}{\backcite{amaral2019hysail}{{57}{6.9}{table.6.3}}}
+\@writefile{brf}{\backcite{armknecht2021outsourcing,shen2024public}{{57}{6.9}{table.6.3}}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.10}Síntese}{57}{section.6.10}\protected@file@percent }
 \bibstyle{babunsrt}
-\@writefile{toc}{\contentsline {chapter}{\numberline {7}Conclusão}{56}{chapter.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {7}Conclusão}{59}{chapter.7}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\newlabel{7_Conclusao}{{7}{56}{Conclusão}{chapter.7}{}}
+\newlabel{7_Conclusao}{{7}{59}{Conclusão}{chapter.7}{}}
 \bibdata{bibliografia}
 \bibcite{amaral2013hysail}{1}
 \bibcite{amaral2019hysail}{2}
@@ -417,7 +409,7 @@
 \bibcite{fi17090427}{7}
 \bibcite{ronald2025}{8}
 \bibcite{luby2007rfc5053}{9}
-\@writefile{toc}{\contentsline {chapter}{Refer\^encias}{57}{section*.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{Refer\^encias}{60}{section*.13}\protected@file@percent }
 \babel@aux{american}{}
 \babel@aux{portuguese}{}
 \babel@aux{american}{}
@@ -443,9 +435,9 @@
 \babel@aux{english}{}
 \bibcite{menezes1997handbook}{23}
 \bibcite{gofountain}{24}
-\newlabel{TotPaginas}{{69}{58}{}{page.58}{}}
+\newlabel{TotPaginas}{{72}{61}{}{page.61}{}}
 \providecommand\totalcount@set[2]{}
-\totalcount@set{figure}{22}
+\totalcount@set{figure}{23}
 \totalcount@set{table}{8}
 \babel@aux{american}{}
 \babel@aux{english}{}
@@ -457,4 +449,4 @@
 \babel@aux{portuguese}{}
 \babel@aux{american}{}
 \babel@aux{american}{}
-\gdef \@abspage@last{70}
+\gdef \@abspage@last{73}
