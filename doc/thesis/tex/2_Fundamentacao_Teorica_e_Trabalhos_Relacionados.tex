@@ -1,4 +1,4 @@
-Este capítulo apresenta os fundamentos necessários à compreensão da proposta e os trabalhos relacionados. Inicialmente, são definidos os corpos finitos e a divisão polinomial em $GF(2)$, que fundamentam as operações de codificação de blocos. Em seguida, descreve-se o HySAIL e são apresentados os códigos \emph{fountain} relevantes ao trabalho: os LT Codes, que servem de base aos demais, os Online Codes, empregados na proposta original do HySAIL, e os RaptorQ Codes, cuja adoção é avaliada neste trabalho. Por fim, são analisados os trabalhos relacionados no campo de \acrshort{PoR}.
+Este capítulo apresenta os fundamentos necessários à compreensão da proposta e os trabalhos relacionados. Inicialmente, são definidos os corpos finitos e a divisão polinomial em $GF(2)$, que fundamentam as operações de codificação de blocos. Em seguida, descreve-se o HySAIL e são apresentados os códigos \emph{fountain} relevantes ao trabalho: os LT Codes, que servem de base aos demais, os Online Codes, empregados na proposta original do HySAIL, o Raptor R10, cuja adoção é avaliada neste trabalho, e os RaptorQ Codes, seu sucessor, cuja pré-codificação em $GF(256)$ explica a escolha do R10. Por fim, são analisados os trabalhos relacionados no campo de \acrshort{PoR}.
 
 \section{Conceitos Fundamentais}
 
@@ -7,7 +7,7 @@ Um corpo finito, ou corpo de Galois, é uma estrutura algébrica composta por um
 
 O corpo $GF(2)$ possui apenas os elementos 0 e 1. Nele, a adição corresponde à operação XOR e a multiplicação, à operação AND. Assim, $1 + 1 = 0$ e $1 + 0 = 1$. As extensões $GF(2^n)$ possuem $2^n$ elementos, representados por polinômios de grau menor que $n$ com coeficientes em $GF(2)$, de modo que cada elemento corresponde a um vetor de $n$ bits. A adição em $GF(2^n)$ continua sendo o XOR dos vetores, enquanto a multiplicação corresponde ao produto dos polinômios reduzido módulo um polinômio irredutível de grau $n$, que define o corpo.
 
-Um caso particular relevante para este trabalho é $GF(2^8)$, também denotado $GF(256)$, cujos elementos correspondem a um byte. O padrão dos RaptorQ Codes define esse corpo pelo polinômio irredutível $x^8 + x^4 + x^3 + x^2 + 1$ \cite{luby2011rfc6330}. Nele, por exemplo, o produto de $x$ por $x^7$ é $x^8$, que, reduzido módulo esse polinômio, resulta em $x^4 + x^3 + x^2 + 1$. Diferentemente da adição, a multiplicação por uma constante de $GF(256)$ mistura os bits de cada byte, o que tem consequências para o \acrshort{MAC} do HySAIL, discutidas no Capítulo~4.
+Um caso particular relevante para este trabalho é $GF(2^8)$, também denotado $GF(256)$, cujos elementos correspondem a um byte. O padrão dos RaptorQ Codes define esse corpo pelo polinômio irredutível $x^8 + x^4 + x^3 + x^2 + 1$ \cite{luby2011rfc6330}. Nele, por exemplo, o produto de $x$ por $x^7$ é $x^8$, que, reduzido módulo esse polinômio, resulta em $x^4 + x^3 + x^2 + 1$. Diferentemente da adição, a multiplicação por uma constante de $GF(256)$ mistura os bits de cada byte, o que impede o uso do \acrshort{MAC} do HySAIL com os RaptorQ Codes e motiva a adoção do Raptor R10, que opera apenas em $GF(2)$, como discutido no Capítulo~4.
 
 \subsubsection{Exemplo de representação polinomial}%
 Neste trabalho, adota-se a convenção em que a primeira posição de um vetor binário corresponde ao coeficiente do termo constante e cada posição seguinte, ao coeficiente da potência imediatamente superior de $x$. Segundo essa convenção, o vetor $1011$ possui coeficientes $1$, $0$, $1$ e $1$ associados, respectivamente, a $x^0$, $x^1$, $x^2$ e $x^3$, e é representado pelo polinômio
@@ -171,42 +171,60 @@ Pelo código interno, $c_1$ e $c_3$ fornecem diretamente $d_1$ e $a_1$, e $c_2 \
 	\label{fig:online_codes}
 \end{figure}
 
-\subsection{RaptorQ Codes}
-Os \textbf{RaptorQ Codes} \cite{shokrollahi2006raptor,WOS:000381844400033} são códigos \emph{fountain} que, assim como os Online Codes, combinam uma etapa de pré-codificação com uma codificação LT. Sua adoção no HySAIL, em substituição aos Online Codes, constitui o objeto deste trabalho. Assim como nos demais códigos \emph{fountain}, o receptor não precisa obter símbolos específicos, bastando receber uma quantidade suficiente de símbolos codificados para reconstruir os dados originais, o que torna o código adequado a cenários com perdas, como a transmissão em redes não confiáveis e o armazenamento distribuído.
+\subsection{Raptor Codes (R10)}
+\label{sec:raptor_r10}
+Os \textbf{Raptor Codes} \cite{shokrollahi2006raptor} são códigos \emph{fountain} que, assim como os Online Codes, combinam uma etapa de pré-codificação com uma codificação LT. A variante padronizada na RFC~5053 \cite{luby2007rfc5053}, conhecida como R10, é a adotada neste trabalho em substituição aos Online Codes. Assim como nos demais códigos \emph{fountain}, o receptor não precisa obter símbolos específicos, bastando receber uma quantidade suficiente de símbolos codificados para reconstruir os dados originais.
 
-O processo de codificação é composto por duas etapas. Primeiro, os $k$ símbolos de origem são submetidos a uma pré-codificação, que acrescenta símbolos de reparo e estabelece relações entre os símbolos do bloco. Em seguida, uma codificação LT gera cada símbolo de saída pela combinação de um subconjunto dos símbolos intermediários. Assim como nos LT Codes, essa etapa utiliza apenas operações XOR em $GF(2)$.
-
-De forma simplificada, seja $\mathbf{d} = (d_1, d_2, \ldots, d_k)$ o vetor de símbolos de origem. A pré-codificação produz um vetor intermediário $\mathbf{v}$, e cada símbolo codificado $c_i$ é obtido por:
+O processo de codificação é composto por duas etapas. Primeiro, os $K$ símbolos de origem, com $4 \le K \le 8.192$, determinam $L = K + S + H$ símbolos intermediários $C_1, \ldots, C_L$. Em seguida, uma codificação LT gera cada símbolo codificado pelo XOR de um subconjunto dos símbolos intermediários:
 
 \begin{equation}
-c_i = \bigoplus_{j \in S_i} v_j,
+c_\eta = \bigoplus_{j \in N_\eta} C_j,
+\label{eq:r10_lt}
 \end{equation}
 
-em que $S_i$ é o conjunto de índices selecionados para o símbolo $c_i$. A diferença em relação ao LT Code isolado é que as relações introduzidas na pré-codificação permitem recuperar símbolos de origem mesmo quando o processo iterativo não encontra imediatamente símbolos de grau 1.
+\noindent em que o conjunto $N_\eta$ é obtido de forma determinística a partir do \acrshort{ESI} $\eta$ por um gerador pseudoaleatório definido pela norma, de modo que o receptor reproduz as escolhas do codificador conhecendo apenas $K$ e $\eta$.
 
-A pré-codificação, contudo, não se limita a operações em $GF(2)$. No padrão RFC~6330 \cite{luby2011rfc6330}, os símbolos intermediários são definidos por um sistema de restrições de dois tipos: as restrições LDPC (\emph{Low-Density Parity-Check}), que combinam símbolos por XOR, e as restrições HDPC (\emph{High-Density Parity-Check}), cujos coeficientes pertencem a $GF(256)$, de modo que cada byte de um símbolo é multiplicado por um elemento do corpo antes de ser somado. A introdução das restrições HDPC sobre $GF(256)$ é a principal diferença em relação ao código Raptor original, cuja pré-codificação opera apenas sobre $GF(2)$ \cite{shokrollahi2006raptor}, e é responsável pela baixa probabilidade de falha do RaptorQ: inferior a 1\% ao receber $K$ símbolos e inferior a $10^{-6}$ ao receber $K + 2$ símbolos \cite{luby2011rfc6330}. O código é ainda sistemático: os símbolos intermediários são calculados de forma que os primeiros $K$ símbolos codificados coincidam com os símbolos de origem. A Figura~\ref{fig:raptorq} resume esse processo: os $K$ símbolos de origem, completados até $K'$ símbolos, determinam os $L$ símbolos intermediários, a partir dos quais a etapa LT gera os símbolos identificados pelo \acrshort{ESI}.
+Os $S$ símbolos LDPC (\emph{Low-Density Parity-Check}) e os $H$ símbolos Half são definidos por restrições de pré-codificação. Sendo $X$ o menor inteiro tal que $X(X-1) \ge 2K$, $S$ é o menor primo maior ou igual a $\lceil 0{,}01K \rceil + X$, e $H$ é o menor inteiro tal que $\binom{H}{\lceil H/2 \rceil} \ge K + S$. Cada um dos $K$ primeiros símbolos intermediários participa de três símbolos LDPC, e cada símbolo Half é o XOR dos símbolos selecionados por um código de Gray com $\lceil H/2 \rceil$ bits não nulos \cite{luby2007rfc5053}. Para $K = 11$, valor padrão deste trabalho, tem-se $S = 7$, $H = 6$ e $L = 24$.
+
+O código é sistemático: os símbolos de \acrshort{ESI} $0$ a $K - 1$ coincidem com os símbolos de origem. Para isso, os símbolos intermediários são definidos como a solução do sistema $A \cdot C = D$, em que $D$ é composto por $S + H$ símbolos nulos seguidos dos $K$ símbolos de origem, e a matriz $A$, de dimensão $L \times L$ sobre $GF(2)$, reúne as restrições LDPC, as restrições Half e as linhas da codificação LT dos $K$ primeiros \acrshort{ESI}s \cite{luby2007rfc5053}:
+
+\begin{equation}
+A = \begin{bmatrix}
+G_{LDPC} & I_S & 0_{S \times H} \\
+\multicolumn{2}{c}{G_{Half}} & I_H \\
+\multicolumn{3}{c}{G_{LT}}
+\end{bmatrix}.
+\label{eq:r10_matriz}
+\end{equation}
+
+O índice sistemático $J(K)$, tabelado na norma para cada $K$, é escolhido de modo que $A$ seja invertível \cite{luby2007rfc5053}. A Figura~\ref{fig:raptor_r10} resume esse processo.
 
 \begin{figure}[htbp]
 	\centering
 	\begin{adjustbox}{max width=\textwidth}
-		\input{img/tikz/raptorq}
+		\input{img/tikz/raptor_r10}
 	\end{adjustbox}
-	\caption{Estrutura de codificação dos RaptorQ Codes segundo a RFC~6330. Os símbolos com \acrshort{ESI} menor que $K$ reproduzem os símbolos de origem, e os demais são símbolos de reparo, que podem ser gerados em quantidade ilimitada. Elaborada pelo autor com base em \cite{luby2011rfc6330}.}
-	\label{fig:raptorq}
+	\caption{Estrutura de codificação do Raptor R10 segundo a RFC~5053. Os símbolos com \acrshort{ESI} menor que $K$ reproduzem os símbolos de origem, e os demais são símbolos de reparo, que podem ser gerados em quantidade ilimitada. Elaborada pelo autor com base em \cite{luby2007rfc5053}.}
+	\label{fig:raptor_r10}
 \end{figure}
 
-Como os símbolos intermediários resultam da solução desse sistema, cada um deles é uma combinação linear dos símbolos de origem com coeficientes em $GF(256)$. Consequentemente, embora a etapa LT combine os símbolos intermediários apenas por XOR, um símbolo de reparo não é o XOR de símbolos de origem, mas uma combinação linear desses símbolos sobre $GF(256)$. Essa é a propriedade que impede o uso direto do \acrshort{MAC} homomórfico do HySAIL, como discutido na Seção~\ref{sec:impacto_mac}.
+Todas as operações do R10 ocorrem em $GF(2)$: as restrições LDPC e Half, a codificação LT e a inversão de $A$. Consequentemente, $C = A^{-1} D$ expressa cada símbolo intermediário como o XOR de símbolos de origem e, pela Equação~\eqref{eq:r10_lt}, o mesmo vale para todo símbolo codificado, inclusive os de reparo. Para cada \acrshort{ESI} $\eta$ existe, portanto, um conjunto $X_\eta \subseteq \{1, \ldots, K\}$, aqui denominado suporte, tal que
 
-Na decodificação, o receptor reúne os símbolos codificados recebidos e suas relações de codificação. Inicialmente, são aplicadas eliminações XOR para resolver os símbolos que podem ser obtidos diretamente. As relações restantes são então resolvidas em conjunto com as restrições da pré-codificação, por eliminação gaussiana que envolve operações em $GF(256)$ na parte correspondente às restrições HDPC \cite{luby2011rfc6330}. Desse modo, o RaptorQ combina a geração flexível de símbolos dos LT Codes com uma camada adicional de proteção, reduzindo a probabilidade de falha na recuperação quando são recebidos símbolos suficientes \cite{shokrollahi2006raptor,WOS:000381844400033}.
+\begin{equation}
+c_\eta = \bigoplus_{i \in X_\eta} d_i.
+\label{eq:r10_suporte}
+\end{equation}
 
-Essa camada adicional resulta em um \emph{overhead} de recepção reduzido, permitindo recuperar o bloco mesmo após perdas sem exigir a retransmissão de símbolos específicos. Em contrapartida, a pré-codificação e a resolução das relações remanescentes aumentam a complexidade de decodificação em comparação com os LT Codes \cite{WOS:000381844400033}.
+Essa é exatamente a estrutura dos blocos de verificação do HySAIL, que o usuário registra na forma $\langle i, x_i \rangle$ \cite{amaral2019hysail}, e é a propriedade que permite manter o \acrshort{MAC} homomórfico da Equação~\eqref{eq:hysail_homomorfismo}, como discutido no Capítulo~4. Diferentemente dos Online Codes, porém, o suporte não precisa ser armazenado: ele é determinado por $K$ e $\eta$.
 
-A Figura~\ref{fig:degree_distributions} compara as distribuições de grau dos três códigos. A distribuição sóliton robusta dos LT Codes precisa admitir graus até $K$ para cobrir todos os símbolos de origem, e a dos Online Codes, com $\varepsilon = 0{,}01$, chega a 2.115, com grau médio de 10,3 e 8,2, respectivamente. Como a pré-codificação do RaptorQ assume a cobertura dos símbolos que a etapa LT deixa de alcançar, sua distribuição é truncada no grau 30, com grau médio de 4,8, o que reduz o número de operações XOR por símbolo codificado \cite{luby2011rfc6330}.
+Na decodificação, o receptor reúne os símbolos recebidos e resolve, por eliminação gaussiana em $GF(2)$, o sistema formado pelas restrições de pré-codificação e pelas linhas LT dos símbolos recebidos; a norma descreve um decodificador por inativação que explora a esparsidade das restrições \cite{luby2007rfc5053}. Pela Equação~\eqref{eq:r10_suporte}, um conjunto de símbolos recebidos permite a recuperação se, e somente se, seus suportes, vistos como vetores de $GF(2)^K$, tiverem posto $K$. Como a pré-codificação opera apenas em $GF(2)$, o R10 não se aproxima de um código MDS (\emph{Maximum Distance Separable}): receber exatamente $K$ símbolos é, em geral, insuficiente, e a probabilidade de falha decresce aproximadamente por um fator constante a cada símbolo adicional recebido, comportamento quantificado no Capítulo~6.
+
+A Figura~\ref{fig:degree_distributions} compara as distribuições de grau dos códigos discutidos. A distribuição sóliton robusta dos LT Codes precisa admitir graus até $K$ para cobrir todos os símbolos de origem, e a dos Online Codes, com $\varepsilon = 0{,}01$, chega a 2.115, com grau médio de 10,3 e 8,2, respectivamente. Como a pré-codificação dos Raptor Codes assume a cobertura dos símbolos que a etapa LT deixa de alcançar, a distribuição do R10 admite apenas os graus 1, 2, 3, 4, 10, 11 e 40, com grau médio de 4,6, e a do RaptorQ é truncada no grau 30, com grau médio de 4,8 \cite{luby2007rfc5053,luby2011rfc6330}.
 
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=0.8\textwidth]{resultados/degree_distributions.pdf}
-	\caption{Distribuições de grau dos LT Codes (sóliton robusta, com $c = 0{,}1$ e $\delta = 0{,}5$), dos Online Codes e dos RaptorQ Codes (tabela da Seção 5.3.5.2 da RFC~6330). Gerada por \texttt{scripts/thesis\_benchmarks.py}.}
+	\caption{Distribuições de grau dos LT Codes (sóliton robusta, com $c = 0{,}1$ e $\delta = 0{,}5$), dos Online Codes, do Raptor R10 (Tabela~1 da RFC~5053) e do RaptorQ (Seção 5.3.5.2 da RFC~6330). Gerada por \texttt{scripts/thesis\_benchmarks.py}.}
 	\label{fig:degree_distributions}
 \end{figure}
 
@@ -217,33 +235,29 @@ Considere os mesmos símbolos de origem dos exemplos anteriores:
 d_1 = 1010, \quad d_2 = 0110, \quad d_3 = 1101.
 \end{equation}
 
-Para fins didáticos, suponha que a pré-codificação produza o símbolo de reparo $v_4 = d_1 \oplus d_2 \oplus d_3$. Assim, os símbolos intermediários são $v_1=d_1$, $v_2=d_2$, $v_3=d_3$ e:
+Para fins didáticos, suponha que a pré-codificação produza o símbolo $C_4 = d_1 \oplus d_2 \oplus d_3$, de modo que os símbolos intermediários são $C_1=d_1$, $C_2=d_2$, $C_3=d_3$ e:
 
 \begin{equation}
-v_4 = 1010 \oplus 0110 \oplus 1101 = 0001.
+C_4 = 1010 \oplus 0110 \oplus 1101 = 0001.
 \end{equation}
 
-Em seguida, a etapa LT pode gerar símbolos codificados a partir de subconjuntos desses símbolos intermediários. Considere os seguintes símbolos transmitidos:
+Em seguida, a etapa LT gera símbolos codificados a partir de subconjuntos desses símbolos intermediários. Considere os seguintes símbolos transmitidos:
 
 \begin{equation}
-c_1 = v_1 = 1010, \quad
-c_2 = v_2 \oplus v_3 = 1011, \quad
-c_3 = v_2 \oplus v_4 = 0111.
+c_1 = C_1 = 1010, \quad
+c_2 = C_2 \oplus C_3 = 1011, \quad
+c_3 = C_2 \oplus C_4 = 0111.
 \end{equation}
 
-Suponha que o símbolo de origem $d_2$ não seja recebido diretamente. A partir de $c_1$, o receptor recupera $d_1$. Além disso, como conhece a relação de pré-codificação e recebe $c_2$ e $c_3$, pode recuperar os símbolos ausentes. Primeiro, observa-se que:
+Seus suportes são $X_1 = \{1\}$, $X_2 = \{2, 3\}$ e $X_3 = \{2\} \triangle \{1, 2, 3\} = \{1, 3\}$, em que $\triangle$ denota a diferença simétrica, que corresponde ao XOR dos vetores de $GF(2)^3$. Como os três vetores $100$, $011$ e $101$ têm posto 3, a recuperação é possível. A partir de $c_1$, o receptor recupera $d_1$; de $c_3 = d_1 \oplus d_3$, obtém $d_3 = c_3 \oplus d_1 = 1101$; e, de $c_2 = d_2 \oplus d_3$, obtém $d_2 = c_2 \oplus d_3 = 0110$.
 
-\begin{equation}
-c_2 \oplus c_3 = (v_2 \oplus v_3) \oplus (v_2 \oplus v_4) = v_3 \oplus v_4 = 1100.
-\end{equation}
+Esse exemplo ilustra o papel da pré-codificação e a representação por suportes: cada símbolo recebido, inclusive os que combinam símbolos de reparo da pré-codificação, é o XOR de símbolos de origem, e a recuperação reduz-se a um sistema linear em $GF(2)$.
 
-Pela relação de pré-codificação, $v_3 \oplus v_4 = d_3 \oplus (d_1 \oplus d_2 \oplus d_3) = d_1 \oplus d_2$. Portanto, como $d_1$ foi recuperado de $c_1$, obtém-se:
+\subsection{RaptorQ Codes}
+\label{sec:raptorq}
+Os \textbf{RaptorQ Codes}, padronizados na RFC~6330 \cite{luby2011rfc6330,WOS:000381844400033}, são o sucessor do R10. A estrutura em duas etapas é mantida, mas a pré-codificação acrescenta, às restrições LDPC, restrições HDPC (\emph{High-Density Parity-Check}) cujos coeficientes pertencem a $GF(256)$, de modo que cada byte de um símbolo é multiplicado por um elemento do corpo antes de ser somado. Essas restrições aproximam o RaptorQ de um código MDS: a probabilidade de falha é inferior a 1\% ao receber $K$ símbolos e inferior a $10^{-6}$ ao receber $K + 2$ símbolos \cite{luby2011rfc6330}, contra a necessidade de símbolos adicionais do R10 descrita acima.
 
-\begin{equation}
-d_2 = (c_2 \oplus c_3) \oplus d_1 = 1100 \oplus 1010 = 0110.
-\end{equation}
-
-Esse exemplo ilustra o papel da pré-codificação: relações adicionais entre os símbolos permitem recuperar dados perdidos a partir dos símbolos codificados recebidos. Para fins didáticos, ele utiliza apenas uma relação do tipo LDPC, resolvida por XOR. O RaptorQ completo utiliza as relações e distribuições de grau definidas pelo padrão, incluindo as restrições HDPC sobre $GF(256)$ descritas anteriormente, de modo que a recuperação envolve também multiplicações nesse corpo.
+Como os símbolos intermediários resultam da solução de um sistema com coeficientes em $GF(256)$, cada um deles é uma combinação linear dos símbolos de origem sobre $GF(256)$, e o mesmo ocorre com os símbolos de reparo. Um símbolo de reparo do RaptorQ não é, portanto, o XOR de símbolos de origem, e a multiplicação por constantes de $GF(256)$ não comuta com a redução módulo $P_j(x)$ do \acrshort{MAC} do HySAIL. Essa incompatibilidade, que obriga o usuário a armazenar um \acrshort{MAC} por pacote e impede a Redistribuição local, motivou a escolha do R10 neste trabalho, como discutido na Seção~\ref{sec:escolha_r10}.
 
 \section{Trabalhos Relacionados}
 

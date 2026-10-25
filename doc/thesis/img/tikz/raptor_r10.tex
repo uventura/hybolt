@@ -1,7 +1,7 @@
 \begin{tikzpicture}[node distance=5mm and 8mm]
 	\node[caixa=serieA, minimum width=24mm, minimum height=15mm] (origem) {$K$ símbolos\\de origem\\$d_1, \ldots, d_K$};
-	\node[caixa=serieD, right=of origem, minimum width=30mm, minimum height=15mm] (pre) {\textbf{Pré-codificação}\\$S$ restrições LDPC ($GF(2)$)\\$H$ restrições HDPC ($GF(256)$)};
-	\node[caixa=serieA, right=of pre, minimum width=24mm, minimum height=15mm] (inter) {$L = K' + S + H$\\símbolos\\intermediários};
+	\node[caixa=serieD, right=of origem, minimum width=30mm, minimum height=15mm] (pre) {\textbf{Pré-codificação}\\$S$ restrições LDPC ($GF(2)$)\\$H$ restrições Half ($GF(2)$)};
+	\node[caixa=serieA, right=of pre, minimum width=24mm, minimum height=15mm] (inter) {$L = K + S + H$\\símbolos\\intermediários};
 	\node[caixa=serieB, right=of inter, minimum width=20mm, minimum height=15mm] (lt) {\textbf{Codificação}\\\textbf{LT}\\(XOR)};
 	\draw[seta] (origem) -- (pre);
 	\draw[seta] (pre) -- (inter);
@@ -20,4 +20,5 @@
 	\draw[seta] (lt.south) |- (saida) -- ($(saida)+(0,-4mm)$);
 	\draw[decorate, decoration={brace, mirror, amplitude=4pt}, draw=tintaSec] ($(p0.south west)+(0,-1mm)$) -- node[rotulo, below=5pt] {símbolos de origem\\(código sistemático)} ($(p3.south east)+(0,-1mm)$);
 	\draw[decorate, decoration={brace, mirror, amplitude=4pt}, draw=tintaSec] ($(p4.south west)+(0,-1mm)$) -- node[rotulo, below=5pt] {símbolos de reparo\\(quantidade ilimitada)} ($(p6.south east)+(0,-1mm)$);
+	\node[rotulo, below=13mm of $(p0.south west)!0.5!(p6.south east)$] {todo símbolo codificado é o XOR de um subconjunto dos $K$ símbolos de origem};
 \end{tikzpicture}
