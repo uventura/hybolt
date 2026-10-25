@@ -32,9 +32,10 @@
 	% Decodificação
 	\node[interface, right=12mm of ac] (ds) {$\langle\langle$interface$\rangle\rangle$\\\texttt{DecodingStrategy}};
 	\node[concreta=serieB, below=7mm of ds] (rq) {Raptor10DecodingStrategy};
-	\node[concreta=serieB, below=of rq] (lt) {LtDecodingStrategy};
+	\node[concreta=serieB, below=of rq] (oc) {OnlineCodesDecodingStrategy};
+	\node[concreta=serieB, below=of oc] (lt) {LtDecodingStrategy};
 	\draw[herda] ($(lt.west)+(-4mm,0)$) -- ($(ds.west)+(-4mm,0)$) -- (ds.west);
-	\foreach \c in {rq,lt} \draw[barramento] (\c.west) -- ++(-4mm,0);
+	\foreach \c in {rq,oc,lt} \draw[barramento] (\c.west) -- ++(-4mm,0);
 	\node[concreta=serieE, below=7mm of lt] (sealing) {SealingKeys};
 	\node[concreta=serieE, below=of sealing] (server) {Server};
 

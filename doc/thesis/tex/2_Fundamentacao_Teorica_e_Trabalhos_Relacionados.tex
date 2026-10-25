@@ -130,6 +130,7 @@ Na decodificação, $c_1$ fornece diretamente $d_2$. Removendo $d_2$ dos demais 
 \end{figure}
 
 \subsection{Online Codes}
+\label{sec:fundamentacao_online}
 Os \textbf{Online Codes}, propostos por Maymounkov \cite{maymounkov2002online,maymounkov2003rateless}, são os códigos \emph{fountain} empregados na proposta original do HySAIL. Assim como os LT Codes, eles geram uma quantidade potencialmente ilimitada de símbolos codificados por meio de combinações XOR, diferentemente destes, porém, empregam uma distribuição de grau com grau máximo constante, independente de $k$, o que resulta em codificação e decodificação de complexidade linear. Para compensar a recuperação apenas parcial que essa distribuição proporciona, os Online Codes combinam dois níveis de codificação, um código externo e um código interno.
 
 O código externo (\emph{outer code}) acrescenta redundância aos $k$ símbolos de origem $\mathbf{d} = (d_1, \ldots, d_k)$. Cada símbolo de origem é associado aleatoriamente a $q$ dos $m$ símbolos auxiliares $a_1, \ldots, a_m$, sendo cada símbolo auxiliar a soma dos símbolos de origem a ele associados:
