@@ -7,12 +7,14 @@ from pathlib import Path
 import numpy as np
 
 import hybolt.utils.galois as ga
+from hybolt.encryption import raptor
 from hybolt.encryption.encoding_metadata import EncodingMetadata
 from hybolt.encryption.retrievability import (
     BOUNDED_SCHEME,
     COMPACT_SCHEME,
     ChallengeLedger,
     CompactRetrievabilityProof,
+    SourceMacs,
 )
 from hybolt.logger.logger import execution_logger
 from hybolt.server.server import Server
@@ -51,12 +53,11 @@ class ServerAudit:
 class ChunkAudit:
     chunk_index: int
     packets: int
+    # Repair packets r; R10 is not MDS, so some sets of r losses already hurt.
     tolerated_losses: int
     corrupted: int = 0
-
-    @property
-    def retrievable(self) -> bool:
-        return self.corrupted <= self.tolerated_losses
+    # Whether the packets not found corrupted still span the K source blocks.
+    retrievable: bool = True
 
 
 @dataclass
@@ -94,8 +95,9 @@ class BoundedAuditChallenge(AuditChallenge):
     """Hy-SAIL Algorithm 2 with a single-use public polynomial P_j.
 
     The server answers (sum of x^k_eta * c_eta) mod P_j and the client compares it
-    with the same combination of its stored MACs. The secret x^k_eta weights stop
-    equal corruptions from cancelling in the XOR (see galois.aggregate_remainders).
+    with the same combination of the packet MACs, which it derives from its
+    source block MACs. The secret x^k_eta weights stop equal corruptions from
+    cancelling in the XOR (see galois.aggregate_remainders).
     """
 
     def __init__(self, metadata, metadata_file, random):
@@ -104,6 +106,10 @@ class BoundedAuditChallenge(AuditChallenge):
         self.remaining_challenges = len(ledger.remaining)
         self._polynomial = metadata.polynomials[self.polynomial_index]
         self._random = random
+        self._source_macs = {
+            chunk.chunk_index: SourceMacs(chunk, metadata.sealing_keys)
+            for chunk in metadata.chunks
+        }
 
     def check(self, server, sample):
         shifts = (
@@ -112,7 +118,12 @@ class BoundedAuditChallenge(AuditChallenge):
             else None
         )
         expected = ga.aggregate_remainders(
-            [packet.macs[self.polynomial_index] for _, packet in sample],
+            [
+                self._source_macs[chunk_index].packet_mac(
+                    packet.packet_index, self.polynomial_index
+                )
+                for chunk_index, packet in sample
+            ],
             self._polynomial,
             shifts,
         )
@@ -176,11 +187,15 @@ class Audit:
             for unit in self._units()
         }
         server_audits = []
+        corrupted = set()
         for storage_location, packets in self._packets_by_server().items():
             audit = self._audit_server(storage_location, packets, challenge)
             for location in audit.corrupted:
                 chunks[location.chunk_index].corrupted += 1
+                corrupted.add((location.chunk_index, location.packet_index))
             server_audits.append(audit)
+        for unit in self._units():
+            chunks[unit.chunk_index].retrievable = self._recoverable(unit, corrupted)
 
         return AuditReport(
             scheme=self._metadata.proof_scheme,
@@ -239,6 +254,16 @@ class Audit:
             )
             return False
 
+    def _recoverable(self, unit, corrupted):
+        """Exact R10 check: do the remaining packets' supports span GF(2)^K?"""
+        system = raptor.Gf2System(unit.source_packets)
+        for packet in unit.packets:
+            if (unit.chunk_index, packet.packet_index) not in corrupted:
+                system.add(
+                    raptor.symbol_support(unit.source_packets, packet.packet_index)
+                )
+        return system.rank == unit.source_packets
+
     def _location(self, chunk_index, packet):
         return PacketLocation(
             chunk_index=chunk_index,
@@ -272,14 +297,10 @@ class Audit:
                 raise ValueError("Compact metadata is missing the client keys")
             return
 
-        polynomial_count = len(self._metadata.polynomials)
         for unit in self._units():
-            for packet in unit.packets:
-                if len(packet.macs) != polynomial_count:
-                    raise ValueError(
-                        f"Packet {packet.packet_index} of chunk {unit.chunk_index} "
-                        "has no MAC for every challenge polynomial"
-                    )
+            missing = SourceMacs(unit).missing()
+            if missing is not None:
+                raise ValueError(f"Chunk {unit.chunk_index} has {missing}")
 
     def _load_servers(self, server_file):
         with open(server_file, "r") as file:

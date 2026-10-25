@@ -11,6 +11,8 @@ import numpy as np
 
 import hybolt.utils.galois as ga
 from hybolt.constant import MAX_MAC_THREADS, POLYNOMIAL_SET_SIZE
+from hybolt.encryption import raptor
+from hybolt.encryption.local_mac import LocalMac
 from hybolt.logger.logger import execution_logger
 from hybolt.logger.progress import advance_progress, create_progress_task, get_progress
 
@@ -23,7 +25,8 @@ class RetrievabilityProof(ABC):
     """Strategy for proving that a server still holds a packet before downloading it."""
 
     scheme = ""
-    # The client keeps one MAC per packet and polynomial (Hy-SAIL's bounded model).
+    # The client keeps one MAC per source block and polynomial (Hy-SAIL's
+    # bounded model) and derives the MAC of any packet from them.
     requires_client_macs = False
     # Revealing a challenge lets the server forge future answers to it.
     single_use_challenges = False
@@ -42,9 +45,9 @@ class RetrievabilityProof(ABC):
     def polynomials(self) -> list[np.ndarray]:
         pass
 
-    @abstractmethod
-    def tag_packets(self, packets) -> dict[int, list[np.ndarray]]:
-        """Return the MACs of each packet, keyed by packet index, one per polynomial."""
+    def tag_source_blocks(self, blocks) -> dict[int, list[LocalMac]]:
+        """MACs the client keeps for each source block, one per polynomial."""
+        return {}
 
     @abstractmethod
     def verify(self, server, block, expected_mac) -> bool:
@@ -86,29 +89,32 @@ class PolynomialRetrievabilityProof(RetrievabilityProof):
     def polynomials(self):
         return self._polynomials
 
-    def tag_packets(self, packets):
+    def tag_source_blocks(self, blocks):
         progress = get_progress()
         execution_logger.debug(
-            f"Calculating {len(packets) * len(self._polynomials)} MACs "
-            f"for {len(packets)} packets"
+            f"Calculating {len(blocks) * len(self._polynomials)} MACs "
+            f"for {len(blocks)} source blocks"
         )
         task_id = create_progress_task(
             progress,
-            "Calculating packet MACs",
-            total=len(packets),
+            "Calculating source block MACs",
+            total=len(blocks),
         )
 
-        packet_macs = {}
+        source_macs = {}
         with ThreadPoolExecutor(max_workers=self._max_threads) as executor:
-            for packet_index, macs, division_seconds in executor.map(
-                self._calculate_packet_macs, packets
+            for block_index, macs, division_seconds in executor.map(
+                self._calculate_block_macs, range(len(blocks)), blocks
             ):
-                packet_macs[packet_index] = macs
+                source_macs[block_index] = [
+                    LocalMac(mac, polynomial_index, block_index)
+                    for polynomial_index, mac in enumerate(macs)
+                ]
                 self.polynomial_division_total_seconds += division_seconds
                 self.polynomial_division_count += len(macs)
                 advance_progress(progress, task_id)
 
-        return packet_macs
+        return source_macs
 
     def verify(self, server, block, expected_mac):
         polynomial_index = self.challenge_index
@@ -132,14 +138,14 @@ class PolynomialRetrievabilityProof(RetrievabilityProof):
 
         return verified
 
-    def _calculate_packet_macs(self, packet):
-        representation = ga.bytes_to_poly_coeffs(packet.data)
+    def _calculate_block_macs(self, block_index, block):
+        representation = ga.bytes_to_poly_coeffs(block)
         started_at = time.perf_counter()
         macs = [
             ga.gf2_poly_mod(representation, polynomial)
             for polynomial in self._polynomials
         ]
-        return packet.index, macs, time.perf_counter() - started_at
+        return block_index, macs, time.perf_counter() - started_at
 
     def _polynomial_set_generation(self):
         execution_logger.debug(
@@ -170,9 +176,6 @@ class DisabledRetrievabilityProof(RetrievabilityProof):
     @property
     def polynomials(self):
         return []
-
-    def tag_packets(self, packets):
-        return {}
 
     def verify(self, server, block, expected_mac):
         return True
@@ -242,9 +245,6 @@ class CompactRetrievabilityProof(RetrievabilityProof):
     @property
     def polynomials(self):
         return []
-
-    def tag_packets(self, packets):
-        return {}
 
     def attach_server_tags(self, packets, chunk_index):
         for packet in packets:
@@ -337,6 +337,56 @@ class ChallengeLedger:
             f"Drew challenge polynomial {index}; {len(remaining) - 1} remaining"
         )
         return index
+
+
+class SourceMacs:
+    """Hy-SAIL's client state for one chunk: h_ij = m_i mod P_j per source block.
+
+    Every R10 packet is the XOR of the source blocks in its support, so by
+    linearity its MAC is the XOR of their MACs (Hy-SAIL's Equation 4). A sealed
+    packet adds its keystream, whose MAC the client recomputes from its key.
+    """
+
+    def __init__(self, chunk, sealer=None):
+        self._polynomials = chunk.polynomials
+        self._chunk_index = getattr(chunk, "chunk_index", 0)
+        self._source_blocks = getattr(chunk, "source_packets", 0)
+        self._symbol_size = getattr(chunk, "symbol_size", 0)
+        self._sealer = sealer
+        self._macs = {
+            (block.block_index, block.polynomial_index): block.mac_value
+            for block in chunk.blocks
+        }
+
+    def missing(self) -> str | None:
+        """What keeps these MACs from backing a proof, or None when complete."""
+        if not self._polynomials:
+            return "no challenge polynomials"
+        expected = self._source_blocks * len(self._polynomials)
+        if self._source_blocks == 0 or len(self._macs) != expected:
+            return "no MAC for every source block and polynomial"
+        return None
+
+    def packet_mac(self, packet_index, polynomial_index):
+        support = raptor.symbol_support(self._source_blocks, packet_index)
+        mac = xor_macs(
+            [
+                self._macs[(block_index, polynomial_index)]
+                for block_index in raptor.support_indices(support)
+            ]
+        )
+        if self._sealer is None:
+            return mac
+        keystream = self._sealer.keystream(
+            self._chunk_index, packet_index, self._symbol_size
+        )
+        return np.bitwise_xor(
+            mac,
+            ga.gf2_poly_mod(
+                ga.bytes_to_poly_coeffs(keystream),
+                self._polynomials[polynomial_index],
+            ),
+        )
 
 
 def xor_macs(macs):

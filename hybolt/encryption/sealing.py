@@ -29,11 +29,15 @@ class SealingKeys:
         ).hexdigest()
         return f"{digest[:32]}.pkl"
 
-    def seal(self, chunk_index, packet_index, data) -> bytes:
-        keystream = hashlib.shake_256(
+    def keystream(self, chunk_index, packet_index, length) -> bytes:
+        return hashlib.shake_256(
             self.key + b"stream" + self._position(chunk_index, packet_index)
-        ).digest(len(data))
-        return bytes(byte ^ mask for byte, mask in zip(data, keystream))
+        ).digest(length)
+
+    def seal(self, chunk_index, packet_index, data) -> bytes:
+        keystream = self.keystream(chunk_index, packet_index, len(data))
+        sealed = int.from_bytes(data, "big") ^ int.from_bytes(keystream, "big")
+        return sealed.to_bytes(len(data), "big")
 
     # XOR with the same keystream inverts the encryption.
     open = seal

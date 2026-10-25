@@ -23,8 +23,6 @@ class PacketMetadata:
     indices: List[int]
     packet_file: str = ""
     packet_sha256: str = ""
-    # One retrievability MAC per challenge polynomial; empty when the proof is off.
-    macs: List[np.ndarray] = field(default_factory=list)
 
 
 @dataclass
@@ -32,6 +30,7 @@ class ChunkMetadata:
     chunk_index: int
     byte_size: int
     polynomials: List[np.ndarray]
+    # Bounded scheme: h_ij of every source block i and polynomial j.
     blocks: List[BlockMetadata]
     packets: List[PacketMetadata]
     codec: str = "r10"
@@ -120,9 +119,6 @@ class EncodingMetadata:
                 chunk.polynomials for chunk in metadata.chunks or []
             )
             metadata.proof_scheme = "bounded" if has_polynomials else ""
-        for packet in metadata.packets:
-            if not hasattr(packet, "macs"):
-                packet.macs = []
         if metadata.chunks is not None:
             for chunk in metadata.chunks:
                 if not hasattr(chunk, "codec"):
@@ -142,7 +138,5 @@ class EncodingMetadata:
                 for packet in chunk.packets:
                     if not hasattr(packet, "packet_sha256"):
                         packet.packet_sha256 = ""
-                    if not hasattr(packet, "macs"):
-                        packet.macs = []
 
         return metadata

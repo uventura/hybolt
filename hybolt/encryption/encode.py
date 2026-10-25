@@ -57,15 +57,18 @@ class Encode:
         # K counts the zero symbols that pad short chunks to R10's minimum.
         self._num_blocks = self._encoder.source_symbols
         self._repair_packets = max(1, math.ceil(redundancy * self._num_blocks))
-        self._mac_blocks = {}
         self._proof = proof or DisabledRetrievabilityProof()
 
         self._packets = self._encode()
+        # Hy-SAIL's MACs cover the plain source blocks: the MAC of any packet is
+        # the XOR of the MACs of its support, plus that of its keystream.
+        self._mac_blocks = self._proof.tag_source_blocks(
+            [packet.data for packet in self._packets[: self._num_blocks]]
+        )
         if sealer is not None:
-            # MACs, tags and hashes cover the sealed bytes the servers store.
+            # Tags and hashes cover the sealed bytes the servers store.
             for packet in self._packets:
                 packet.data = sealer.seal(chunk_index, packet.index, packet.data)
-        self._packet_macs = self._proof.tag_packets(self._packets)
         self._proof.attach_server_tags(self._packets, chunk_index)
 
     @property
@@ -87,10 +90,6 @@ class Encode:
     @property
     def mac_blocks(self):
         return self._mac_blocks
-
-    @property
-    def packet_macs(self):
-        return self._packet_macs
 
     @property
     def polynomials(self):

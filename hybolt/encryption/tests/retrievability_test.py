@@ -63,22 +63,22 @@ def test_given_no_polynomials_when_creating_enabled_proof_then_generates_challen
     assert len({tuple(p.tolist()) for p in proof.polynomials}) == POLYNOMIAL_SET_SIZE
 
 
-def test_given_packets_when_tagging_then_computes_one_mac_per_polynomial():
+def test_given_source_blocks_when_tagging_then_computes_one_mac_per_polynomial():
     second_polynomial = np.array([1, 1] + [0] * 14 + [1], dtype=np.uint8)
     proof = PolynomialRetrievabilityProof([POLYNOMIAL, second_polynomial])
-    packets = [Block(0, 0, [], b"ABCD"), Block(1, 0, [], b"WXYZ")]
 
-    macs = proof.tag_packets(packets)
+    macs = proof.tag_source_blocks([b"ABCD", b"WXYZ"])
 
     assert set(macs) == {0, 1}
-    assert np.array_equal(macs[1][0], _mac(b"WXYZ"))
-    assert np.array_equal(macs[1][1], _mac(b"WXYZ", second_polynomial))
+    assert np.array_equal(macs[1][0].mac, _mac(b"WXYZ"))
+    assert np.array_equal(macs[1][1].mac, _mac(b"WXYZ", second_polynomial))
+    assert [(m.block_index, m.polynomial_index) for m in macs[1]] == [(1, 0), (1, 1)]
     assert proof.polynomial_division_count == 4
     assert proof.polynomial_division_total_seconds > 0
 
 
 def test_given_disabled_proof_when_tagging_then_returns_no_macs():
-    assert DisabledRetrievabilityProof().tag_packets([Block(0, 0, [], b"AB")]) == {}
+    assert DisabledRetrievabilityProof().tag_source_blocks([b"AB"]) == {}
 
 
 def test_given_correct_answer_when_verifying_then_returns_true_and_forwards_packet_file():
@@ -259,7 +259,7 @@ def test_given_packets_when_attaching_server_tags_then_tags_every_packet():
         packet.tag == proof.keys.tag(0, packet.index, packet.data) for packet in packets
     )
     assert proof.polynomial_division_count == len(packets)
-    assert proof.tag_packets(packets) == {}
+    assert proof.tag_source_blocks([packet.data for packet in packets]) == {}
     assert proof.polynomials == []
 
 

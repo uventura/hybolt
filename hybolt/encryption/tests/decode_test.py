@@ -191,20 +191,6 @@ def test_given_r10_encoded_without_proof_when_decoding_without_proof_then_recons
     assert decoded == input_file.read_bytes()
 
 
-def test_given_metadata_saved_before_packet_macs_when_loading_then_backfills_empty_macs(
-    tmp_path,
-):
-    packet = PacketMetadata("server", 0, 1, [0])
-    del packet.macs
-    metadata = EncodingMetadata(polynomials=[], blocks=[], packets=[packet])
-    metadata_file = tmp_path / "legacy_metadata.pkl"
-    metadata.save(metadata_file)
-
-    loaded = EncodingMetadata.load(metadata_file)
-
-    assert loaded.packets[0].macs == []
-
-
 def test_given_lt_metadata_when_loading_then_local_blocks_carry_packet_hashes(tmp_path):
     _, metadata_file, server_file = _write_lt_metadata(tmp_path, [b"ABCD"])
     decoder = Decode(metadata_file, server_file)

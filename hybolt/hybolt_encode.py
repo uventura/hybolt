@@ -150,17 +150,12 @@ class HyboltEncode:
                     )
                 )
 
-        packets = []
-        for packet in saver.packet_metadata:
-            packet.macs = encoded.packet_macs.get(packet.packet_index, [])
-            packets.append(packet)
-
         return ChunkMetadata(
             chunk_index=chunk_index,
             byte_size=byte_size,
             polynomials=encoded.polynomials,
             blocks=blocks,
-            packets=packets,
+            packets=list(saver.packet_metadata),
             codec="r10",
             transfer_length=encoded.total_block_bytes,
             symbol_size=encoded.symbol_size,

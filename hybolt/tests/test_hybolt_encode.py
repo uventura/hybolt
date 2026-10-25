@@ -41,7 +41,8 @@ def test_given_chunked_file_when_encoding_with_proof_then_chunks_share_one_polyn
         assert len(chunk.polynomials) == POLYNOMIAL_SET_SIZE
         for shared, own in zip(metadata.polynomials, chunk.polynomials):
             assert np.array_equal(shared, own)
-        assert all(len(packet.macs) == POLYNOMIAL_SET_SIZE for packet in chunk.packets)
+        # Hy-SAIL's n * l MACs: one per source block and polynomial.
+        assert len(chunk.blocks) == chunk.source_packets * POLYNOMIAL_SET_SIZE
 
 
 def test_given_chunked_file_when_encoding_without_proof_then_stores_no_polynomials(
@@ -51,9 +52,7 @@ def test_given_chunked_file_when_encoding_without_proof_then_stores_no_polynomia
 
     assert metadata.polynomials == []
     assert all(chunk.polynomials == [] for chunk in metadata.chunks)
-    assert all(
-        packet.macs == [] for chunk in metadata.chunks for packet in chunk.packets
-    )
+    assert all(chunk.blocks == [] for chunk in metadata.chunks)
 
 
 def test_given_redundancy_when_encoding_then_records_repair_packets_per_chunk(tmp_path):
@@ -75,7 +74,6 @@ def test_given_compact_scheme_when_encoding_then_client_keeps_only_keys_and_serv
     assert metadata.polynomials == []
     for chunk in metadata.chunks:
         for packet in chunk.packets:
-            assert packet.macs == []
             stored_tag = Server(packet.server).download_tag(packet.packet_file)
             data = Server(packet.server).download_block(0, packet.packet_file)
             assert stored_tag == metadata.compact_keys.tag(

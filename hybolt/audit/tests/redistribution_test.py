@@ -78,7 +78,6 @@ def test_given_corrupted_packet_when_redistributing_then_replaces_it_with_fresh_
     assert fresh.server == replaced.to_server
     assert (Path(fresh.server) / fresh.packet_file).exists()
     assert fresh.packet_sha256 != victim.packet_sha256
-    assert len(fresh.macs) == len(EncodingMetadata.load(metadata_file).polynomials)
 
 
 def test_given_redistributed_packet_when_auditing_again_then_audit_passes(encoded):

@@ -4,7 +4,11 @@ from abc import ABC, abstractmethod
 from hybolt.encryption import raptor
 from hybolt.encryption.block import Block, LocalBlock
 from hybolt.encryption.local_mac import LocalMac
-from hybolt.encryption.retrievability import RetrievabilityProof, xor_macs
+from hybolt.encryption.retrievability import (
+    RetrievabilityProof,
+    SourceMacs,
+    xor_macs,
+)
 from hybolt.logger.logger import execution_logger
 from hybolt.utils.operators import xor_bytes
 from hybolt.utils.padding import remove_padding
@@ -269,9 +273,17 @@ class LtDecodingStrategy(DecodingStrategy):
 
 
 class Raptor10DecodingStrategy(DecodingStrategy):
-    """Feeds verified packets to a Raptor R10 decoder; each packet carries its own MACs."""
+    """Feeds verified packets to a Raptor R10 decoder.
+
+    A packet's expected MAC is derived from the source block MACs, as in
+    Hy-SAIL, since every R10 packet is the XOR of source blocks.
+    """
 
     codec = "r10"
+
+    def __init__(self, metadata, server_cache, proof, sealer=None):
+        self._source_macs = SourceMacs(metadata, sealer)
+        super().__init__(metadata, server_cache, proof, sealer)
 
     def decode(self):
         transfer_length = getattr(self._metadata, "transfer_length", 0)
@@ -304,7 +316,10 @@ class Raptor10DecodingStrategy(DecodingStrategy):
                 packet_sha256=packet.packet_sha256,
             )
             packet_data = self._download_verified_block(
-                block, lambda polynomial_index, macs=packet.macs: macs[polynomial_index]
+                block,
+                lambda polynomial_index, esi=packet.packet_index: (
+                    self._source_macs.packet_mac(esi, polynomial_index)
+                ),
             )
             if packet_data is None:
                 continue
@@ -320,15 +335,9 @@ class Raptor10DecodingStrategy(DecodingStrategy):
         raise ValueError("Insufficient valid R10 packets to reconstruct data")
 
     def _validate_proof_metadata(self):
-        polynomial_count = len(self._metadata.polynomials)
-        if polynomial_count == 0:
-            raise self._missing_proof_metadata_error("no challenge polynomials")
-
-        for packet in self._metadata.packets:
-            if len(getattr(packet, "macs", [])) != polynomial_count:
-                raise self._missing_proof_metadata_error(
-                    f"packet {packet.packet_index} has no MAC for every polynomial"
-                )
+        missing = self._source_macs.missing()
+        if missing is not None:
+            raise self._missing_proof_metadata_error(missing)
 
 
 DECODING_STRATEGIES = {

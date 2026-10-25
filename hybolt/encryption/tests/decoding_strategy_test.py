@@ -21,6 +21,7 @@ from hybolt.encryption.retrievability import (
     DisabledRetrievabilityProof,
     PolynomialRetrievabilityProof,
 )
+from hybolt.encryption.sealing import SealingKeys
 from hybolt.utils.operators import xor_bytes
 
 POLYNOMIAL = np.array([1, 0, 1, 1] + [0] * 12 + [1], dtype=np.uint8)
@@ -271,9 +272,9 @@ def test_given_lt_metadata_without_macs_when_proof_enabled_then_raises():
 # --- Raptor R10 -----------------------------------------------------------------
 
 
-def _r10_chunk(original, block_size, proof, server_for_packet):
+def _r10_chunk(original, block_size, proof, server_for_packet, sealer=None):
     """Encode `original`, returning chunk metadata and a server per packet."""
-    encoded = Encode(original, block_size, proof=proof)
+    encoded = Encode(original, block_size, proof=proof, sealer=sealer)
     servers = {}
     packets = []
     for packet in encoded.packets:
@@ -288,7 +289,6 @@ def _r10_chunk(original, block_size, proof, server_for_packet):
                 indices=[],
                 packet_file=f"packet_{packet.index}.pkl",
                 packet_sha256=_sha256(packet.data),
-                macs=encoded.packet_macs.get(packet.index, []),
             )
         )
 
@@ -296,17 +296,23 @@ def _r10_chunk(original, block_size, proof, server_for_packet):
         chunk_index=0,
         byte_size=len(original),
         polynomials=encoded.polynomials,
-        blocks=[],
+        blocks=[
+            BlockMetadata(mac.mac, mac.block_index, mac.polynomial_index)
+            for macs in encoded.mac_blocks.values()
+            for mac in macs
+        ],
         packets=packets,
         codec="r10",
         transfer_length=encoded.total_block_bytes,
         symbol_size=encoded.symbol_size,
+        repair_packets=encoded.repair_packets,
+        source_packets=encoded.num_blocks,
     )
     return chunk, servers
 
 
 def test_given_honest_r10_servers_when_decoding_with_proof_then_reconstructs_data():
-    original = b"R10 packets carry their own MACs here."
+    original = b"R10 packet MACs come from source MACs."
     chunk, servers = _r10_chunk(
         original, 8, _proof(), lambda packet: FakeServer(packet.data)
     )
@@ -320,7 +326,7 @@ def test_given_honest_r10_servers_when_decoding_with_proof_then_reconstructs_dat
 
 
 def test_given_r10_server_failing_challenge_when_decoding_then_skips_packet_and_uses_repair():
-    original = b"R10 packets carry their own MACs here."
+    original = b"R10 packet MACs come from source MACs."
     chunk, servers = _r10_chunk(
         original,
         8,
@@ -338,7 +344,7 @@ def test_given_r10_server_failing_challenge_when_decoding_then_skips_packet_and_
 
 
 def test_given_r10_server_swapping_data_after_challenge_when_decoding_then_hash_rejects_packet():
-    original = b"R10 packets carry their own MACs here."
+    original = b"R10 packet MACs come from source MACs."
     chunk, servers = _r10_chunk(
         original,
         8,
@@ -356,7 +362,7 @@ def test_given_r10_server_swapping_data_after_challenge_when_decoding_then_hash_
 
 
 def test_given_all_r10_servers_dishonest_when_decoding_then_raises_insufficient_packets():
-    original = b"R10 packets carry their own MACs here."
+    original = b"R10 packet MACs come from source MACs."
     chunk, servers = _r10_chunk(
         original, 8, _proof(), lambda packet: FakeServer(b"\x00" * len(packet.data))
     )
@@ -374,7 +380,7 @@ def test_given_r10_metadata_without_macs_when_proof_enabled_then_raises():
     )
     chunk.polynomials = [POLYNOMIAL]
 
-    with pytest.raises(ValueError, match="no MAC for every polynomial"):
+    with pytest.raises(ValueError, match="no MAC for every source block"):
         Raptor10DecodingStrategy(chunk, servers, _proof())
 
 
@@ -385,6 +391,21 @@ def test_given_r10_metadata_without_polynomials_when_proof_enabled_then_raises()
 
     with pytest.raises(ValueError, match="no challenge polynomials"):
         Raptor10DecodingStrategy(chunk, servers, _proof())
+
+
+def test_given_sealed_r10_packets_when_decoding_with_proof_then_accepts_derived_macs():
+    original = b"Sealed packets add the MAC of their keystream."
+    sealer = SealingKeys.generate()
+    chunk, servers = _r10_chunk(
+        original, 8, _proof(), lambda packet: FakeServer(packet.data), sealer
+    )
+
+    strategy = Raptor10DecodingStrategy(chunk, servers, _proof(), sealer)
+
+    assert strategy.decode() == original
+    assert all(
+        server.download_calls == server.challenge_calls for server in servers.values()
+    )
 
 
 def test_given_r10_metadata_without_macs_when_proof_disabled_then_decodes_without_challenge():

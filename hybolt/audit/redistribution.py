@@ -10,10 +10,8 @@ from hybolt.encryption.block import Block
 from hybolt.encryption.decoding_strategy import Raptor10DecodingStrategy
 from hybolt.encryption.encoding_metadata import EncodingMetadata, PacketMetadata
 from hybolt.encryption.retrievability import (
-    BOUNDED_SCHEME,
     COMPACT_SCHEME,
     DisabledRetrievabilityProof,
-    PolynomialRetrievabilityProof,
 )
 from hybolt.logger.logger import execution_logger
 from hybolt.server.server import Server
@@ -172,14 +170,12 @@ class Redistribution:
     def _store(self, chunk, packet_index, packet_data, target):
         sealed = self._seal(chunk, packet_index, packet_data)
         block = Block(packet_index, 0, [], sealed)
-        macs = []
+        # The bounded scheme needs nothing new: the client derives the MAC of a
+        # fresh ESI from its source block MACs.
         if self._metadata.proof_scheme == COMPACT_SCHEME:
             block.tag = self._metadata.compact_keys.tag(
                 chunk.chunk_index, packet_index, sealed
             )
-        elif self._metadata.proof_scheme == BOUNDED_SCHEME:
-            proof = PolynomialRetrievabilityProof(chunk.polynomials)
-            macs = proof.tag_packets([block])[packet_index]
 
         packet_file = self._packet_file(chunk, packet_index)
         target.store_packet(block, packet_file)
@@ -191,7 +187,6 @@ class Redistribution:
                 indices=[],
                 packet_file=packet_file,
                 packet_sha256=hashlib.sha256(sealed).hexdigest(),
-                macs=macs,
             )
         )
         execution_logger.debug(

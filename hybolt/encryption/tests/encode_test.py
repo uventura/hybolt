@@ -83,10 +83,9 @@ def test_given_no_proof_when_encoding_then_omits_mac_metadata():
 
     assert encoded.polynomials == []
     assert encoded.mac_blocks == {}
-    assert encoded.packet_macs == {}
 
 
-def test_given_retrievability_proof_when_encoding_then_tags_every_packet():
+def test_given_retrievability_proof_when_encoding_then_macs_only_source_blocks():
     polynomial = np.array([1, 0, 1, 1] + [0] * 12 + [1], dtype=np.uint8)
     proof = PolynomialRetrievabilityProof([polynomial])
 
@@ -94,12 +93,27 @@ def test_given_retrievability_proof_when_encoding_then_tags_every_packet():
 
     assert len(encoded.polynomials) == 1
     assert np.array_equal(encoded.polynomials[0], polynomial)
-    assert encoded.mac_blocks == {}
-    assert set(encoded.packet_macs) == {packet.index for packet in encoded.packets}
-    for packet in encoded.packets:
+    assert set(encoded.mac_blocks) == set(range(encoded.num_blocks))
+    for packet in encoded.packets[: encoded.num_blocks]:
         expected = ga.gf2_poly_mod(ga.bytes_to_poly_coeffs(packet.data), polynomial)
-        assert np.array_equal(encoded.packet_macs[packet.index][0], expected)
-    assert encoded.polynomial_division_count == len(encoded.packets)
+        assert np.array_equal(encoded.mac_blocks[packet.index][0].mac, expected)
+    assert encoded.polynomial_division_count == encoded.num_blocks
+
+
+def test_given_source_macs_when_deriving_repair_mac_then_matches_mac_of_packet():
+    polynomial = np.array([1, 0, 1, 1] + [0] * 12 + [1], dtype=np.uint8)
+    proof = PolynomialRetrievabilityProof([polynomial])
+    encoded = Encode(bytes(range(64)), block_size=4, proof=proof, redundancy=1.0)
+
+    for packet in encoded.packets[encoded.num_blocks :]:
+        support = raptor.support_indices(
+            raptor.symbol_support(encoded.num_blocks, packet.index)
+        )
+        derived = encoded.mac_blocks[support[0]][0].mac
+        for index in support[1:]:
+            derived = np.bitwise_xor(derived, encoded.mac_blocks[index][0].mac)
+        expected = ga.gf2_poly_mod(ga.bytes_to_poly_coeffs(packet.data), polynomial)
+        assert np.array_equal(derived, expected)
 
 
 @pytest.mark.parametrize(
