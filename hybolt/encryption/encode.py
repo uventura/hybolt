@@ -1,7 +1,7 @@
 import math
 
-from hybolt.encryption import raptor
 from hybolt.encryption.block import Block
+from hybolt.encryption.codecs import CODEC_NAMES, DEFAULT_CODEC, codec_module
 from hybolt.encryption.retrievability import (
     DisabledRetrievabilityProof,
     RetrievabilityProof,
@@ -21,6 +21,7 @@ class Encode:
         redundancy: float = DEFAULT_REDUNDANCY,
         chunk_index: int = 0,
         sealer=None,
+        codec: str = DEFAULT_CODEC,
     ):
         if not data:
             raise ValueError("Data cannot be empty")
@@ -53,18 +54,19 @@ class Encode:
             f"({len(self._data)} bytes)"
         )
 
-        self._encoder = raptor.Encoder(self._data, block_size)
+        self._codec = codec
+        self._encoder = codec_module(codec).Encoder(self._data, block_size)
         # K counts the zero symbols that pad short chunks to R10's minimum.
         self._num_blocks = self._encoder.source_symbols
         self._repair_packets = max(1, math.ceil(redundancy * self._num_blocks))
         self._proof = proof or DisabledRetrievabilityProof()
 
         self._packets = self._encode()
+        # Online Codes add check blocks until the chunk decodes.
+        self._repair_packets = len(self._packets) - self._num_blocks
         # Hy-SAIL's MACs cover the plain source blocks: the MAC of any packet is
         # the XOR of the MACs of its support, plus that of its keystream.
-        self._mac_blocks = self._proof.tag_source_blocks(
-            [packet.data for packet in self._packets[: self._num_blocks]]
-        )
+        self._mac_blocks = self._proof.tag_source_blocks(self._source_blocks())
         if sealer is not None:
             # Tags and hashes cover the sealed bytes the servers store.
             for packet in self._packets:
@@ -74,6 +76,10 @@ class Encode:
     @property
     def packets(self):
         return list(self._packets)
+
+    @property
+    def codec(self):
+        return self._codec
 
     @property
     def symbol_size(self):
@@ -112,10 +118,11 @@ class Encode:
         return self._proof.polynomial_division_count
 
     def _encode(self):
-        # A chunk is a single R10 source block, so this is the chunk's total.
+        # A chunk is a single source block, so this is the chunk's total.
         encoded_symbols = self._encoder.symbols(self._repair_packets)
         execution_logger.debug(
-            f"Generating {len(encoded_symbols)} Raptor R10 packets from "
+            f"Generating {len(encoded_symbols)} {CODEC_NAMES[self._codec]} "
+            f"packets from "
             f"{self._num_blocks} source symbols with "
             f"{self._repair_packets} repair packets"
         )
@@ -132,6 +139,14 @@ class Encode:
             advance_progress(self._progress, task_id)
 
         return packets
+
+    def _source_blocks(self):
+        """The K plain source symbols, zero padding included."""
+        if codec_module(self._codec).SYSTEMATIC:
+            # The first K packets of R10 are the source symbols.
+            return [packet.data for packet in self._packets[: self._num_blocks]]
+        padded = self._data.ljust(self._num_blocks * self._block_size, b"\0")
+        return self._split_blocks(padded, self._block_size)
 
     def _split_blocks(self, data, block_size):
         return [data[i : i + block_size] for i in range(0, len(data), block_size)]

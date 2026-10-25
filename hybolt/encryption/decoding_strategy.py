@@ -1,7 +1,7 @@
 import hashlib
 from abc import ABC, abstractmethod
 
-from hybolt.encryption import raptor
+from hybolt.encryption import online_codes, raptor
 from hybolt.encryption.block import Block, LocalBlock
 from hybolt.encryption.local_mac import LocalMac
 from hybolt.encryption.retrievability import (
@@ -272,14 +272,15 @@ class LtDecodingStrategy(DecodingStrategy):
         return local_mac
 
 
-class Raptor10DecodingStrategy(DecodingStrategy):
-    """Feeds verified packets to a Raptor R10 decoder.
+class FountainDecodingStrategy(DecodingStrategy):
+    """Feeds verified packets to the decoder of the chunk's fountain code.
 
     A packet's expected MAC is derived from the source block MACs, as in
-    Hy-SAIL, since every R10 packet is the XOR of source blocks.
+    Hy-SAIL, since every packet of these codes is the XOR of source blocks.
     """
 
-    codec = "r10"
+    codec_module = None
+    codec_name = ""
 
     def __init__(self, metadata, server_cache, proof, sealer=None):
         self._source_macs = SourceMacs(metadata, sealer)
@@ -289,13 +290,16 @@ class Raptor10DecodingStrategy(DecodingStrategy):
         transfer_length = getattr(self._metadata, "transfer_length", 0)
         symbol_size = getattr(self._metadata, "symbol_size", 0)
         if transfer_length <= 0 or symbol_size <= 0:
-            raise ValueError("R10 metadata is missing transfer parameters")
+            raise ValueError(
+                f"{self.codec_name} metadata is missing transfer parameters"
+            )
 
-        decoder = raptor.Decoder(transfer_length, symbol_size)
+        decoder = self.codec_module.Decoder(transfer_length, symbol_size)
         for packet in self._metadata.packets:
             if not getattr(packet, "packet_sha256", ""):
                 raise ValueError(
-                    f"R10 packet {packet.packet_index} has no integrity hash"
+                    f"{self.codec_name} packet {packet.packet_index} has no "
+                    "integrity hash"
                 )
 
             server = self._server_cache.get(packet.server)
@@ -332,7 +336,9 @@ class Raptor10DecodingStrategy(DecodingStrategy):
             if decoded is not None:
                 return decoded
 
-        raise ValueError("Insufficient valid R10 packets to reconstruct data")
+        raise ValueError(
+            f"Insufficient valid {self.codec_name} packets to reconstruct data"
+        )
 
     def _validate_proof_metadata(self):
         missing = self._source_macs.missing()
@@ -340,9 +346,27 @@ class Raptor10DecodingStrategy(DecodingStrategy):
             raise self._missing_proof_metadata_error(missing)
 
 
+class Raptor10DecodingStrategy(FountainDecodingStrategy):
+    codec = raptor.CODEC
+    codec_module = raptor
+    codec_name = "R10"
+
+
+class OnlineCodesDecodingStrategy(FountainDecodingStrategy):
+    """Peels the verified check blocks, as the original Hy-SAIL decoder does."""
+
+    codec = online_codes.CODEC
+    codec_module = online_codes
+    codec_name = "Online Codes"
+
+
 DECODING_STRATEGIES = {
     strategy.codec: strategy
-    for strategy in (LtDecodingStrategy, Raptor10DecodingStrategy)
+    for strategy in (
+        LtDecodingStrategy,
+        Raptor10DecodingStrategy,
+        OnlineCodesDecodingStrategy,
+    )
 }
 
 

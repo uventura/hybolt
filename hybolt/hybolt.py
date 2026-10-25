@@ -17,6 +17,7 @@ from hybolt.audit.redistribution import Redistribution
 from hybolt.hybolt_decode import HyboltDecode
 from hybolt.hybolt_encode import HyboltEncode
 from hybolt.constant import DEFAULT_REDUNDANCY, MAX_MAC_THREADS
+from hybolt.encryption.codecs import CODECS, DEFAULT_CODEC
 from hybolt.encryption.digest import Digest
 from hybolt.encryption.retrievability import BOUNDED_SCHEME, COMPACT_SCHEME
 from hybolt.logger.logger import execution_logger
@@ -56,8 +57,7 @@ def main():
     "--block-size",
     type=int,
     default=None,
-    help="R10 symbol size in bytes; if omitted, each chunk is split into "
-    "100 symbols",
+    help="R10 symbol size in bytes; if omitted, each chunk is split into 100 symbols",
 )
 @click.option(
     "--server-list",
@@ -107,11 +107,20 @@ def main():
     "which packets belong to the same chunk",
 )
 @click.option(
+    "--codec",
+    type=click.Choice(list(CODECS)),
+    default=DEFAULT_CODEC,
+    show_default=True,
+    help="Fountain code of every chunk: r10 (RFC 5053) or online "
+    "(Online Codes, as in the original Hy-SAIL)",
+)
+@click.option(
     "--redundancy",
     type=click.FloatRange(min=0, min_open=True),
     default=DEFAULT_REDUNDANCY,
     show_default=True,
-    help="Repair packets generated per source packet of each chunk",
+    help="Repair packets generated per source packet of each chunk; a minimum "
+    "for online, which adds check blocks until the chunk decodes",
 )
 @click.option(
     "--debug",
@@ -135,6 +144,7 @@ def encode_command(
     retrievability_proof,
     proof_scheme,
     seal_packets,
+    codec,
     redundancy,
     debug,
     log_dir,
@@ -164,6 +174,7 @@ def encode_command(
             redundancy,
             proof_scheme,
             seal_packets,
+            codec,
         )
         encode_started_at = time.perf_counter()
         packet_count = hybolt_encode.encode()
@@ -379,8 +390,7 @@ def plot_command(runtime_file, output, polynomial_division_output):
 
     click.echo(f"Runtime plot written to {output_path}")
     click.echo(
-        "Polynomial division runtime plot written to "
-        f"{polynomial_division_output_path}"
+        f"Polynomial division runtime plot written to {polynomial_division_output_path}"
     )
 
 

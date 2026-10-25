@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 
 import hybolt.utils.galois as ga
-from hybolt.encryption import raptor
+from hybolt.encryption.codecs import DEFAULT_CODEC, codec_module
 from hybolt.encryption.encoding_metadata import EncodingMetadata
 from hybolt.encryption.retrievability import (
     BOUNDED_SCHEME,
@@ -53,7 +53,7 @@ class ServerAudit:
 class ChunkAudit:
     chunk_index: int
     packets: int
-    # Repair packets r; R10 is not MDS, so some sets of r losses already hurt.
+    # Repair packets r; neither code is MDS, so some sets of r losses already hurt.
     tolerated_losses: int
     corrupted: int = 0
     # Whether the packets not found corrupted still span the K source blocks.
@@ -255,14 +255,16 @@ class Audit:
             return False
 
     def _recoverable(self, unit, corrupted):
-        """Exact R10 check: do the remaining packets' supports span GF(2)^K?"""
-        system = raptor.Gf2System(unit.source_packets)
-        for packet in unit.packets:
-            if (unit.chunk_index, packet.packet_index) not in corrupted:
-                system.add(
-                    raptor.symbol_support(unit.source_packets, packet.packet_index)
-                )
-        return system.rank == unit.source_packets
+        """Exact check with the chunk's own decoder criterion (rank or peeling)."""
+        codec = codec_module(getattr(unit, "codec", DEFAULT_CODEC))
+        return codec.recoverable(
+            unit.source_packets,
+            [
+                packet.packet_index
+                for packet in unit.packets
+                if (unit.chunk_index, packet.packet_index) not in corrupted
+            ],
+        )
 
     def _location(self, chunk_index, packet):
         return PacketLocation(

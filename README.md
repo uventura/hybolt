@@ -102,6 +102,25 @@ holds each packet's ESI. Repair symbols match those of
 [gofountain](https://github.com/google/gofountain), an independent RFC 5053
 implementation.
 
+### Online Codes
+
+`hybolt encode --codec online` encodes every chunk with the Online Codes of
+Maymounkov, the fountain code of the original Hy-SAIL, implemented in
+[`hybolt/encryption/online_codes.py`](hybolt/encryption/online_codes.py). The
+outer code adds `ceil(0.55 q epsilon K)` auxiliary blocks, each the XOR of the
+source blocks assigned to it (every source block joins `q = 3` of them), and
+each check block XORs a degree drawn from Maymounkov's distribution of
+composite blocks. Every check block is therefore also a XOR of source blocks,
+so MACs, audits and redistribution work as with R10; decoding is the paper's
+peeling decoder. The graph depends only on K and the ESI. Epsilon starts at
+0.01 and grows until the largest degree fits in the composite message (0.10
+for K = 100). Online Codes are not systematic and need a random number of
+check blocks beyond K, so the encoder writes at least `K + ceil(redundancy *
+K)` of them and adds more until the chunk decodes. The codec is recorded in
+each chunk's metadata, so `decode` and `audit` need no option. The option
+exists to compare both codes on the same machine and pipeline; R10 remains
+the default.
+
 Use `--chunk-count` to divide a file into an exact number of balanced chunks,
 for example `hybolt encode --chunk-count 8 ...`. The command prints the
 average MAC-and-packet-generation time per chunk after encoding completes.
@@ -250,6 +269,6 @@ python scripts/thesis_benchmarks.py all
 
 Raw data goes to `logs/thesis/` and PDF figures to `doc/thesis/img/resultados/`.
 Name experiments to run a subset (`degrees`, `mac`, `overhead`, `loss`,
-`pipeline`, `detection`, `hysail`), pass `--quick` for tiny workloads, or
+`pipeline`, `detection`, `codecs`), pass `--quick` for tiny workloads, or
 `replot` to redraw the slow experiments from the saved data. The full run
-encodes files of up to 500 MB and takes about 15 minutes.
+encodes files of up to 500 MB with both codes and takes about 20 minutes.

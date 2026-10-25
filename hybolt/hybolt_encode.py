@@ -8,6 +8,7 @@ from hybolt.constant import (
     DEFAULT_SOURCE_SYMBOLS,
     MAX_MAC_THREADS,
 )
+from hybolt.encryption.codecs import DEFAULT_CODEC
 from hybolt.encryption.encode import Encode
 from hybolt.encryption.encoding_metadata import (
     BlockMetadata,
@@ -43,6 +44,7 @@ class HyboltEncode:
         redundancy: float = DEFAULT_REDUNDANCY,
         proof_scheme: str = COMPACT_SCHEME,
         seal_packets: bool = True,
+        codec: str = DEFAULT_CODEC,
     ):
         self.input_file = input_file
         self.block_size = block_size
@@ -54,6 +56,7 @@ class HyboltEncode:
         self.redundancy = redundancy
         self.proof_scheme = proof_scheme
         self.seal_packets = seal_packets
+        self.codec = codec
         self.average_chunk_encode_seconds = 0.0
         self.average_block_size = 0.0
         self.average_polynomial_division_seconds = 0.0
@@ -69,7 +72,7 @@ class HyboltEncode:
             f"servers={len(self.server_list or [])}, max_threads={self.max_threads}, "
             f"retrievability_proof={self.retrievability_proof}, "
             f"redundancy={self.redundancy}, proof_scheme={self.proof_scheme}, "
-            f"seal_packets={self.seal_packets}"
+            f"seal_packets={self.seal_packets}, codec={self.codec}"
         )
         digest = Digest(input_path, chunk_count=self.chunk_count)
         chunks = []
@@ -106,6 +109,7 @@ class HyboltEncode:
                 self.redundancy,
                 chunk_index,
                 sealer,
+                self.codec,
             )
             chunk_encode_durations.append(time.perf_counter() - encode_started_at)
             total_block_bytes += encoded.total_block_bytes
@@ -156,7 +160,7 @@ class HyboltEncode:
             polynomials=encoded.polynomials,
             blocks=blocks,
             packets=list(saver.packet_metadata),
-            codec="r10",
+            codec=encoded.codec,
             transfer_length=encoded.total_block_bytes,
             symbol_size=encoded.symbol_size,
             repair_packets=encoded.repair_packets,

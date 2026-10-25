@@ -12,6 +12,7 @@ import numpy as np
 import hybolt.utils.galois as ga
 from hybolt.constant import MAX_MAC_THREADS, POLYNOMIAL_SET_SIZE
 from hybolt.encryption import raptor
+from hybolt.encryption.codecs import DEFAULT_CODEC, codec_module
 from hybolt.encryption.local_mac import LocalMac
 from hybolt.logger.logger import execution_logger
 from hybolt.logger.progress import advance_progress, create_progress_task, get_progress
@@ -342,9 +343,10 @@ class ChallengeLedger:
 class SourceMacs:
     """Hy-SAIL's client state for one chunk: h_ij = m_i mod P_j per source block.
 
-    Every R10 packet is the XOR of the source blocks in its support, so by
-    linearity its MAC is the XOR of their MACs (Hy-SAIL's Equation 4). A sealed
-    packet adds its keystream, whose MAC the client recomputes from its key.
+    Every R10 or Online Codes packet is the XOR of the source blocks in its
+    support, so by linearity its MAC is the XOR of their MACs (Hy-SAIL's
+    Equation 4). A sealed packet adds its keystream, whose MAC the client
+    recomputes from its key.
     """
 
     def __init__(self, chunk, sealer=None):
@@ -352,6 +354,7 @@ class SourceMacs:
         self._chunk_index = getattr(chunk, "chunk_index", 0)
         self._source_blocks = getattr(chunk, "source_packets", 0)
         self._symbol_size = getattr(chunk, "symbol_size", 0)
+        self._codec = codec_module(getattr(chunk, "codec", DEFAULT_CODEC))
         self._sealer = sealer
         self._macs = {
             (block.block_index, block.polynomial_index): block.mac_value
@@ -368,7 +371,7 @@ class SourceMacs:
         return None
 
     def packet_mac(self, packet_index, polynomial_index):
-        support = raptor.symbol_support(self._source_blocks, packet_index)
+        support = self._codec.symbol_support(self._source_blocks, packet_index)
         mac = xor_macs(
             [
                 self._macs[(block_index, polynomial_index)]

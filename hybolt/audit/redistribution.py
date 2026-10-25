@@ -7,7 +7,7 @@ from pathlib import Path
 from hybolt.audit.audit import PacketLocation
 from hybolt.encryption import raptor
 from hybolt.encryption.block import Block
-from hybolt.encryption.decoding_strategy import Raptor10DecodingStrategy
+from hybolt.encryption.codecs import CODECS, CODEC_NAMES, codec_module
 from hybolt.encryption.encoding_metadata import EncodingMetadata, PacketMetadata
 from hybolt.encryption.retrievability import COMPACT_SCHEME
 from hybolt.logger.logger import execution_logger
@@ -45,9 +45,12 @@ class Redistribution:
     """Hy-SAIL Redistribution phase for packets an audit found corrupted or lost.
 
     As in Hy-SAIL's Figure 3, a new packet is the XOR of packets other servers
-    still hold: every R10 packet is the XOR of the source blocks in its
-    support, so a fresh ESI's support is solved over GF(2) as a combination of
-    the healthy packets' supports, preferring low-degree (systematic) packets.
+    still hold: every R10 or Online Codes packet is the XOR of the source
+    blocks in its support, so a fresh ESI's support is solved over GF(2) as a
+    combination of the healthy packets' supports, preferring low-degree
+    packets. Online Codes decode by peeling, which a set of supports spanning
+    GF(2)^K does not guarantee, so their chunks get fresh check blocks until
+    they peel again.
     Only the packets of that combination are downloaded, checked against their
     SHA-256 and XORed; the chunk is never decoded. Each lost packet is replaced
     by a packet with a fresh, never used ESI, stored on another server, and
@@ -71,7 +74,7 @@ class Redistribution:
         self._extra_repair = extra_repair
         self._random = secrets.SystemRandom()
         if self._metadata.chunks is None:
-            raise ValueError("Redistribution requires chunked R10 metadata")
+            raise ValueError("Redistribution requires chunked metadata")
 
     def run(self) -> RedistributionReport:
         report = RedistributionReport()
@@ -94,18 +97,13 @@ class Redistribution:
         return report
 
     def _repair_chunk(self, chunk, locations, report):
-        if chunk.codec != Raptor10DecodingStrategy.codec:
+        if chunk.codec not in CODECS:
             raise ValueError(f"unsupported codec {chunk.codec}")
 
         lost_indices = {location.packet_index for location in locations}
         lost = [p for p in chunk.packets if p.packet_index in lost_indices]
         healthy = [p for p in chunk.packets if p.packet_index not in lost_indices]
-        new_indices = list(
-            range(
-                chunk.next_packet_index,
-                chunk.next_packet_index + len(lost) + self._extra_repair,
-            )
-        )
+        new_indices = self._new_indices(chunk, healthy, len(lost))
         generated = self._combine(chunk, healthy, new_indices)
 
         excluded = {packet.server for packet in lost}
@@ -138,15 +136,42 @@ class Redistribution:
         chunk.next_packet_index += len(new_indices)
         chunk.repair_packets = len(chunk.packets) - chunk.source_packets
 
+    def _new_indices(self, chunk, healthy, lost_count):
+        """Fresh ESIs replacing the lost packets, plus the requested extra ones."""
+        k = chunk.source_packets
+        codec = codec_module(chunk.codec)
+        new_indices = list(
+            range(
+                chunk.next_packet_index,
+                chunk.next_packet_index + lost_count + self._extra_repair,
+            )
+        )
+        healthy_indices = [packet.packet_index for packet in healthy]
+        # Without a spanning set no fresh packet can be built; _plan reports it.
+        if not self._spans(chunk, healthy):
+            return new_indices
+        while not codec.recoverable(k, healthy_indices + new_indices):
+            new_indices.append(new_indices[-1] + 1)
+        return new_indices
+
+    def _spans(self, chunk, packets):
+        k = chunk.source_packets
+        system = raptor.Gf2System(k)
+        codec = codec_module(chunk.codec)
+        for packet in packets:
+            system.add(codec.symbol_support(k, packet.packet_index))
+        return system.rank == k
+
     def _combine(self, chunk, healthy, new_indices):
         """Plain symbols of `new_indices`, each the XOR of verified healthy packets."""
         k = chunk.source_packets
+        codec = codec_module(chunk.codec)
         candidates = sorted(
             healthy,
-            key=lambda p: raptor.symbol_support(k, p.packet_index).bit_count(),
+            key=lambda p: codec.symbol_support(k, p.packet_index).bit_count(),
         )
         while True:
-            plans = self._plan(k, candidates, new_indices)
+            plans = self._plan(chunk, candidates, new_indices)
             needed = {index for plan in plans.values() for index in plan}
             symbols = {
                 index: self._download(chunk, candidates[index]) for index in needed
@@ -172,18 +197,21 @@ class Redistribution:
             generated[esi] = value.to_bytes(chunk.symbol_size, "big")
         return generated
 
-    def _plan(self, k, candidates, new_indices):
+    def _plan(self, chunk, candidates, new_indices):
         """For each new ESI, the candidate positions whose packets XOR to it."""
+        k = chunk.source_packets
+        codec = codec_module(chunk.codec)
         system = raptor.Gf2System(k)
         for position, packet in enumerate(candidates):
-            system.add(raptor.symbol_support(k, packet.packet_index), 1 << position)
+            system.add(codec.symbol_support(k, packet.packet_index), 1 << position)
 
         plans = {}
         for esi in new_indices:
-            remainder, combination = system.reduce(raptor.symbol_support(k, esi))
+            remainder, combination = system.reduce(codec.symbol_support(k, esi))
             if remainder:
                 raise ValueError(
-                    f"Insufficient valid R10 packets to rebuild packet {esi}"
+                    f"Insufficient valid {CODEC_NAMES[chunk.codec]} packets to "
+                    f"rebuild packet {esi}"
                 )
             plans[esi] = raptor.support_indices(combination)
         return plans
