@@ -73,11 +73,11 @@ Substituir os Online Codes pelo R10 mantendo o restante do HySAIL inalterado pre
 \begin{enumerate}
 	\item \textit{Memória do usuário no modelo limitado:} o usuário armazena $n \cdot l$ \acrshort{MAC}s de $\lambda$ bits, como no HySAIL, o que corresponde a uma fração $l \lambda / B$ do arquivo para blocos de mensagem de $B$ bits. Com $l = 40$, $\lambda = 127$ e blocos de 6.500 bytes, o usuário armazena cerca de 10\% do volume terceirizado, o que contraria o objetivo de uma \acrshort{PoR}, que é manter junto ao usuário apenas uma quantidade pequena de informação \cite{juels2007pors}.
 	\item \textit{Número limitado de auditorias:} como cada desafio $P_j$ é revelado ao provedor, ele só pode ser usado uma vez (Seção~\ref{sec:auditoria_limitada}). Um arquivo admite, portanto, $l$ auditorias, incluindo os desafios realizados durante a decodificação, após as quais precisa ser recodificado.
-	\item \textit{Ataque dirigido a um único \emph{chunk}:} a redundância é calculada por \emph{chunk}, e a estrutura do código fica exposta aos provedores, pois o nome dos arquivos e os próprios símbolos de origem, emitidos de forma sistemática, são armazenados em claro. Um adversário pode, assim, corromper alguns pacotes de um mesmo \emph{chunk} e tornar o arquivo irrecuperável; como o R10 não é MDS, o menor desses conjuntos pode ter menos que $r + 1$ pacotes, e, com os parâmetros padrão, tem apenas dois pacotes, contra os $r + 1 = 6$ que um código MDS exigiria. Essa corrupção atinge apenas uma fração mínima dos $T$ pacotes do arquivo, e uma auditoria que amostra $s$ pacotes a detecta com probabilidade desprezível para arquivos grandes. As \acrshort{PoR}s clássicas evitam esse ataque aplicando o código sobre todo o arquivo ou ocultando, por cifragem e permutação, quais símbolos pertencem a uma mesma palavra-código \cite{juels2007pors,bowers2009proofs}.
+	\item \textit{Ataque dirigido a um único \emph{chunk}:} a redundância é calculada por \emph{chunk}, e a estrutura do código fica exposta aos provedores, pois o nome dos arquivos e os próprios símbolos de origem, emitidos de forma sistemática, são armazenados em claro. Um adversário pode, assim, corromper alguns pacotes de um mesmo \emph{chunk} e tornar o arquivo irrecuperável; como o R10 não é MDS, o menor desses conjuntos pode ter menos que $r + 1$ pacotes, e, com os parâmetros padrão, bastam os sete pacotes que contêm um mesmo símbolo de origem, contra os $r + 1 = 26$ que um código MDS exigiria. Essa corrupção atinge apenas uma fração mínima dos $T$ pacotes do arquivo, e uma auditoria que amostra $s$ pacotes a detecta com probabilidade desprezível para arquivos grandes. As \acrshort{PoR}s clássicas evitam esse ataque aplicando o código sobre todo o arquivo ou ocultando, por cifragem e permutação, quais símbolos pertencem a uma mesma palavra-código \cite{juels2007pors,bowers2009proofs}.
 	\item \textit{Cancelamento de erros na resposta agregada:} a resposta da Auditoria original, o XOR dos pacotes desafiados, permite que dois pacotes corrompidos com o mesmo padrão de erro se anulem, como detalhado na Seção~\ref{sec:auditoria_limitada}.
 \end{enumerate}
 
-Além desses aspectos, herdados do HySAIL, a substituição introduz uma diferença no dimensionamento da redundância: os $r$ símbolos de reparo de um \emph{chunk} não toleram, em geral, a perda de quaisquer $r$ pacotes (Seção~\ref{sec:redundancia}). As Seções~\ref{sec:impacto_mac} a~\ref{sec:redistribuicao} descrevem como o R10 mantém o modelo limitado do HySAIL e resolvem o item 4. Os itens 1 e 2 decorrem do próprio modelo limitado e são resolvidos pelo esquema compacto da Seção~\ref{sec:esquema_compacto}, e o item 3, pela ocultação da estrutura do código da Seção~\ref{sec:ocultacao}.
+Além desses aspectos, herdados do HySAIL, a substituição introduz uma diferença no dimensionamento da redundância e do tamanho dos \emph{chunks}: os $r$ símbolos de reparo de um \emph{chunk} não toleram, em geral, a perda de quaisquer $r$ pacotes (Seção~\ref{sec:redundancia}). As Seções~\ref{sec:impacto_mac} a~\ref{sec:redistribuicao} descrevem como o R10 mantém o modelo limitado do HySAIL e resolvem o item 4. Os itens 1 e 2 decorrem do próprio modelo limitado e são resolvidos pelo esquema compacto da Seção~\ref{sec:esquema_compacto}, e o item 3, pela ocultação da estrutura do código da Seção~\ref{sec:ocultacao}.
 
 \section{MAC Homomórfico com o Raptor R10}
 \label{sec:impacto_mac}
@@ -124,7 +124,32 @@ No HySAIL original, a redundância decorre dos parâmetros dos Online Codes, que
 
 Diferentemente de um código MDS, em que quaisquer $K$ pacotes recuperam o \emph{chunk}, a recuperação com o R10 depende de quais pacotes restam: o \emph{chunk} é recuperável se, e somente se, os suportes dos pacotes restantes têm posto $K$ (Seção~\ref{sec:raptor_r10}). Perder $r$ pacotes, deixando exatamente $K$, frequentemente impede a recuperação, e a probabilidade de sucesso cresce a cada pacote excedente. A densidade de corrupção tolerada por \emph{chunk} é, portanto, inferior a $r / (K + r) \approx \varepsilon / (1 + \varepsilon)$, e deve ser estimada a partir da probabilidade de falha do R10, medida no Capítulo~6. Como o número de símbolos excedentes necessário é aproximadamente independente de $K$, a fração tolerada aproxima-se de $\varepsilon / (1 + \varepsilon)$ à medida que $K$ cresce, o que favorece símbolos menores ou \emph{chunks} maiores.
 
-Para $K$ pequeno, o efeito é determinístico e pode ser calculado exatamente, pois os suportes dependem apenas de $K$ e dos \acrshort{ESI}s. Com o tamanho de símbolo padrão, um \emph{chunk} completo tem $K = 10$, e, com $\varepsilon = 0{,}25$, os três símbolos de reparo, de \acrshort{ESI}s 10 a 12, não contêm dois dos dez símbolos de origem em seus suportes: a perda de qualquer um desses dois pacotes torna o \emph{chunk} irrecuperável, o que ocorre em 15,4\% das perdas de um único pacote. Com $\varepsilon = 0{,}5$, os cinco símbolos de reparo cobrem todos os símbolos de origem, e o \emph{chunk} sobrevive a toda perda de um pacote e a 98,1\% das perdas de dois pacotes. Por esse motivo, a proposta adota $\varepsilon = 0{,}5$ como valor padrão, o dobro do que seria necessário com o RaptorQ.
+\subsection{Tamanho dos \emph{chunks}}
+\label{sec:tamanho_chunk}
+
+O HySAIL original codifica o arquivo inteiro \cite{amaral2019hysail}. Com o R10, a divisão em \emph{chunks} é necessária por três motivos. Primeiro, a norma limita cada bloco de origem a 8.192 símbolos e particiona objetos maiores em vários blocos \cite{luby2007rfc5053}. Segundo, como os suportes dos símbolos de reparo do R10 são densos, com cerca de $K/2$ símbolos de origem, a Redistribuição transfere cerca de $K/2$ pacotes (Seção~\ref{sec:redistribuicao}); com um único bloco, reparar um pacote exigiria transferir metade do arquivo. Terceiro, cada \emph{chunk} é codificado e decodificado independentemente, sem manter o arquivo inteiro em memória.
+
+O tamanho do \emph{chunk}, por outro lado, é uma escolha de projeto que o \acrshort{MAC} não restringe, e o \emph{overhead} aproximadamente constante do R10 favorece \emph{chunks} com mais símbolos. Para $K$ pequeno, o efeito é determinístico e pode ser calculado exatamente, pois os suportes dependem apenas de $K$ e dos \acrshort{ESI}s: com $K = 10$ e $\varepsilon = 0{,}25$, os três símbolos de reparo, de \acrshort{ESI}s 10 a 12, não contêm dois dos dez símbolos de origem em seus suportes, e a perda de qualquer um desses dois pacotes torna o \emph{chunk} irrecuperável, o que ocorre em 15,4\% das perdas de um único pacote. A Tabela~\ref{tab:tamanho_chunk} compara, para símbolos de 6.500 bytes, a fração de pacotes de um \emph{chunk} cuja perda aleatória é tolerada em 99\% dos casos, a fração de pacotes de um arquivo de 1~GiB que, corrompida uniformemente, torna a perda do arquivo mais provável que sua recuperação, e o volume transferido por pacote reparado.
+
+\begin{table}[htbp]
+	\centering
+	\caption{Efeito do número de símbolos por \emph{chunk}, com símbolos de 6.500 bytes, estimado por simulação}
+	\label{tab:tamanho_chunk}
+	\begin{tabular}{rrrrrr}
+		\hline
+		\textbf{$K$} & \textbf{\emph{Chunk}} & \textbf{$\varepsilon$} & \textbf{Perda tolerada} & \textbf{Corrupção crítica (1~GiB)} & \textbf{Reparo} \\
+		\hline
+		10 & 65~KB & 0,25 & 0\% & $< 0{,}01\%$ & 33~KB \\
+		10 & 65~KB & 0,5 & 6,7\% & 0,4\% & 33~KB \\
+		100 & 650~KB & 0,25 & 14,4\% & 8,1\% & 325~KB \\
+		100 & 650~KB & 0,5 & 28,7\% & 20,1\% & 325~KB \\
+		250 & 1,6~MB & 0,25 & 17,9\% & 13,3\% & 813~KB \\
+		1.000 & 6,5~MB & 0,25 & 19,5\% & 17,0\% & 3,3~MB \\
+		\hline
+	\end{tabular}
+\end{table}
+
+Com $K = 100$, a perda tolerada por \emph{chunk} já se aproxima do limite MDS de $r/(K + r) = 20\%$ para $\varepsilon = 0{,}25$, e a corrupção crítica de um arquivo de 1~GiB é cinco vezes maior que a obtida com o RaptorQ e \emph{chunks} de $K = 11$ símbolos, de 1,6\%, enquanto cada reparo transfere apenas 325~KB. Valores maiores de $K$ aumentam pouco a tolerância e multiplicam o custo da Redistribuição. A proposta adota, por isso, \emph{chunks} de $K = 100$ símbolos de 6.500 bytes (650.000 bytes) e $\varepsilon = 0{,}25$ como valores padrão. Para arquivos ou \emph{chunks} menores que 650.000 bytes, o símbolo é reduzido de modo a manter 100 símbolos de origem.
 
 O parâmetro $\varepsilon$ também determina quantos provedores podem deixar o sistema sem perda de dados. Como os $K + r$ pacotes de cada \emph{chunk} são distribuídos de forma equilibrada entre os $N$ provedores, cada provedor armazena cerca de $(K + r)/N$ deles, e a saída de $f$ provedores só pode ser tolerada se $f (K + r)/N \le r$, isto é, se
 
@@ -133,7 +158,7 @@ O parâmetro $\varepsilon$ também determina quantos provedores podem deixar o s
 	\label{eq:tolerancia_provedores}
 \end{equation}
 
-\noindent Com o R10, essa condição é necessária, mas não suficiente: é preciso, além disso, que restem alguns pacotes além de $K$. Com três provedores e $K = 10$, a saída de um provedor torna irrecuperáveis 59\% dos \emph{chunks} com o valor padrão $\varepsilon = 0{,}5$, que satisfaz a Equação~\eqref{eq:tolerancia_provedores} com igualdade, 4,8\% com $\varepsilon = 1$ e 0,3\% com $\varepsilon = 1{,}5$, valores obtidos por simulação da distribuição dos pacotes.
+\noindent Com o R10, essa condição é necessária, mas não suficiente: é preciso, além disso, que restem alguns pacotes além de $K$. Com três provedores e $K = 100$, o valor padrão $\varepsilon = 0{,}25$ não tolera a saída de nenhum provedor, e a saída de um torna irrecuperáveis 72\% dos \emph{chunks} com $\varepsilon = 0{,}5$, que satisfaz a Equação~\eqref{eq:tolerancia_provedores} com igualdade, 1,3\% com $\varepsilon = 0{,}6$ e nenhum, em 2.000 simulações, com $\varepsilon = 0{,}75$.
 
 \section{Redistribuição}
 \label{sec:redistribuicao}
@@ -158,7 +183,7 @@ Em vez de reproduzir o pacote corrompido, a proposta explora a propriedade \emph
 	\label{fig:redistribuicao}
 \end{figure}
 
-A divisão do arquivo em \emph{chunks} de, por padrão, no máximo $\lambda \cdot 512$ bytes (65.024 bytes para $\lambda = 127$) limita o volume transferido em cada Redistribuição a uma parte de um único \emph{chunk}, independentemente do tamanho do arquivo.
+A divisão do arquivo em \emph{chunks} de, por padrão, no máximo 650.000 bytes limita o volume transferido em cada Redistribuição a uma parte de um único \emph{chunk}, independentemente do tamanho do arquivo: com $K = 100$, cada pacote reparado exige, em média, a transferência de cerca de 49 pacotes, aproximadamente 320~KB.
 
 \section{Esquema Compacto e Ilimitado}
 \label{sec:esquema_compacto}
