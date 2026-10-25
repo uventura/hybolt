@@ -11,3 +11,9 @@ logs/
 doc/thesis/monografia.{acn,acr,alg,aux,bbl,blg,glg,glo,gls,glsdefs,ist,lof,log,out,pdf,toc}
 doc/thesis/monografia.pdflatex.*.log
 *.log
+
+# Native extension build output
+build/
+*.egg-info/
+hybolt/utils/_gf2*.so
+hybolt/utils/_gf2*.pyd

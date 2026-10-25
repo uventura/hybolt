@@ -1,12 +1,9 @@
 [build-system]
-requires = ["hatchling==1.2.0"]
-build-backend = "hatchling.build"
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
 
-[tool.hatch.build.targets.wheel]
-packages = ["hybolt"]
-
-[tool.hatch.build]
-include = ["hybolt/**/*.py"]
+[tool.setuptools.packages.find]
+include = ["hybolt*"]
 
 [tool.pytest.ini_options]
 testpaths = ["hybolt/**/tests"]

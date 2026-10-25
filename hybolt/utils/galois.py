@@ -6,7 +6,17 @@ import numpy as np
 from hybolt.constant import POLYNOMIAL_LAMBDA
 from hybolt.utils.decorators import start_record_timeit
 
+try:
+    from hybolt.utils import _gf2 as _native
+except ImportError:  # pragma: no cover - built only where a C compiler exists
+    _native = None
+
 _BYTE_REDUCTION_TABLES = {}
+# Moduli the C extension handles: lambda = 127 needs two 64-bit words.
+_NATIVE_MIN_DEGREE = 8
+_NATIVE_MAX_DEGREE = 128
+_NATIVE_MODULUS_BYTES = 17
+_NATIVE_ELEMENT_BYTES = 16
 
 
 def bytes_to_poly_coeffs(message_block):
@@ -38,25 +48,9 @@ def _byte_reduction_table(divisor, divisor_degree):
     key = (divisor, divisor_degree)
     if key not in _BYTE_REDUCTION_TABLES:
         _BYTE_REDUCTION_TABLES[key] = [
-            _reduce_polynomial(value << divisor_degree, divisor)
-            for value in range(256)
+            _reduce_polynomial(value << divisor_degree, divisor) for value in range(256)
         ]
     return _BYTE_REDUCTION_TABLES[key]
-
-
-def _byte_aligned_gf2_poly_mod(m_coeffs, divisor, divisor_degree):
-    table = _byte_reduction_table(divisor, divisor_degree)
-    mask = (1 << divisor_degree) - 1
-    packed_message = np.packbits(
-        np.asarray(m_coeffs, dtype=np.uint8)[::-1]
-    ).tobytes()
-    remainder = 0
-
-    for byte in packed_message:
-        top_byte = remainder >> (divisor_degree - 8)
-        remainder = ((remainder << 8) & mask) ^ table[top_byte] ^ byte
-
-    return remainder
 
 
 @start_record_timeit(runs=1)
@@ -65,27 +59,17 @@ def gf2_poly_mod(m_coeffs, p_coeffs):
     Performs polynomial division m(x) % p(x) over GF(2).
     In GF(2), addition and subtraction are both XOR.
     """
-    dividend_coeffs = list(m_coeffs)
-    divisor_coeffs = list(p_coeffs)
+    dividend_coeffs = np.asarray(m_coeffs, dtype=np.uint8)
+    divisor_coeffs = np.trim_zeros(np.asarray(p_coeffs, dtype=np.uint8), "b")
 
-    while divisor_coeffs and divisor_coeffs[-1] == 0:
-        divisor_coeffs.pop()
-
-    if not divisor_coeffs:
+    if not len(divisor_coeffs):
         raise ZeroDivisionError("Division by zero polynomial.")
 
-    divisor = _poly_coeffs_to_int(divisor_coeffs)
-    divisor_degree = divisor.bit_length() - 1
-    if divisor_degree >= 8 and len(dividend_coeffs) % 8 == 0:
-        current_dividend = _byte_aligned_gf2_poly_mod(
-            dividend_coeffs, divisor, divisor_degree
-        )
-    else:
-        dividend = _poly_coeffs_to_int(dividend_coeffs)
-        current_dividend = _reduce_polynomial(dividend, divisor)
-
+    remainder = gf2_mod(
+        _poly_coeffs_to_int(dividend_coeffs), _poly_coeffs_to_int(divisor_coeffs)
+    )
     remainder_width = min(len(dividend_coeffs), len(divisor_coeffs) - 1)
-    return _int_to_poly_coeffs(current_dividend, remainder_width)
+    return _int_to_poly_coeffs(remainder, remainder_width)
 
 
 def bytes_to_poly_int(message_block):
@@ -95,6 +79,14 @@ def bytes_to_poly_int(message_block):
 
 def gf2_mod(value, modulus):
     """value(x) mod modulus(x) over GF(2), both given as integers."""
+    if _native_modulus(modulus):
+        data = value.to_bytes((value.bit_length() + 7) // 8, "big")
+        remainder = _native.mod(data, modulus.to_bytes(_NATIVE_MODULUS_BYTES, "little"))
+        return int.from_bytes(remainder, "little")
+    return _python_gf2_mod(value, modulus)
+
+
+def _python_gf2_mod(value, modulus):
     degree = modulus.bit_length() - 1
     if degree < 8:
         return _gf2_reduce(value, modulus)
@@ -112,6 +104,14 @@ def gf2_clmul(left, right):
     """Carry-less product of two GF(2)[x] polynomials given as integers."""
     if left.bit_length() < right.bit_length():
         left, right = right, left
+    if _native is not None and right.bit_length() <= 8 * _NATIVE_ELEMENT_BYTES:
+        data = left.to_bytes((left.bit_length() + 7) // 8, "big")
+        product = _native.clmul(data, right.to_bytes(_NATIVE_ELEMENT_BYTES, "little"))
+        return int.from_bytes(product, "big")
+    return _python_gf2_clmul(left, right)
+
+
+def _python_gf2_clmul(left, right):
     product = 0
     while right:
         if right & 1:
@@ -207,6 +207,8 @@ def _gf2_reduce(value, modulus):
 
 
 def _gf2_square_mod(value, modulus):
+    if _native_modulus(modulus):
+        return _gf2_mul_mod(value, value, modulus)
     # Squaring in GF(2)[x] spreads the coefficients: bit i moves to bit 2i.
     if value == 0:
         return 0
@@ -214,6 +216,29 @@ def _gf2_square_mod(value, modulus):
 
 
 def _gf2_mul_mod(left, right, modulus):
+    if _native_modulus(modulus):
+        degree = modulus.bit_length() - 1
+        if left.bit_length() > degree:
+            left = gf2_mod(left, modulus)
+        if right.bit_length() > degree:
+            right = gf2_mod(right, modulus)
+        product = _native.mulmod(
+            left.to_bytes(_NATIVE_ELEMENT_BYTES, "little"),
+            right.to_bytes(_NATIVE_ELEMENT_BYTES, "little"),
+            modulus.to_bytes(_NATIVE_MODULUS_BYTES, "little"),
+        )
+        return int.from_bytes(product, "little")
+    return _python_gf2_mul_mod(left, right, modulus)
+
+
+def _native_modulus(modulus):
+    return (
+        _native is not None
+        and _NATIVE_MIN_DEGREE <= modulus.bit_length() - 1 <= _NATIVE_MAX_DEGREE
+    )
+
+
+def _python_gf2_mul_mod(left, right, modulus):
     product = 0
     while right:
         if right & 1:

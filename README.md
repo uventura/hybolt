@@ -37,6 +37,15 @@ Install HyBolt in editable mode:
 python -m pip install -e .
 ```
 
+Installing also compiles
+[`hybolt/utils/_gf2.c`](hybolt/utils/_gf2.c), a C extension for the GF(2)[x]
+arithmetic of moduli up to degree 128 (polynomial reduction, modular product
+and carry-less product), which dominates the MAC, tag and challenge costs.
+The extension is optional: without a C compiler the installation still
+succeeds and HyBolt uses the pure-Python implementation, which gives the same
+results more slowly. After editing the C file, rebuild it in place with
+`python setup.py build_ext --inplace`.
+
 The equivalent Makefile target is:
 
 ```sh

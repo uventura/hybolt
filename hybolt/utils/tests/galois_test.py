@@ -1,6 +1,9 @@
+import random
+
 import numpy as np
 import pytest
 
+import hybolt.utils.galois as ga
 from hybolt.utils.galois import (
     _poly_coeffs_to_int,
     _prime_factors,
@@ -195,3 +198,55 @@ def test_given_polynomials_when_carry_less_multiplying_then_returns_gf2_product(
     # (x + 1)(x^2 + x + 1) = x^3 + 1 over GF(2)
     assert gf2_clmul(0b11, 0b111) == 0b1001
     assert gf2_clmul(0, 0b111) == 0
+
+
+native = pytest.mark.skipif(ga._native is None, reason="C extension not built")
+
+
+def _random_modulus(rng, degree):
+    return (1 << degree) | rng.getrandbits(degree) | 1
+
+
+@native
+@pytest.mark.parametrize("degree", [8, 9, 63, 64, 65, 127, 128])
+def test_given_native_extension_when_reducing_then_matches_python(degree):
+    rng = random.Random(degree)
+    for _ in range(50):
+        modulus = _random_modulus(rng, degree)
+        value = rng.getrandbits(rng.randint(1, 4000))
+        assert ga.gf2_mod(value, modulus) == ga._gf2_reduce(value, modulus)
+
+
+@native
+@pytest.mark.parametrize("degree", [8, 64, 127, 128])
+def test_given_native_extension_when_multiplying_then_matches_python(degree):
+    rng = random.Random(degree)
+    for _ in range(50):
+        modulus = _random_modulus(rng, degree)
+        left, right = rng.getrandbits(degree + 20), rng.getrandbits(degree)
+        assert ga._gf2_mul_mod(left, right, modulus) == ga._python_gf2_mul_mod(
+            left, right, modulus
+        )
+
+
+@native
+def test_given_native_extension_when_carry_less_multiplying_then_matches_python():
+    rng = random.Random(7)
+    for _ in range(50):
+        big, small = rng.getrandbits(52000), rng.getrandbits(rng.randint(1, 128))
+        assert ga.gf2_clmul(big, small) == ga._python_gf2_clmul(big, small)
+
+
+def test_given_no_native_extension_when_computing_then_falls_back_to_python(
+    monkeypatch,
+):
+    polynomial = np.array([1, 0, 1, 1] + [0] * 12 + [1], dtype=np.uint8)
+    message = ga.bytes_to_poly_coeffs(b"fallback")
+    expected = ga.gf2_poly_mod(message, polynomial)
+    primitive = ga.generate_challenge_polynomial(degree=31)
+
+    monkeypatch.setattr(ga, "_native", None)
+
+    assert np.array_equal(ga.gf2_poly_mod(message, polynomial), expected)
+    assert ga.is_primitive(primitive)
+    assert ga.gf2_clmul(0b1011, 0b11) == 0b11101
