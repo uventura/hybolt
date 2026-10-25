@@ -107,17 +107,17 @@
   \btxurlfont{https://thejaps.org.pk/AbstractView.aspx?mid=2024-japs-1928}}.
 
 \btxselectlanguage {english}
-\bibitem {WOS:000381844400033}
-\btxnamefont {\btxlastnamefont {Ko}, Dongyub}, \btxnamefont {Kijong
-  \btxlastnamefont {Koo}}\btxandcomma {} \btxandlong {}\ \btxnamefont
-  {Do\btxfnamespacelong Young \btxlastnamefont {Kim}}\btxauthorcolon\
-  \btxjtitlefont {\btxifchangecase {Reducing the decoding complexity of raptorq
-  codes for delay sensitive applications using a simplified and scaled-down
-  matrix}{Reducing the decoding complexity of RaptorQ codes for delay sensitive
-  applications using a simplified and scaled-down matrix}}.
-\newblock \btxjournalfont {AEU-INTERNATIONAL JOURNAL OF ELECTRONICS AND
-  COMMUNICATIONS}, 70(9):1356--1360, 2016\ifbtxprintISSN {,
-  \mbox{\btxISSN~\btxISSNfont {1434-8411}}}.
+\bibitem {luby2007rfc5053}
+\btxnamefont {\btxlastnamefont {Luby}, Michael}, \btxnamefont {Amin
+  \btxlastnamefont {Shokrollahi}}, \btxnamefont {Mark \btxlastnamefont
+  {Watson}}\btxandcomma {} \btxandlong {}\ \btxnamefont {Thomas
+  \btxlastnamefont {Stockhammer}}\btxauthorcolon\ \btxtitlefont
+  {\btxifchangecase {Raptor forward error correction scheme for object
+  delivery}{Raptor Forward Error Correction Scheme for Object Delivery}}.
+\newblock \Btxtechreplong {}\ RFC 5053, Internet Engineering Task Force (IETF),
+  2007.
+\newblock {\latintext \btxurlfont{https://www.rfc-editor.org/rfc/rfc5053}},
+  Acesso em: 25 out. 2026.
 
 \bibitem {luby2011rfc6330}
 \btxnamefont {\btxlastnamefont {Luby}, Michael}, \btxnamefont {Amin
@@ -164,6 +164,18 @@
   \btxjtitlefont {\btxifchangecase {Raptor codes}{Raptor Codes}}.
 \newblock \btxjournalfont {IEEE Transactions on Information Theory},
   52(6):2551--2567, 2006.
+
+\bibitem {WOS:000381844400033}
+\btxnamefont {\btxlastnamefont {Ko}, Dongyub}, \btxnamefont {Kijong
+  \btxlastnamefont {Koo}}\btxandcomma {} \btxandlong {}\ \btxnamefont
+  {Do\btxfnamespacelong Young \btxlastnamefont {Kim}}\btxauthorcolon\
+  \btxjtitlefont {\btxifchangecase {Reducing the decoding complexity of raptorq
+  codes for delay sensitive applications using a simplified and scaled-down
+  matrix}{Reducing the decoding complexity of RaptorQ codes for delay sensitive
+  applications using a simplified and scaled-down matrix}}.
+\newblock \btxjournalfont {AEU-INTERNATIONAL JOURNAL OF ELECTRONICS AND
+  COMMUNICATIONS}, 70(9):1356--1360, 2016\ifbtxprintISSN {,
+  \mbox{\btxISSN~\btxISSNfont {1434-8411}}}.
 
 \expandafter\btxselectlanguage\expandafter {\btxfallbacklanguage}
 \bibitem {armknecht2021outsourcing}
@@ -241,5 +253,12 @@
   {Scott\btxfnamespacelong A. \btxlastnamefont {Vanstone}}\btxauthorcolon\
   \btxtitlefont {Handbook of Applied Cryptography}.
 \newblock \btxpublisherfont {CRC Press}, Boca Raton, FL, 1997.
+
+\bibitem {gofountain}
+\btxnamefont {\btxlastnamefont {Google}}\btxauthorcolon\ \btxtitlefont
+  {\btxifchangecase {gofountain: Fountain codes in go}{gofountain: Fountain
+  codes in Go}}, 2016.
+\newblock {\latintext \btxurlfont{https://github.com/google/gofountain}},
+  Acesso em: 25 out. 2026.
 
 \end{thebibliography}
