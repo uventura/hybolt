@@ -9,7 +9,7 @@
 	\node[rotulo, above=1mm of ch0] {$\le \lambda \cdot 512$ bytes};
 
 	% Codificação de um chunk
-	\node[caixa=serieD, right=of ch0, minimum width=22mm, yshift=-5mm, minimum height=14mm] (rq) {RaptorQ\\$K$ origem\\$+\ r = \lceil \varepsilon K \rceil$};
+	\node[caixa=serieD, right=of ch0, minimum width=22mm, yshift=-5mm, minimum height=14mm] (rq) {Raptor R10\\$K$ origem\\$+\ r = \lceil \varepsilon K \rceil$};
 	\draw[seta] (ch0.east) -- (rq.west |- ch0.east);
 	\node[caixa=serieE, right=of rq, minimum width=24mm, minimum height=14mm] (selo) {Cifragem\\SHAKE-256\\nome HMAC};
 	\node[caixa=serieB, right=of selo, minimum width=24mm, minimum height=14mm] (prova) {Etiqueta $\sigma_\eta$\\ou $l$ MACs\\+ SHA-256};

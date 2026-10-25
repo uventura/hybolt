@@ -14,8 +14,8 @@
 
 	% Passos
 	\node[caixa=serieB, right=14mm of s3, yshift=12mm, minimum width=52mm, align=left] (p1) {1. auditoria detecta o pacote 4 corrompido};
-	\node[caixa=serieD, below=of p1, minimum width=52mm, align=left] (p2) {2. decodifica o \emph{chunk} com os pacotes\\\phantom{2. }cujo SHA-256 confere};
-	\node[caixa=serieA, below=of p2, minimum width=52mm, align=left] (p3) {3. recodifica e gera o reparo com ESI\\\phantom{3. }inédito $t$ (contador nos metadados)};
+	\node[caixa=serieD, below=of p1, minimum width=52mm, align=left] (p2) {2. escreve o suporte de $t$ como XOR dos\\\phantom{2. }suportes de pacotes íntegros: $X_t = X_0 \triangle X_9$};
+	\node[caixa=serieA, below=of p2, minimum width=52mm, align=left] (p3) {3. transfere 0 e 9, confere o SHA-256 e\\\phantom{3. }calcula $c_t = c_0 \oplus c_9$, sem decodificar};
 	\node[caixa=serieC, below=of p3, minimum width=52mm, align=left] (p4) {4. grava em $S_3$, o provedor do \emph{chunk}\\\phantom{4. }com menos pacotes, e remove o pacote 4};
 	\draw[seta] (p1) -- (p2);
 	\draw[seta] (p2) -- (p3);

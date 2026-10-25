@@ -31,7 +31,7 @@
 
 	% Decodificação
 	\node[interface, right=12mm of ac] (ds) {$\langle\langle$interface$\rangle\rangle$\\\texttt{DecodingStrategy}};
-	\node[concreta=serieB, below=7mm of ds] (rq) {RaptorQDecodingStrategy};
+	\node[concreta=serieB, below=7mm of ds] (rq) {Raptor10DecodingStrategy};
 	\node[concreta=serieB, below=of rq] (lt) {LtDecodingStrategy};
 	\draw[herda] ($(lt.west)+(-4mm,0)$) -- ($(ds.west)+(-4mm,0)$) -- (ds.west);
 	\foreach \c in {rq,lt} \draw[barramento] (\c.west) -- ++(-4mm,0);
