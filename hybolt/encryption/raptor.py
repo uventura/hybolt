@@ -15,6 +15,8 @@ from dataclasses import dataclass
 
 from hybolt.encryption import raptor_tables as tables
 
+CODEC = "r10"
+SYSTEMATIC = True
 # Q in the triple generator (Section 5.4.4.4): the largest prime below 2^16.
 _TRIPLE_PRIME = 65521
 _DEGREE_RANGE = 1 << 20
@@ -169,6 +171,14 @@ def symbol_support(source_symbols: int, esi: int) -> int:
     for neighbour in lt_neighbours(parameters(source_symbols), esi):
         mask ^= supports[neighbour]
     return mask
+
+
+def recoverable(source_symbols: int, esis) -> bool:
+    """Exact R10 check: do the supports of `esis` span GF(2)^K?"""
+    system = Gf2System(source_symbols)
+    for esi in esis:
+        system.add(symbol_support(source_symbols, esi))
+    return system.rank == source_symbols
 
 
 def support_indices(mask: int) -> list[int]:
