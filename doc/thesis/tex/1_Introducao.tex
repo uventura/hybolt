@@ -37,13 +37,13 @@ Portanto, embora o cenário tecnológico tenha evoluído, permanece necessária 
 
 \section{Objetivos}
 
-Na proposta original, o HySAIL depende de Online Codes para gerar os blocos distribuídos entre os servidores. Considerando as otimizações incorporadas aos RaptorQ Codes \cite{WOS:000381844400033}, o presente trabalho tem como objetivo avaliar a substituição dos Online Codes pelos RaptorQ Codes no processo de codificação e decodificação de blocos do HySAIL.
+Na proposta original, o HySAIL depende de Online Codes para gerar os blocos distribuídos entre os servidores. O presente trabalho tem como objetivo avaliar a substituição dos Online Codes pelos Raptor Codes padronizados na RFC~5053 (R10) \cite{luby2007rfc5053} no processo de codificação e decodificação de blocos do HySAIL. O R10 foi escolhido em vez de seu sucessor, o RaptorQ \cite{luby2011rfc6330}, porque opera inteiramente em $GF(2)$: cada símbolo codificado continua sendo o XOR de blocos de mensagem, como nos Online Codes, o que preserva o \acrshort{MAC} homomórfico e a Redistribuição local do HySAIL.
 
 Após a implementação e a avaliação dessas mudanças, serão realizadas comparações com soluções adotadas anteriormente, a fim de identificar os ganhos proporcionados pelo novo modelo.
 
 \section{Contribuições Esperadas}
 
-Ao final deste trabalho, espera-se que o modelo proposto para codificação e decodificação de blocos utilizando RaptorQ Codes apresente melhorias em termos de eficiência, segurança e robustez em comparação com as soluções baseadas em Online Codes e que exista prova matemática que admita seu uso.
+Ao final deste trabalho, espera-se que o modelo proposto para codificação e decodificação de blocos utilizando o Raptor R10 apresente melhorias em termos de eficiência, segurança e robustez em comparação com as soluções baseadas em Online Codes, que exista prova matemática que admita seu uso e que as concessões em relação ao RaptorQ sejam quantificadas.
 
 Além disso, espera-se que as contribuições deste estudo forneçam subsídios para a adoção de técnicas avançadas de codificação em cenários de Big Data e ambientes distribuídos.
 
@@ -54,7 +54,7 @@ O presente trabalho está organizado da seguinte forma:
 \begin{itemize}
 \item O Capítulo 2 apresenta os conceitos matemáticos e os códigos \emph{fountain} que fundamentam o trabalho, bem como os trabalhos relacionados no campo de \acrshort{PoR}.
 \item O Capítulo 3 detalha a metodologia de pesquisa adotada.
-\item O Capítulo 4 descreve a proposta de substituição dos Online Codes pelos RaptorQ Codes no HySAIL.
+\item O Capítulo 4 descreve a proposta de substituição dos Online Codes pelo Raptor R10 no HySAIL.
 \item O Capítulo 5 descreve a implementação do modelo proposto.
 \item O Capítulo 6 apresenta os resultados obtidos e a análise comparativa com a solução baseada em Online Codes.
 \item Por fim, o Capítulo 7 apresenta as conclusões e as perspectivas para trabalhos futuros.
