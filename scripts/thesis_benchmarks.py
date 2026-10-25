@@ -33,12 +33,11 @@ import numpy as np
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from raptorq import Decoder, Encoder
-
 import hybolt.utils.galois as ga
 from hybolt.audit.audit import Audit
 from hybolt.constant import POLYNOMIAL_LAMBDA, POLYNOMIAL_SET_SIZE
 from hybolt.encryption import encode as encode_module
+from hybolt.encryption import raptor
 from hybolt.encryption.retrievability import (
     BOUNDED_SCHEME,
     COMPACT_SCHEME,
@@ -53,6 +52,13 @@ from hybolt.server.packet_saver import PacketSaver
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+
+try:
+    # RaptorQ is no longer a HyBolt dependency; when installed, it is measured
+    # as the reference the R10 trade-off is compared with.
+    import raptorq
+except ImportError:
+    raptorq = None
 
 KIB = 1024
 MIB = 1024 * KIB
@@ -178,9 +184,9 @@ class StageTimer:
 
 
 ENCODE_STAGES = (
-    (encode_module.Encode, "_encode", "RaptorQ"),
+    (encode_module.Encode, "_encode", "R10"),
     (SealingKeys, "seal", "cifragem"),
-    (PolynomialRetrievabilityProof, "tag_packets", "MAC/etiqueta"),
+    (PolynomialRetrievabilityProof, "tag_source_blocks", "MAC/etiqueta"),
     (CompactRetrievabilityProof, "attach_server_tags", "MAC/etiqueta"),
     (PacketSaver, "save", "distribuição"),
     (HyboltEncode, "_save_packet_metadata", "metadados"),
@@ -417,12 +423,17 @@ def plot_pipeline(results, figure_dir):
                 label=f"{SCHEME_LABELS[scheme]} (medido)",
                 **series_style(slot),
             )
+    # n * l MACs: K = 11 source blocks per chunk of lambda * 512 bytes.
     axis.axhline(
-        100 * POLYNOMIAL_SET_SIZE * POLYNOMIAL_LAMBDA / (8 * 6500) * 1.25,
+        100
+        * 11
+        * POLYNOMIAL_SET_SIZE
+        * POLYNOMIAL_LAMBDA
+        / (8 * POLYNOMIAL_LAMBDA * 512),
         color=COLORS[3],
         linestyle=":",
         linewidth=1.5,
-        label=r"limitado, MACs em bits ($1{,}25\,l\lambda/B$)",
+        label=r"limitado, MACs em bits ($K l \lambda$ por chunk)",
     )
     axis.set_xscale("log", base=2)
     axis.set_yscale("log")
@@ -445,7 +456,7 @@ def plot_pipeline(results, figure_dir):
 
 def plot_stages(records, figure_dir):
     stages = [
-        "RaptorQ",
+        "R10",
         "cifragem",
         "MAC/etiqueta",
         "distribuição",
@@ -556,7 +567,7 @@ def experiment_mac(args):
 
 
 # ---------------------------------------------------------------------------
-# Overhead: symbols needed for recovery, RaptorQ against Online and LT codes
+# Overhead: symbols needed for recovery, R10 against RaptorQ, Online and LT codes
 # ---------------------------------------------------------------------------
 
 
@@ -676,8 +687,23 @@ def symbols_needed_lt(k, rng, limit_factor=4):
     return None
 
 
+def symbols_needed_r10(k, rng, pool_factor=3):
+    """Symbols received, in random order, until their R10 supports span GF(2)^K.
+
+    Every R10 symbol is the XOR of the source symbols in its support, so a set
+    decodes exactly when the supports have rank K: this is the decoder's own
+    criterion, computed without the data.
+    """
+    system = raptor.Gf2System(k)
+    for received, esi in enumerate(rng.permutation(pool_factor * k), start=1):
+        system.add(raptor.symbol_support(k, int(esi)))
+        if system.rank == k:
+            return received
+    return None
+
+
 def symbols_needed_raptorq(packets, transfer_length, symbol_size, rng):
-    decoder = Decoder.with_defaults(transfer_length, symbol_size)
+    decoder = raptorq.Decoder.with_defaults(transfer_length, symbol_size)
     for received, index in enumerate(rng.permutation(len(packets)), start=1):
         if decoder.decode(packets[index]) is not None:
             return received
@@ -693,21 +719,26 @@ def experiment_overhead(args):
     rng = np.random.default_rng(2)
     results = {}
     for k in ks:
-        data = rng.integers(0, 256, k * symbol_size, dtype=np.uint8).tobytes()
-        packets = Encoder.with_defaults(data, symbol_size).get_encoded_packets(k)
-        needed = {"raptorq": [], "online": [], "lt": []}
+        needed = {"r10": [], "online": [], "lt": []}
         started = time.perf_counter()
         for _ in range(trials[k]):
-            needed["raptorq"].append(
+            needed["r10"].append(symbols_needed_r10(k, rng))
+        r10_seconds = time.perf_counter() - started
+        if raptorq is not None:
+            data = rng.integers(0, 256, k * symbol_size, dtype=np.uint8).tobytes()
+            packets = raptorq.Encoder.with_defaults(
+                data, symbol_size
+            ).get_encoded_packets(k)
+            needed["raptorq"] = [
                 symbols_needed_raptorq(packets, len(data), symbol_size, rng)
-            )
-        raptorq_seconds = time.perf_counter() - started
+                for _ in range(trials[k])
+            ]
         for _ in range(trials[k]):
             needed["online"].append(symbols_needed_online(k, rng))
             needed["lt"].append(symbols_needed_lt(k, rng))
         results[k] = {
             "needed": needed,
-            "raptorq_decode_seconds": raptorq_seconds,
+            "r10_rank_seconds": r10_seconds,
             "online_epsilon": online_epsilon(k),
         }
         summary = {
@@ -716,9 +747,15 @@ def experiment_overhead(args):
         }
         print(f"  overhead K={k}: mean extra symbols {summary}")
     save_json(args.data_dir, "overhead", results)
+    plot_overhead(results, args.figure_dir)
+    return results
 
+
+def plot_overhead(results, figure_dir):
+    ks = [int(k) for k in results]
     figure, axes = plt.subplots(1, len(ks), figsize=(6.2, 2.8), sharey=True)
     codes = (
+        ("r10", "Raptor R10"),
         ("raptorq", "RaptorQ"),
         ("online", "Online Codes"),
         ("lt", "LT (sóliton robusto)"),
@@ -726,11 +763,14 @@ def experiment_overhead(args):
     for axis, k in zip(axes, ks):
         limit = 3.0 if k <= 11 else 1.6
         ratios = np.linspace(0.9, limit, 400)
+        needed = results[k] if k in results else results[str(k)]
         for slot, (code, label) in enumerate(codes):
+            if code not in needed["needed"]:
+                continue
             values = np.asarray(
                 [
                     value if value is not None else np.inf
-                    for value in results[k]["needed"][code]
+                    for value in needed["needed"][code]
                 ]
             )
             success = [100 * np.mean(values <= ratio * k) for ratio in ratios]
@@ -746,9 +786,8 @@ def experiment_overhead(args):
         axis.set_title(f"K = {k}")
         axis.set_xlabel("símbolos recebidos / K")
     axes[0].set_ylabel("decodificações bem-sucedidas (%)")
-    axes[1].legend(ncol=3, loc="upper center", bbox_to_anchor=(0.5, -0.25))
-    save_figure(figure, args.figure_dir, "reception_overhead")
-    return results
+    axes[1].legend(ncol=4, loc="upper center", bbox_to_anchor=(0.5, -0.25))
+    save_figure(figure, figure_dir, "reception_overhead")
 
 
 # ---------------------------------------------------------------------------
@@ -756,33 +795,37 @@ def experiment_overhead(args):
 # ---------------------------------------------------------------------------
 
 
+def recoverable_after_losses(k, total, rng, trials, lost):
+    """Fraction of random `lost`-subsets of ESIs 0..total-1 that still decode."""
+    supports = [raptor.symbol_support(k, esi) for esi in range(total)]
+    successes = 0
+    for _ in range(trials):
+        system = raptor.Gf2System(k)
+        for index in rng.permutation(total)[lost:]:
+            system.add(supports[index])
+        successes += system.rank == k
+    return successes / trials
+
+
 def experiment_loss(args):
-    redundancies = [0.1, 0.25, 0.5]
-    # RaptorQ aligns 6,500-byte symbols down to 6,496 bytes, so K = 12 here.
+    redundancies = [0.1, 0.25, 0.5, 1.0]
+    # HyBolt's default chunk: 65,024 bytes in 6,500-byte symbols, so K = 11.
     k = 11
-    trials = 50 if args.quick else 1000
-    symbol_size = 6500
+    trials = 50 if args.quick else 2000
     rng = np.random.default_rng(3)
-    data = rng.integers(0, 256, k * symbol_size, dtype=np.uint8).tobytes()
     results = []
     for redundancy in redundancies:
         repair = max(1, math.ceil(redundancy * k))
-        packets = Encoder.with_defaults(data, symbol_size).get_encoded_packets(repair)
-        total = len(packets)
+        total = k + repair
         for lost in range(total + 1):
-            successes = 0
-            for _ in range(trials if lost else 1):
-                kept = rng.permutation(total)[lost:]
-                decoder = Decoder.with_defaults(len(data), symbol_size)
-                if any(decoder.decode(packets[index]) is not None for index in kept):
-                    successes += 1
+            rate = recoverable_after_losses(k, total, rng, trials if lost else 1, lost)
             results.append(
                 {
                     "redundancy": redundancy,
                     "repair": repair,
                     "total": total,
                     "lost": lost,
-                    "success_rate": successes / (trials if lost else 1),
+                    "success_rate": rate,
                 }
             )
     save_json(args.data_dir, "loss", results)
@@ -888,11 +931,11 @@ def detection_probability(packets, corrupted, sample_size):
 
 def plot_detection(empirical, fractions, sample_sizes, figure_dir):
     figure, axis = plt.subplots()
-    grid = np.arange(1, max(sample_sizes) + 1)
     for slot, fraction in enumerate(fractions):
         rows = [row for row in empirical if abs(row["fraction"] - fraction) < 0.01]
         beta = rows[0]["fraction"]
         packets = rows[0]["server_packets"]
+        grid = np.arange(1, min(max(sample_sizes), packets) + 1)
         corrupted = round(beta * packets)
         axis.plot(
             grid,
@@ -919,15 +962,39 @@ def plot_detection(empirical, fractions, sample_sizes, figure_dir):
     save_figure(figure, figure_dir, "audit_detection")
 
 
+def chunk_failure_by_hits(k, repair):
+    """P(chunk lost | h of its packets corrupted), over every h-subset.
+
+    R10 is not MDS: whether a chunk survives depends on which packets are hit,
+    not only on how many, so each of the 2^(K + r) subsets is checked by rank.
+    """
+    total = k + repair
+    supports = [raptor.symbol_support(k, esi) for esi in range(total)]
+    failures = [0] * (total + 1)
+    counts = [0] * (total + 1)
+    for lost_mask in range(1 << total):
+        system = raptor.Gf2System(k)
+        for index in range(total):
+            if not lost_mask >> index & 1:
+                system.add(supports[index])
+        hits = lost_mask.bit_count()
+        counts[hits] += 1
+        failures[hits] += system.rank < k
+    return [failure / count for failure, count in zip(failures, counts)]
+
+
 def targeted_attack_model(args):
     """P(file lost) when a fraction of packets is corrupted uniformly at random.
 
     With sealing the adversary cannot tell chunks apart, so its corruption is
-    spread uniformly; without it, r + 1 packets of one chunk suffice.
+    spread uniformly; without it, the smallest set of one chunk's packets whose
+    loss drops the rank below K suffices.
     """
 
     k, repair = 11, 3
     per_chunk = k + repair
+    failure_by_hits = np.asarray(chunk_failure_by_hits(k, repair))
+    smallest_attack = int(np.flatnonzero(failure_by_hits > 0)[0])
     chunk_size = POLYNOMIAL_LAMBDA * 512
     files = {"1 MiB": MIB, "64 MiB": 64 * MIB, "1 GiB": 1024 * MIB}
     fractions = np.concatenate(
@@ -948,21 +1015,24 @@ def targeted_attack_model(args):
             lost = 0
             for _ in range(trials):
                 hits = rng.multivariate_hypergeometric([per_chunk] * chunks, corrupted)
-                lost += bool((hits > repair).any())
+                lost += bool((rng.random(chunks) < failure_by_hits[hits]).any())
             losses.append(lost / trials)
         results[label] = {
             "chunks": chunks,
             "packets": total,
             "fractions": fractions.tolist(),
             "random_loss": losses,
-            "targeted_fraction": (repair + 1) / total,
+            "targeted_packets": smallest_attack,
+            "targeted_fraction": smallest_attack / total,
         }
+    results["chunk_failure_by_hits"] = failure_by_hits.tolist()
     return results
 
 
 def plot_attack(attack, figure_dir):
     figure, axis = plt.subplots()
-    for slot, (label, data) in enumerate(attack.items()):
+    files = {label: data for label, data in attack.items() if isinstance(data, dict)}
+    for slot, (label, data) in enumerate(files.items()):
         axis.plot(
             100 * np.asarray(data["fractions"]),
             100 * np.asarray(data["random_loss"]),
@@ -975,7 +1045,7 @@ def plot_attack(attack, figure_dir):
             color=COLORS[slot],
             linestyle=":",
             linewidth=1.4,
-            label=f"{label}, sem ocultação ($r + 1$ pacotes)",
+            label=f"{label}, sem ocultação ({data['targeted_packets']} pacotes)",
         )
     axis.set_xscale("log")
     axis.set_xlabel("pacotes corrompidos pelo adversário (% do arquivo)")
@@ -1047,7 +1117,7 @@ def plot_hysail(results, figure_dir):
                 lambda size: (HYSAIL_CODEC_SECONDS.get(size) or {}).get(key, 0),
             ),
             (
-                "HyBolt, só RaptorQ",
+                "HyBolt, só R10",
                 lambda size: _hysail_value(results, size, "none", key, codec_only=True),
             ),
             (
@@ -1088,7 +1158,7 @@ def _hysail_value(results, size_mb, scheme, key, codec_only=False):
         if record["size_mb"] == size_mb and record["scheme"] == scheme:
             if codec_only:
                 # Decoding has no separate codec stage to report.
-                return record["stages"].get("RaptorQ", 0.0) if key == "encode" else 0.0
+                return record["stages"].get("R10", 0.0) if key == "encode" else 0.0
             return record[f"{key}_seconds"]
     return 0.0
 
@@ -1139,11 +1209,24 @@ def raptorq_degree_distribution():
     return np.diff(table) / table[-1]
 
 
+def r10_degree_distribution():
+    """RFC 5053, Section 5.4.4.2, Table 1."""
+    distribution = np.zeros(max(raptor.tables.DEGREES))
+    previous = 0
+    for threshold, degree in zip(
+        raptor.tables.DEGREE_THRESHOLDS, raptor.tables.DEGREES
+    ):
+        distribution[degree - 1] = (threshold - previous) / (1 << 20)
+        previous = threshold
+    return distribution
+
+
 def experiment_degrees(args):
     k = 1000
     distributions = {
         "LT, sóliton robusto (K = 1000)": robust_soliton(k),
         r"Online Codes ($\varepsilon$ = 0,01)": online_degree_distribution(0.01),
+        "Raptor R10 (RFC 5053)": r10_degree_distribution(),
         "RaptorQ (RFC 6330)": raptorq_degree_distribution(),
     }
     summary = {}
@@ -1189,6 +1272,7 @@ def replot_saved(args):
     )
     plot_attack(detection["attack"], args.figure_dir)
     plot_hysail(json.loads((data_dir / "hysail.json").read_text()), args.figure_dir)
+    plot_overhead(json.loads((data_dir / "overhead.json").read_text()), args.figure_dir)
 
 
 EXPERIMENTS = {
