@@ -119,6 +119,19 @@
   COMMUNICATIONS}, 70(9):1356--1360, 2016\ifbtxprintISSN {,
   \mbox{\btxISSN~\btxISSNfont {1434-8411}}}.
 
+\bibitem {luby2011rfc6330}
+\btxnamefont {\btxlastnamefont {Luby}, Michael}, \btxnamefont {Amin
+  \btxlastnamefont {Shokrollahi}}, \btxnamefont {Mark \btxlastnamefont
+  {Watson}}, \btxnamefont {Thomas \btxlastnamefont {Stockhammer}}\btxandcomma
+  {} \btxandlong {}\ \btxnamefont {Lorenz \btxlastnamefont
+  {Minder}}\btxauthorcolon\ \btxtitlefont {\btxifchangecase {Raptorq forward
+  error correction scheme for object delivery}{RaptorQ Forward Error Correction
+  Scheme for Object Delivery}}.
+\newblock \Btxtechreplong {}\ RFC 6330, Internet Engineering Task Force (IETF),
+  2011.
+\newblock {\latintext \btxurlfont{https://www.rfc-editor.org/rfc/rfc6330}},
+  Acesso em: 24 out. 2026.
+
 \bibitem {luby2002lt}
 \btxnamefont {\btxlastnamefont {Luby}, Michael}\btxauthorcolon\ \btxtitlefont
   {\btxifchangecase {Lt codes}{LT codes}}.
@@ -195,19 +208,6 @@
   2008}, \btxvolumelong {}\ \btxvolumefont {5350} \btxofserieslong {}\
   \btxtitlefont {Lecture Notes in Computer Science}, \btxpageslong {}\ 90--107,
   Berlin, Heidelberg, 2008. \btxpublisherfont {Springer}.
-
-\bibitem {luby2011rfc6330}
-\btxnamefont {\btxlastnamefont {Luby}, Michael}, \btxnamefont {Amin
-  \btxlastnamefont {Shokrollahi}}, \btxnamefont {Mark \btxlastnamefont
-  {Watson}}, \btxnamefont {Thomas \btxlastnamefont {Stockhammer}}\btxandcomma
-  {} \btxandlong {}\ \btxnamefont {Lorenz \btxlastnamefont
-  {Minder}}\btxauthorcolon\ \btxtitlefont {\btxifchangecase {Raptorq forward
-  error correction scheme for object delivery}{RaptorQ Forward Error Correction
-  Scheme for Object Delivery}}.
-\newblock \Btxtechreplong {}\ RFC 6330, Internet Engineering Task Force (IETF),
-  2011.
-\newblock {\latintext \btxurlfont{https://www.rfc-editor.org/rfc/rfc6330}},
-  Acesso em: 24 out. 2026.
 
 \bibitem {juels2007pors}
 \btxnamefont {\btxlastnamefont {Juels}, Ari} \btxandlong {}\ \btxnamefont
