@@ -1,7 +1,7 @@
 import hashlib
 import json
 import secrets
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from hybolt.audit.audit import PacketLocation
@@ -9,10 +9,7 @@ from hybolt.encryption import raptor
 from hybolt.encryption.block import Block
 from hybolt.encryption.decoding_strategy import Raptor10DecodingStrategy
 from hybolt.encryption.encoding_metadata import EncodingMetadata, PacketMetadata
-from hybolt.encryption.retrievability import (
-    COMPACT_SCHEME,
-    DisabledRetrievabilityProof,
-)
+from hybolt.encryption.retrievability import COMPACT_SCHEME
 from hybolt.logger.logger import execution_logger
 from hybolt.server.server import Server
 
@@ -47,13 +44,14 @@ class RedistributionReport:
 class Redistribution:
     """Hy-SAIL Redistribution phase for packets an audit found corrupted or lost.
 
-    The affected chunk (not the whole file) is decoded from its verified
-    packets first. Being a fountain code, R10 can then
-    emit as many new repair packets as needed: each lost packet is replaced by a
-    packet with a fresh, never used ESI, stored on another server, and
+    As in Hy-SAIL's Figure 3, a new packet is the XOR of packets other servers
+    still hold: every R10 packet is the XOR of the source blocks in its
+    support, so a fresh ESI's support is solved over GF(2) as a combination of
+    the healthy packets' supports, preferring low-degree (systematic) packets.
+    Only the packets of that combination are downloaded, checked against their
+    SHA-256 and XORed; the chunk is never decoded. Each lost packet is replaced
+    by a packet with a fresh, never used ESI, stored on another server, and
     `extra_repair` further packets can be added to widen the chunk's margin.
-    Re-encoding is checked by regenerating a healthy packet and comparing it
-    with its stored SHA-256.
     """
 
     def __init__(
@@ -102,29 +100,13 @@ class Redistribution:
         lost_indices = {location.packet_index for location in locations}
         lost = [p for p in chunk.packets if p.packet_index in lost_indices]
         healthy = [p for p in chunk.packets if p.packet_index not in lost_indices]
-        sealer = self._metadata.sealing_keys
-        data = Raptor10DecodingStrategy(
-            replace(chunk, packets=healthy),
-            self._servers,
-            DisabledRetrievabilityProof(),
-            sealer,
-        ).decode()
-
         new_indices = list(
             range(
                 chunk.next_packet_index,
                 chunk.next_packet_index + len(lost) + self._extra_repair,
             )
         )
-        generated = self._generate(
-            chunk, data, max(new_indices + [healthy[0].packet_index])
-        )
-        reference = healthy[0]
-        rebuilt = self._seal(
-            chunk, reference.packet_index, generated[reference.packet_index]
-        )
-        if hashlib.sha256(rebuilt).hexdigest() != reference.packet_sha256:
-            raise ValueError("re-encoding does not reproduce the stored packets")
+        generated = self._combine(chunk, healthy, new_indices)
 
         excluded = {packet.server for packet in lost}
         for packet in lost:
@@ -156,10 +138,75 @@ class Redistribution:
         chunk.next_packet_index += len(new_indices)
         chunk.repair_packets = len(chunk.packets) - chunk.source_packets
 
-    def _generate(self, chunk, data, highest_index):
-        """Emit the packets of every ESI up to `highest_index`."""
-        repair = max(0, highest_index + 1 - chunk.source_packets)
-        return dict(raptor.Encoder(data, chunk.symbol_size).symbols(repair))
+    def _combine(self, chunk, healthy, new_indices):
+        """Plain symbols of `new_indices`, each the XOR of verified healthy packets."""
+        k = chunk.source_packets
+        candidates = sorted(
+            healthy,
+            key=lambda p: raptor.symbol_support(k, p.packet_index).bit_count(),
+        )
+        while True:
+            plans = self._plan(k, candidates, new_indices)
+            needed = {index for plan in plans.values() for index in plan}
+            symbols = {
+                index: self._download(chunk, candidates[index]) for index in needed
+            }
+            rejected = {index for index, symbol in symbols.items() if symbol is None}
+            if not rejected:
+                break
+            candidates = [
+                packet
+                for index, packet in enumerate(candidates)
+                if index not in rejected
+            ]
+
+        execution_logger.debug(
+            f"Chunk {chunk.chunk_index}: rebuilding {len(new_indices)} packets "
+            f"from {len(needed)} of {len(healthy)} healthy packets"
+        )
+        generated = {}
+        for esi, plan in plans.items():
+            value = 0
+            for index in plan:
+                value ^= int.from_bytes(symbols[index], "big")
+            generated[esi] = value.to_bytes(chunk.symbol_size, "big")
+        return generated
+
+    def _plan(self, k, candidates, new_indices):
+        """For each new ESI, the candidate positions whose packets XOR to it."""
+        system = raptor.Gf2System(k)
+        for position, packet in enumerate(candidates):
+            system.add(raptor.symbol_support(k, packet.packet_index), 1 << position)
+
+        plans = {}
+        for esi in new_indices:
+            remainder, combination = system.reduce(raptor.symbol_support(k, esi))
+            if remainder:
+                raise ValueError(
+                    f"Insufficient valid R10 packets to rebuild packet {esi}"
+                )
+            plans[esi] = raptor.support_indices(combination)
+        return plans
+
+    def _download(self, chunk, packet):
+        """The opened symbol of a stored packet, or None when it cannot be trusted."""
+        server = self._servers.get(packet.server)
+        if server is None:
+            return None
+        try:
+            data = server.download_block(packet.packet_index, packet.packet_file)
+        except ValueError:
+            return None
+        if hashlib.sha256(data).hexdigest() != packet.packet_sha256:
+            execution_logger.error(
+                f"Packet {packet.packet_index} of chunk {chunk.chunk_index} "
+                "does not match its SHA-256; leaving it out of the repair"
+            )
+            return None
+        sealer = self._metadata.sealing_keys
+        if sealer is None:
+            return data
+        return sealer.open(chunk.chunk_index, packet.packet_index, data)
 
     def _seal(self, chunk, packet_index, packet_data):
         sealer = self._metadata.sealing_keys

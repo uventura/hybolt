@@ -114,8 +114,10 @@ repair packets.
   coefficients; the server answers with the combination of the sampled packets
   and of their tags, and the client checks it with P, which never leaves the
   client. Decoding checks every downloaded packet against its tag.
-- `bounded`: Hy-SAIL's original model. The client stores one MAC per packet
-  for each of 40 primitive challenge polynomials. Each audit round reveals one
+- `bounded`: Hy-SAIL's original model. The client stores one MAC per source
+  block for each of 40 primitive challenge polynomials, and derives the MAC of
+  any packet as the XOR of the MACs of its support (plus the MAC of its
+  keystream when packets are sealed). Each audit round reveals one
   unused polynomial, which is never reused, because a server that knows it
   could keep only the remainders. The set therefore supports 40 challenges
   (audits and decodes) per encode. Aggregates are weighted by secret powers of
@@ -133,12 +135,15 @@ Each round challenges a random sample of every server's packets
 (`--sample-size`, all packets by default). When a server's answer fails, the
 sampled packets are checked individually to locate the corrupted ones. A server
 fails when it holds more than `--tau-maximum` corrupted packets (default `0`),
-and a chunk is at risk when it has more corrupted packets than repair packets.
+and a chunk is at risk when the supports of its remaining packets no longer
+span its K source blocks.
 The command exits with status 1 when it finds corruption.
 
-Add `--redistribute` to replace the corrupted or lost packets. The affected
-chunk is decoded from its verified packets and re-encoded, and each lost packet
-is replaced by a fresh R10 repair packet with a never-used ESI, stored on
+Add `--redistribute` to replace the corrupted or lost packets. As in Hy-SAIL,
+the chunk is not decoded: each lost packet is replaced by a fresh R10 repair
+packet with a never-used ESI, computed as the XOR of healthy packets whose
+supports combine into the new packet's support. Only those packets are
+downloaded and checked against their SHA-256, and the new packet is stored on
 the least-loaded server of the chunk. `--extra-repair N` adds N more repair
 packets to each repaired chunk to widen its margin. A server missing from the
 server file has all of its packets reported lost, and decoding continues

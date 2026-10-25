@@ -7,6 +7,7 @@ import pytest
 
 from hybolt.audit.audit import Audit
 from hybolt.audit.redistribution import Redistribution
+from hybolt.encryption import raptor
 from hybolt.encryption.decode import Decode
 from hybolt.encryption.encoding_metadata import EncodingMetadata
 from hybolt.hybolt_encode import HyboltEncode
@@ -212,19 +213,60 @@ def test_given_server_that_left_when_auditing_and_redistributing_then_restores_c
     assert decoded == input_file.read_bytes()
 
 
-def test_given_reencoding_mismatch_when_redistributing_then_refuses_chunk(encoded):
-    _, metadata_file, server_file = encoded
-    victim = _packets(metadata_file)[-1]
-    _corrupt(victim)
-    report = Audit(metadata_file, server_file).run()
+def _stored_symbol(metadata_file, chunk_index, packet_index):
     metadata = EncodingMetadata.load(metadata_file)
-    metadata.chunks[0].packets[0].packet_sha256 = "0" * 64
-    metadata.save(metadata_file)
+    chunk = metadata.chunks[chunk_index]
+    [packet] = [p for p in chunk.packets if p.packet_index == packet_index]
+    with open(Path(packet.server) / packet.packet_file, "rb") as file:
+        data = pickle.load(file).data
+    return metadata.sealing_keys.open(chunk_index, packet_index, data)
+
+
+def _chunk_data(input_file, metadata_file, chunk_index):
+    chunks = sorted(
+        EncodingMetadata.load(metadata_file).chunks, key=lambda c: c.chunk_index
+    )
+    offset = sum(chunk.byte_size for chunk in chunks[:chunk_index])
+    return input_file.read_bytes()[offset : offset + chunks[chunk_index].byte_size]
+
+
+def test_given_lost_packet_when_redistributing_then_new_packet_equals_r10_encoding(
+    encoded,
+):
+    input_file, metadata_file, server_file = encoded
+    _corrupt(_packets(metadata_file)[0])
+    report = Audit(metadata_file, server_file).run()
 
     result = Redistribution(metadata_file, server_file, report.corrupted_packets).run()
 
-    assert "does not reproduce" in result.failed_chunks[0]
-    assert victim.packet_index in {p.packet_index for p in _packets(metadata_file)}
+    [replaced] = result.replaced
+    chunk = EncodingMetadata.load(metadata_file).chunks[0]
+    expected = raptor.Encoder(
+        _chunk_data(input_file, metadata_file, 0), chunk.symbol_size
+    ).symbol(replaced.new_packet_index)
+    assert _stored_symbol(metadata_file, 0, replaced.new_packet_index) == expected
+
+
+def test_given_healthy_packet_tampered_after_audit_when_redistributing_then_avoids_it(
+    encoded,
+):
+    input_file, metadata_file, server_file = encoded
+    packets = _packets(metadata_file)
+    _corrupt(packets[-1])
+    report = Audit(metadata_file, server_file).run()
+    # Systematic packets are preferred in the XOR, so tamper with one of them.
+    sneaky = min((p for p in packets[:-1]), key=lambda p: p.packet_index)
+    _corrupt(sneaky)
+
+    result = Redistribution(metadata_file, server_file, report.corrupted_packets).run()
+
+    assert result.succeeded
+    [replaced] = result.replaced
+    chunk = EncodingMetadata.load(metadata_file).chunks[0]
+    expected = raptor.Encoder(
+        _chunk_data(input_file, metadata_file, 0), chunk.symbol_size
+    ).symbol(replaced.new_packet_index)
+    assert _stored_symbol(metadata_file, 0, replaced.new_packet_index) == expected
 
 
 def test_given_negative_extra_repair_when_creating_redistribution_then_raises(
