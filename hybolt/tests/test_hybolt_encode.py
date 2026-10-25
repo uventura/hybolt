@@ -2,7 +2,11 @@ import math
 
 import numpy as np
 
-from hybolt.constant import POLYNOMIAL_SET_SIZE
+from hybolt.constant import (
+    DEFAULT_CHUNK_SIZE,
+    DEFAULT_SOURCE_SYMBOLS,
+    POLYNOMIAL_SET_SIZE,
+)
 from hybolt.encryption.encoding_metadata import EncodingMetadata
 from hybolt.hybolt_encode import HyboltEncode
 from hybolt.server.server import Server
@@ -123,3 +127,21 @@ def test_given_sealing_disabled_when_encoding_then_keeps_plain_packets(tmp_path)
     if packet.packet_index < metadata.chunks[0].source_packets:
         start = packet.packet_index * metadata.chunks[0].symbol_size
         assert stored == input_file.read_bytes()[start : start + len(stored)]
+
+
+def test_given_full_chunk_when_encoding_by_default_then_uses_k_source_symbols(
+    tmp_path,
+):
+    input_file = tmp_path / "input.bin"
+    input_file.write_bytes(bytes(range(256)) * (DEFAULT_CHUNK_SIZE // 256 + 1))
+    HyboltEncode(
+        str(input_file),
+        server_list=[{"id": 1, "storage_location": str(tmp_path / "server")}],
+        metadata_output=str(tmp_path),
+        retrievability_proof=False,
+    ).encode()
+    chunk = EncodingMetadata.load(tmp_path / "input_metadata.pkl").chunks[0]
+
+    assert chunk.byte_size == DEFAULT_CHUNK_SIZE
+    assert chunk.source_packets == DEFAULT_SOURCE_SYMBOLS
+    assert chunk.symbol_size == DEFAULT_CHUNK_SIZE // DEFAULT_SOURCE_SYMBOLS

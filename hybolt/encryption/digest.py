@@ -1,16 +1,7 @@
 from collections.abc import Iterator
 from pathlib import Path
 
-from hybolt.constant import POLYNOMIAL_LAMBDA
-
-_BYTES_PER_LAMBDA_UNIT = 512
-
-
-def chunk_size_for_lambda(lambda_value: int = POLYNOMIAL_LAMBDA) -> int:
-    if lambda_value <= 0:
-        raise ValueError("lambda_value must be a positive integer")
-
-    return lambda_value * _BYTES_PER_LAMBDA_UNIT
+from hybolt.constant import DEFAULT_CHUNK_SIZE
 
 
 class Digest:
@@ -19,11 +10,13 @@ class Digest:
     def __init__(
         self,
         input_path: str | Path,
-        lambda_value: int = POLYNOMIAL_LAMBDA,
+        chunk_size: int = DEFAULT_CHUNK_SIZE,
         chunk_count: int | None = None,
     ):
+        if chunk_size <= 0:
+            raise ValueError("chunk_size must be a positive integer")
         self.input_path = Path(input_path)
-        self.chunk_size = chunk_size_for_lambda(lambda_value)
+        self.chunk_size = chunk_size
         self._chunk_count = chunk_count
         self._chunk_sizes = self._determine_chunk_sizes()
 

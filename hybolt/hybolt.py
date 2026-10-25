@@ -56,7 +56,8 @@ def main():
     "--block-size",
     type=int,
     default=None,
-    help="Block size for encoding; if omitted, uses 10% of the file size",
+    help="R10 symbol size in bytes; if omitted, each chunk is split into "
+    "100 symbols",
 )
 @click.option(
     "--server-list",

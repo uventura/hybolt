@@ -2,7 +2,7 @@ import json
 import time
 from pathlib import Path
 
-from hybolt.encryption.digest import chunk_size_for_lambda
+from hybolt.constant import DEFAULT_CHUNK_SIZE
 from hybolt.encryption.encoding_metadata import EncodingMetadata
 from hybolt.hybolt_decode import HyboltDecode
 from hybolt.hybolt_encode import HyboltEncode
@@ -156,7 +156,7 @@ def test_given_one_mebib_lorem_when_round_tripping_then_uses_chunked_metadata_wi
 
     assert metadata.chunks is not None
     assert len(metadata.chunks) > 1
-    assert all(chunk.byte_size <= chunk_size_for_lambda() for chunk in metadata.chunks)
+    assert all(chunk.byte_size <= DEFAULT_CHUNK_SIZE for chunk in metadata.chunks)
     assert packet_count == sum(len(chunk.packets) for chunk in metadata.chunks)
     assert output_file.read_bytes() == input_file.read_bytes()
     assert reconstructed == output_file

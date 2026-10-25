@@ -78,13 +78,16 @@ hybolt decode \
   output/hello_metadata.pkl
 ```
 
-HyBolt reads a source file in independent chunks sized from the security
-parameter (`POLYNOMIAL_LAMBDA × 512` bytes; 65,024 bytes with the default
-lambda). Each chunk is encoded, distributed, and represented separately in
-metadata, allowing reconstruction to decode each chunk before joining them in
-their original order. Use `--block-size` on `encode` to select the R10
-symbol size inside each chunk. If omitted, HyBolt chooses a size equal to 10%
-of that chunk, with a minimum of one byte. R10 codes between 4 and 8,192 source
+HyBolt reads a source file in independent chunks of 650,000 bytes: 100 R10
+source symbols of 6,500 bytes (`DEFAULT_SOURCE_SYMBOLS` and
+`DEFAULT_SYMBOL_SIZE` in `hybolt/constant.py`). Each chunk is encoded,
+distributed, and represented separately in metadata, allowing reconstruction
+to decode each chunk before joining them in their original order. Chunks keep
+the cost of a repair to part of one chunk, and R10 needs them anyway: it codes
+at most 8,192 symbols per source block. Use `--block-size` on `encode` to
+select the R10 symbol size inside each chunk. If omitted, HyBolt splits each
+chunk into 100 symbols, with a minimum of one byte, so shorter chunks get
+shorter symbols. R10 codes between 4 and 8,192 source
 symbols per block: shorter chunks are padded with zero symbols, and a block
 size that would need more than 8,192 symbols is rejected.
 
@@ -107,12 +110,12 @@ average MAC-and-packet-generation time per chunk after encoding completes.
 
 Each chunk is encoded into its K source packets plus `ceil(redundancy * K)`
 R10 repair packets. Set the ratio with `--redundancy` on `encode` (default
-`0.5`). Unlike RaptorQ, R10 is not close to an MDS code: K received packets
-decode a chunk only some of the time, and whether a chunk survives depends on
-which packets are lost. With the default 10% symbol size (K = 10), a
-redundancy of `0.25` (r = 3) already loses a chunk to 15% of single-packet
-losses, because two source symbols appear in no repair symbol; the default
-`0.5` (r = 5) survives every single loss and 98% of double losses.
+`0.25`). Unlike RaptorQ, R10 is not close to an MDS code: it needs a few
+packets beyond K, about the same number whatever K is, and whether a chunk
+survives depends on which packets are lost. That is why chunks hold 100
+symbols: with K = 100 and the default redundancy, a chunk survives losing 14%
+of its 125 packets in 99% of cases, while with K = 10 a single lost packet
+destroyed the chunk 15% of the time.
 
 ### Proof of retrievability
 
@@ -162,8 +165,9 @@ without it.
 
 With packets balanced over N servers, losing f of them requires
 `redundancy >= f / (N - f)`, and R10 needs a few packets beyond that. With
-three servers and K = 10, one server leaving loses 59% of the chunks at the
-default `0.5`, 4.8% at `--redundancy 1.0` and 0.3% at `--redundancy 1.5`.
+three servers, one server leaving loses every chunk at the default `0.25`,
+72% of them at `--redundancy 0.5`, 1.3% at `0.6` and none in 2,000 trials at
+`0.75`.
 
 Disable the proof with `--no-retrievability-proof` on `encode` or `decode`.
 The SHA-256 check after each download stays active either way.

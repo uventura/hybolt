@@ -4,8 +4,8 @@ import time
 from pathlib import Path
 
 from hybolt.constant import (
-    DEFAULT_BLOCK_SIZE_PERCENTAGE,
     DEFAULT_REDUNDANCY,
+    DEFAULT_SOURCE_SYMBOLS,
     MAX_MAC_THREADS,
 )
 from hybolt.encryption.encode import Encode
@@ -166,7 +166,8 @@ class HyboltEncode:
 
     def _determine_block_size(self, file_size: int) -> int:
         if self.block_size is None:
-            return max(1, math.ceil(file_size * DEFAULT_BLOCK_SIZE_PERCENTAGE))
+            # K source symbols per chunk, so short chunks get short symbols.
+            return max(1, math.ceil(file_size / DEFAULT_SOURCE_SYMBOLS))
 
         if self.block_size <= 0:
             raise ValueError("Block size must be a positive integer")
