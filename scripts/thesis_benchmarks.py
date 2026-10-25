@@ -8,8 +8,8 @@ figure to ``<figure-dir>/<name>.pdf``. Run every experiment with
 
 or a subset, e.g. ``python scripts/thesis_benchmarks.py overhead loss``.
 ``--quick`` shrinks every workload to check the script end to end, and
-``replot`` redraws the pipeline, detection and Hy-SAIL figures from the saved
-data without measuring again.
+``replot`` redraws the pipeline, detection, overhead and codec figures from the
+saved data without measuring again.
 """
 
 import argparse
@@ -43,7 +43,7 @@ from hybolt.constant import (
     POLYNOMIAL_SET_SIZE,
 )
 from hybolt.encryption import encode as encode_module
-from hybolt.encryption import raptor
+from hybolt.encryption import online_codes, raptor
 from hybolt.encryption.retrievability import (
     BOUNDED_SCHEME,
     COMPACT_SCHEME,
@@ -84,8 +84,7 @@ SCHEME_LABELS = {
     "none": "sem prova",
 }
 
-# Hy-SAIL's measurements, read from the figures of its publications.
-# Thesis (2013), Figure 5.5: m(x) mod P(x) time by message block size.
+# Hy-SAIL's thesis (2013), Figure 5.5: m(x) mod P(x) time by message block size.
 HYSAIL_MAC_SECONDS = {
     0.25: 0.0075,
     0.5: 0.02,
@@ -100,12 +99,6 @@ HYSAIL_MAC_SECONDS = {
     32: 40,
     36: 52,
     40: 62,
-}
-# IEEE Access (2019), Figures 5 and 6: fastest encode and decode over n.
-HYSAIL_CODEC_SECONDS = {
-    50: {"encode": 3.0, "decode": 2.0},
-    100: {"encode": 5.0, "decode": 4.0},
-    500: {"encode": 21.0, "decode": 27.0},
 }
 
 
@@ -248,7 +241,13 @@ def write_input(path, size, seed=0):
 
 
 def encode_file(
-    deployment, input_file, scheme, seal=True, redundancy=DEFAULT_REDUNDANCY
+    deployment,
+    input_file,
+    scheme,
+    seal=True,
+    redundancy=DEFAULT_REDUNDANCY,
+    codec=raptor.CODEC,
+    stages=ENCODE_STAGES,
 ):
     deployment.reset()
     metadata_dir = deployment.root / "metadata"
@@ -262,8 +261,9 @@ def encode_file(
         redundancy=redundancy,
         proof_scheme=scheme if scheme != "none" else COMPACT_SCHEME,
         seal_packets=seal,
+        codec=codec,
     )
-    with timer.instrument(ENCODE_STAGES):
+    with timer.instrument(stages):
         started_at = time.perf_counter()
         packet_count = encoder.encode()
         runtime = time.perf_counter() - started_at
@@ -278,13 +278,16 @@ def encode_file(
     }
 
 
-def decode_file(deployment, metadata_file, proof=True):
+def decode_file(deployment, metadata_file, proof=True, timer=None, stages=()):
     output_file = deployment.root / "decoded.bin"
-    started_at = time.perf_counter()
-    HyboltDecode(
+    decoder = HyboltDecode(
         str(metadata_file), str(deployment.server_file), str(output_file), proof
-    ).decode()
-    return time.perf_counter() - started_at, output_file
+    )
+    with (timer or StageTimer()).instrument(stages):
+        started_at = time.perf_counter()
+        decoder.decode()
+        runtime = time.perf_counter() - started_at
+    return runtime, output_file
 
 
 def audit_file(deployment, metadata_file, sample_size=None):
@@ -627,36 +630,6 @@ class PeelingDecoder:
                     pending.append(other_index)
 
 
-def online_max_degree(epsilon):
-    return math.ceil(math.log(epsilon**2 / 4) / math.log(1 - epsilon / 2))
-
-
-def online_auxiliary_count(k, epsilon, q):
-    return max(1, math.ceil(0.55 * q * epsilon * k))
-
-
-def online_epsilon(k, q=3, epsilon=0.01):
-    """Smallest epsilon whose maximum degree fits in the composite message.
-
-    Maymounkov's distribution assumes F < k; for small k the design epsilon
-    has to grow until it does.
-    """
-    while online_max_degree(epsilon) > k + online_auxiliary_count(k, epsilon, q):
-        epsilon *= 1.05
-    return epsilon
-
-
-def online_degree_distribution(epsilon):
-    max_degree = online_max_degree(epsilon)
-    rho_1 = 1 - (1 + 1 / max_degree) / (1 + epsilon)
-    weights = [rho_1] + [
-        (1 - rho_1) * max_degree / ((max_degree - 1) * degree * (degree - 1))
-        for degree in range(2, max_degree + 1)
-    ]
-    weights = np.asarray(weights)
-    return weights / weights.sum()
-
-
 def robust_soliton(k, c=0.1, delta=0.5):
     spike = c * math.log(k / delta) * math.sqrt(k)
     rho = [1 / k] + [1 / (d * (d - 1)) for d in range(2, k + 1)]
@@ -669,26 +642,30 @@ def robust_soliton(k, c=0.1, delta=0.5):
     return weights / weights.sum()
 
 
-def symbols_needed_online(k, rng, q=3, limit_factor=4):
-    epsilon = online_epsilon(k, q)
-    auxiliary = online_auxiliary_count(k, epsilon, q)
-    composite = k + auxiliary
-    decoder = PeelingDecoder(composite, k)
-    members = defaultdict(list)
-    for source in range(k):
-        for auxiliary_index in rng.choice(
-            auxiliary, size=min(q, auxiliary), replace=False
-        ):
-            members[auxiliary_index].append(source)
-    for auxiliary_index, sources in members.items():
-        decoder.add_check(sources + [k + auxiliary_index])
-    distribution = online_degree_distribution(epsilon)
-    degrees = rng.choice(len(distribution), size=limit_factor * k, p=distribution) + 1
-    for received, degree in enumerate(degrees, start=1):
-        decoder.add_check(rng.choice(composite, size=degree, replace=False).tolist())
-        if decoder.complete:
+def received_until_decoded(codec, k, order):
+    """Symbols of `order` received until the codec's own decoder finishes.
+
+    Every packet of both codes is the XOR of the source symbols in its
+    support, so the outcome is decided without the data: R10 decodes once the
+    supports have rank K, Online Codes once peeling recovers every source.
+    """
+    if codec is online_codes:
+        decoder = online_codes.PeelingDecoder(k)
+        for received, esi in enumerate(order, start=1):
+            if decoder.add(int(esi)):
+                return received
+        return None
+    system = raptor.Gf2System(k)
+    for received, esi in enumerate(order, start=1):
+        system.add(raptor.symbol_support(k, int(esi)))
+        if system.rank == k:
             return received
     return None
+
+
+def symbols_needed_online(k, rng, pool_factor=4):
+    """Check blocks of HyBolt's Online Codes received in random order until decoded."""
+    return received_until_decoded(online_codes, k, rng.permutation(pool_factor * k))
 
 
 def symbols_needed_lt(k, rng, limit_factor=4):
@@ -703,18 +680,8 @@ def symbols_needed_lt(k, rng, limit_factor=4):
 
 
 def symbols_needed_r10(k, rng, pool_factor=3):
-    """Symbols received, in random order, until their R10 supports span GF(2)^K.
-
-    Every R10 symbol is the XOR of the source symbols in its support, so a set
-    decodes exactly when the supports have rank K: this is the decoder's own
-    criterion, computed without the data.
-    """
-    system = raptor.Gf2System(k)
-    for received, esi in enumerate(rng.permutation(pool_factor * k), start=1):
-        system.add(raptor.symbol_support(k, int(esi)))
-        if system.rank == k:
-            return received
-    return None
+    """Symbols received, in random order, until their R10 supports span GF(2)^K."""
+    return received_until_decoded(raptor, k, rng.permutation(pool_factor * k))
 
 
 def symbols_needed_raptorq(packets, transfer_length, symbol_size, rng):
@@ -754,7 +721,7 @@ def experiment_overhead(args):
         results[k] = {
             "needed": needed,
             "r10_rank_seconds": r10_seconds,
-            "online_epsilon": online_epsilon(k),
+            "online_epsilon": online_codes.parameters(k).epsilon,
         }
         summary = {
             code: statistics.mean(value - k for value in values if value is not None)
@@ -810,22 +777,18 @@ def plot_overhead(results, figure_dir):
 # ---------------------------------------------------------------------------
 
 
-def failure_by_losses(k, total, rng, trials):
+def failure_by_losses(k, total, rng, trials, codec=raptor):
     """P(chunk lost | h random losses) for h = 0..total, over ESIs 0..total-1.
 
     A random order of the packets gives, at once, the outcome of losing its
-    first h packets for every h: the chunk survives while the packets left
-    still include the prefix of the reversed order that reaches rank K.
+    first h packets for every h: decodability only grows with the packets
+    held, so the chunk survives while the packets left still include the
+    prefix of the reversed order that decodes.
     """
-    supports = [raptor.symbol_support(k, esi) for esi in range(total)]
     needed = []
     for _ in range(trials):
-        system = raptor.Gf2System(k)
-        for received, index in enumerate(rng.permutation(total), start=1):
-            system.add(supports[index])
-            if system.rank == k:
-                break
-        needed.append(received if system.rank == k else total + 1)
+        received = received_until_decoded(codec, k, rng.permutation(total))
+        needed.append(total + 1 if received is None else received)
     needed = np.asarray(needed)
     return [float(np.mean(needed > total - lost)) for lost in range(total + 1)]
 
@@ -1080,104 +1043,241 @@ def plot_attack(attack, figure_dir):
 
 
 # ---------------------------------------------------------------------------
-# Hy-SAIL: the file sizes of Hy-SAIL's own experiments
+# Codecs: HyBolt with Online Codes, as in Hy-SAIL, against Raptor R10
 # ---------------------------------------------------------------------------
 
+CODECS = ((raptor.CODEC, "Raptor R10"), (online_codes.CODEC, "Online Codes"))
+CODEC_CONFIGS = (
+    ("codec", "só o código"),
+    ("none", "sem prova"),
+    (COMPACT_SCHEME, "compacto + ocultação"),
+)
+# The codec's own work, under one name for both codes.
+CODEC_STAGES = (
+    *(stage for stage in ENCODE_STAGES if stage[0] is not encode_module.Encode),
+    (raptor.Encoder, "__init__", "código"),
+    (raptor.Encoder, "symbols", "código"),
+    (online_codes.Encoder, "__init__", "código"),
+    (online_codes.Encoder, "symbols", "código"),
+)
+DECODER_STAGES = (
+    (raptor.Decoder, "add", "código"),
+    (online_codes.Decoder, "add", "código"),
+)
 
-def experiment_hysail(args):
+
+def experiment_codecs(args):
+    """Encode and decode the file sizes of Hy-SAIL's article with both codes.
+
+    Both codes run inside the same HyBolt pipeline, on the same machine and
+    with the same chunks, so the comparison isolates the fountain code.
+    """
     sizes_mb = [1, 5] if args.quick else [50, 100, 500]
-    deployment = Deployment(Path(args.work_dir) / "hysail")
+    deployment = Deployment(Path(args.work_dir) / "codecs")
     inputs_dir = Path(args.work_dir) / "inputs"
     inputs_dir.mkdir(parents=True, exist_ok=True)
-    results = []
+    timings = []
     for size_mb in sizes_mb:
-        input_file = inputs_dir / f"hysail_{size_mb}mb.bin"
+        input_file = inputs_dir / f"codecs_{size_mb}mb.bin"
         if not input_file.exists():
             write_input(input_file, size_mb * MB, seed=size_mb)
-        for scheme, seal in ((COMPACT_SCHEME, True), ("none", False)):
-            print(f"  hysail {size_mb} MB scheme={scheme} seal={seal}")
-            encoded = encode_file(deployment, input_file, scheme, seal=seal)
-            decode_seconds, output_file = decode_file(
-                deployment, encoded["metadata_file"], proof=scheme != "none"
-            )
-            results.append(
-                {
-                    "size_mb": size_mb,
-                    "scheme": scheme,
-                    "sealed": seal,
-                    "encode_seconds": encoded["runtime"],
-                    "stages": encoded["stages"],
-                    "decode_seconds": decode_seconds,
-                    "packets": encoded["packets"],
-                    "metadata_bytes": encoded["metadata_bytes"],
-                    "decoded_ok": output_file.read_bytes() == input_file.read_bytes(),
-                    "hysail": HYSAIL_CODEC_SECONDS.get(size_mb),
-                }
-            )
+        for codec, _ in CODECS:
+            for scheme, seal in ((COMPACT_SCHEME, True), ("none", False)):
+                print(f"  codecs {size_mb} MB codec={codec} scheme={scheme}")
+                encoded = encode_file(
+                    deployment,
+                    input_file,
+                    scheme,
+                    seal=seal,
+                    codec=codec,
+                    stages=CODEC_STAGES,
+                )
+                decode_timer = StageTimer()
+                decode_seconds, output_file = decode_file(
+                    deployment,
+                    encoded["metadata_file"],
+                    proof=scheme != "none",
+                    timer=decode_timer,
+                    stages=DECODER_STAGES,
+                )
+                timings.append(
+                    {
+                        "size_mb": size_mb,
+                        "codec": codec,
+                        "scheme": scheme,
+                        "sealed": seal,
+                        "encode_seconds": encoded["runtime"],
+                        "encode_codec_seconds": encoded["stages"].get("código", 0.0),
+                        "decode_seconds": decode_seconds,
+                        "decode_codec_seconds": decode_timer.seconds["código"],
+                        "stages": encoded["stages"],
+                        "packets": encoded["packets"],
+                        "stored_bytes": encoded["stored_bytes"],
+                        "metadata_bytes": encoded["metadata_bytes"],
+                        "decoded_ok": output_file.read_bytes()
+                        == input_file.read_bytes(),
+                    }
+                )
         input_file.unlink()
-    save_json(args.data_dir, "hysail", results)
-    plot_hysail(results, args.figure_dir)
+
+    results = {
+        "timings": timings,
+        "chunk": chunk_codec_benchmark(args),
+        "loss": codec_loss_model(args),
+    }
+    save_json(args.data_dir, "codecs", results)
+    plot_codecs(results, args.figure_dir)
     return results
 
 
-def plot_hysail(results, figure_dir):
-    sizes_mb = sorted({record["size_mb"] for record in results})
-    figure, axes = plt.subplots(1, 2, figsize=(6.2, 2.8), sharey=True)
+def chunk_codec_benchmark(args):
+    """Encode and decode one default chunk in memory, without storage or proofs.
+
+    The file runs above are dominated by writing and reading packets, whose
+    time varies between runs; this isolates each code's own work. Decoding
+    receives the stored packets in random order until the chunk is recovered.
+    """
+    k, repair = default_chunk_code()
+    symbol_size = math.ceil(DEFAULT_CHUNK_SIZE / DEFAULT_SOURCE_SYMBOLS)
+    trials = 5 if args.quick else 200
+    rng = np.random.default_rng(9)
+    results = {}
+    for codec, _ in CODECS:
+        module = raptor if codec == raptor.CODEC else online_codes
+        encode_seconds, decode_seconds, received = [], [], []
+        for _ in range(trials):
+            data = rng.integers(0, 256, DEFAULT_CHUNK_SIZE, dtype=np.uint8).tobytes()
+            started_at = time.perf_counter()
+            symbols = module.Encoder(data, symbol_size).symbols(repair)
+            encode_seconds.append(time.perf_counter() - started_at)
+            decoder = module.Decoder(len(data), symbol_size)
+            started_at = time.perf_counter()
+            for count, index in enumerate(rng.permutation(len(symbols)), start=1):
+                decoded = decoder.add(*symbols[index])
+                if decoded is not None:
+                    break
+            decode_seconds.append(time.perf_counter() - started_at)
+            if decoded != data:
+                raise AssertionError(f"{codec} decoded a different chunk")
+            received.append(count)
+        results[codec] = {
+            "k": k,
+            "stored_packets": len(symbols),
+            "encode_seconds": statistics.median(encode_seconds),
+            "decode_seconds": statistics.median(decode_seconds),
+            "received_mean": statistics.mean(received),
+            "received_max": max(received),
+        }
+        print(f"  chunk {codec}: {results[codec]}")
+    return results
+
+
+def codec_loss_model(args):
+    """Loss tolerance of a default chunk with each code and redundancy.
+
+    Online Codes store as many check blocks as the chunk needs to decode, at
+    least K + r, which is the set the encoder writes.
+    """
+    k, _ = default_chunk_code()
+    trials = 50 if args.quick else 4000
+    rng = np.random.default_rng(8)
+    results = []
+    for redundancy in (0.25, 0.5):
+        repair = max(1, math.ceil(redundancy * k))
+        for codec, _ in CODECS:
+            module = raptor if codec == raptor.CODEC else online_codes
+            total = k + repair
+            if module is online_codes:
+                total = online_codes.check_block_count(k, total)
+            failures = failure_by_losses(k, total, rng, trials, codec=module)
+            results.append(
+                {
+                    "codec": codec,
+                    "redundancy": redundancy,
+                    "k": k,
+                    "total": total,
+                    "success_rate": [1 - failure for failure in failures],
+                }
+            )
+            tolerated = max(
+                lost for lost, failure in enumerate(failures) if failure <= 0.01
+            )
+            print(
+                f"  codec loss {codec} eps={redundancy}: {total} packets, "
+                f"{tolerated} losses tolerated in 99% of chunks"
+            )
+    return results
+
+
+def plot_codecs(results, figure_dir):
+    timings = results["timings"]
+    sizes_mb = sorted({record["size_mb"] for record in timings})
+    figure, axes = plt.subplots(1, 2, figsize=(6.2, 3.0), sharey=True)
     for axis, key, title in (
         (axes[0], "encode", "codificação"),
         (axes[1], "decode", "decodificação"),
     ):
-        positions = np.arange(len(sizes_mb))
-        bars = [
-            (
-                "HySAIL (2019), melhor n",
-                lambda size: (HYSAIL_CODEC_SECONDS.get(size) or {}).get(key, 0),
-            ),
-            (
-                "HyBolt, só R10",
-                lambda size: _hysail_value(results, size, "none", key, codec_only=True),
-            ),
-            (
-                "HyBolt, sem prova",
-                lambda size: _hysail_value(results, size, "none", key),
-            ),
-            (
-                "HyBolt, compacto + ocultação",
-                lambda size: _hysail_value(results, size, COMPACT_SCHEME, key),
-            ),
-        ]
-        width = 0.8 / len(bars)
-        for slot, (label, value) in enumerate(bars):
-            values = [value(size) or np.nan for size in sizes_mb]
-            axis.bar(
-                positions + (slot - (len(bars) - 1) / 2) * width,
-                values,
-                width=width,
-                color=COLORS[(1, 0, 2, 3)[slot]],
-                edgecolor="white",
-                linewidth=1,
-                label=label,
-            )
-        axis.set_xticks(positions, [f"{size} MB" for size in sizes_mb])
-        axis.set_title(title)
+        for codec_slot, (codec, codec_label) in enumerate(CODECS):
+            for config_slot, (config, config_label) in enumerate(CODEC_CONFIGS):
+                values = [
+                    _codec_value(timings, size, codec, config, key) for size in sizes_mb
+                ]
+                axis.plot(
+                    sizes_mb,
+                    values,
+                    color=COLORS[codec_slot],
+                    marker=MARKERS[config_slot],
+                    linestyle=LINESTYLES[config_slot],
+                    label=f"{codec_label}, {config_label}",
+                )
+        axis.set_xscale("log")
         axis.set_yscale("log")
-        axis.grid(axis="x", visible=False)
+        axis.set_xticks(sizes_mb, [f"{size}" for size in sizes_mb])
+        axis.minorticks_off()
+        axis.set_xlabel("tamanho do arquivo (MB)")
+        axis.set_title(title)
     axes[0].set_ylabel("tempo (s)")
     handles, labels = axes[0].get_legend_handles_labels()
     figure.legend(
-        handles, labels, ncol=2, loc="upper center", bbox_to_anchor=(0.5, 0.02)
+        handles, labels, ncol=2, loc="upper center", bbox_to_anchor=(0.5, -0.02)
     )
-    save_figure(figure, figure_dir, "hysail_comparison")
+    save_figure(figure, figure_dir, "codec_comparison")
+
+    figure, axis = plt.subplots()
+    for row in results["loss"]:
+        codec_slot = [codec for codec, _ in CODECS].index(row["codec"])
+        style_slot = 0 if row["redundancy"] == 0.25 else 1
+        total = row["total"]
+        axis.plot(
+            [100 * lost / total for lost in range(total + 1)],
+            [100 * rate for rate in row["success_rate"]],
+            color=COLORS[codec_slot],
+            linestyle=LINESTYLES[style_slot],
+            linewidth=1.8,
+            label=(
+                f"{dict(CODECS)[row['codec']]}, "
+                rf"$\varepsilon$ = {row['redundancy']:g} ({total} pacotes)"
+            ),
+        )
+    axis.set_xlabel("pacotes perdidos no chunk (%)")
+    axis.set_ylabel("chunks recuperados (%)")
+    axis.set_xlim(0, 40)
+    axis.legend(ncol=2, loc="upper center", bbox_to_anchor=(0.5, -0.18))
+    save_figure(figure, figure_dir, "codec_loss")
 
 
-def _hysail_value(results, size_mb, scheme, key, codec_only=False):
-    for record in results:
-        if record["size_mb"] == size_mb and record["scheme"] == scheme:
-            if codec_only:
-                # Decoding has no separate codec stage to report.
-                return record["stages"].get("R10", 0.0) if key == "encode" else 0.0
+def _codec_value(timings, size_mb, codec, config, key):
+    scheme = "none" if config == "codec" else config
+    for record in timings:
+        if (
+            record["size_mb"] == size_mb
+            and record["codec"] == codec
+            and record["scheme"] == scheme
+        ):
+            if config == "codec":
+                return record[f"{key}_codec_seconds"]
             return record[f"{key}_seconds"]
-    return 0.0
+    return np.nan
 
 
 # ---------------------------------------------------------------------------
@@ -1242,7 +1342,9 @@ def experiment_degrees(args):
     k = 1000
     distributions = {
         "LT, sóliton robusto (K = 1000)": robust_soliton(k),
-        r"Online Codes ($\varepsilon$ = 0,01)": online_degree_distribution(0.01),
+        r"Online Codes ($\varepsilon$ = 0,01)": np.asarray(
+            online_codes.degree_distribution(0.01)
+        ),
         "Raptor R10 (RFC 5053)": r10_degree_distribution(),
         "RaptorQ (RFC 6330)": raptorq_degree_distribution(),
     }
@@ -1288,7 +1390,7 @@ def replot_saved(args):
         args.figure_dir,
     )
     plot_attack(detection["attack"], args.figure_dir)
-    plot_hysail(json.loads((data_dir / "hysail.json").read_text()), args.figure_dir)
+    plot_codecs(json.loads((data_dir / "codecs.json").read_text()), args.figure_dir)
     plot_overhead(json.loads((data_dir / "overhead.json").read_text()), args.figure_dir)
 
 
@@ -1299,7 +1401,7 @@ EXPERIMENTS = {
     "loss": experiment_loss,
     "pipeline": experiment_pipeline,
     "detection": experiment_detection,
-    "hysail": experiment_hysail,
+    "codecs": experiment_codecs,
 }
 
 
