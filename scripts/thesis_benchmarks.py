@@ -35,7 +35,13 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import hybolt.utils.galois as ga
 from hybolt.audit.audit import Audit
-from hybolt.constant import DEFAULT_REDUNDANCY, POLYNOMIAL_LAMBDA, POLYNOMIAL_SET_SIZE
+from hybolt.constant import (
+    DEFAULT_CHUNK_SIZE,
+    DEFAULT_REDUNDANCY,
+    DEFAULT_SOURCE_SYMBOLS,
+    POLYNOMIAL_LAMBDA,
+    POLYNOMIAL_SET_SIZE,
+)
 from hybolt.encryption import encode as encode_module
 from hybolt.encryption import raptor
 from hybolt.encryption.retrievability import (
@@ -225,10 +231,9 @@ class Deployment:
 
 
 def default_chunk_code(redundancy=DEFAULT_REDUNDANCY):
-    """K and r of a full chunk with HyBolt's default 10% symbol size."""
-    chunk_size = POLYNOMIAL_LAMBDA * 512
-    symbol_size = math.ceil(0.1 * chunk_size)
-    k = raptor.source_symbol_count(chunk_size, symbol_size)
+    """K and r of a full chunk with HyBolt's default symbol size."""
+    symbol_size = math.ceil(DEFAULT_CHUNK_SIZE / DEFAULT_SOURCE_SYMBOLS)
+    k = raptor.source_symbol_count(DEFAULT_CHUNK_SIZE, symbol_size)
     return k, max(1, math.ceil(redundancy * k))
 
 
@@ -433,13 +438,13 @@ def plot_pipeline(results, figure_dir):
                 label=f"{SCHEME_LABELS[scheme]} (medido)",
                 **series_style(slot),
             )
-    # n * l MACs: K source blocks per chunk of lambda * 512 bytes.
+    # n * l MACs: K source blocks per full chunk.
     axis.axhline(
         100
         * default_chunk_code()[0]
         * POLYNOMIAL_SET_SIZE
         * POLYNOMIAL_LAMBDA
-        / (8 * POLYNOMIAL_LAMBDA * 512),
+        / (8 * DEFAULT_CHUNK_SIZE),
         color=COLORS[3],
         linestyle=":",
         linewidth=1.5,
@@ -721,7 +726,7 @@ def symbols_needed_raptorq(packets, transfer_length, symbol_size, rng):
 
 
 def experiment_overhead(args):
-    ks = [default_chunk_code()[0], 100, 1000]
+    ks = [10, default_chunk_code()[0], 1000]
     trials = dict(zip(ks, (2000, 1000, 200)))
     if args.quick:
         trials = {k: 20 for k in ks}
@@ -805,30 +810,39 @@ def plot_overhead(results, figure_dir):
 # ---------------------------------------------------------------------------
 
 
-def recoverable_after_losses(k, total, rng, trials, lost):
-    """Fraction of random `lost`-subsets of ESIs 0..total-1 that still decode."""
+def failure_by_losses(k, total, rng, trials):
+    """P(chunk lost | h random losses) for h = 0..total, over ESIs 0..total-1.
+
+    A random order of the packets gives, at once, the outcome of losing its
+    first h packets for every h: the chunk survives while the packets left
+    still include the prefix of the reversed order that reaches rank K.
+    """
     supports = [raptor.symbol_support(k, esi) for esi in range(total)]
-    successes = 0
+    needed = []
     for _ in range(trials):
         system = raptor.Gf2System(k)
-        for index in rng.permutation(total)[lost:]:
+        for received, index in enumerate(rng.permutation(total), start=1):
             system.add(supports[index])
-        successes += system.rank == k
-    return successes / trials
+            if system.rank == k:
+                break
+        needed.append(received if system.rank == k else total + 1)
+    needed = np.asarray(needed)
+    return [float(np.mean(needed > total - lost)) for lost in range(total + 1)]
 
 
 def experiment_loss(args):
     redundancies = [0.1, 0.25, 0.5, 1.0]
-    # HyBolt's default chunk: 65,024 bytes in 6,503-byte symbols, so K = 10.
+    # HyBolt's default chunk: 100 source symbols of 6,500 bytes.
     k, _ = default_chunk_code()
-    trials = 50 if args.quick else 2000
+    trials = 50 if args.quick else 4000
     rng = np.random.default_rng(3)
     results = []
     for redundancy in redundancies:
         repair = max(1, math.ceil(redundancy * k))
         total = k + repair
+        failures = failure_by_losses(k, total, rng, trials)
         for lost in range(total + 1):
-            rate = recoverable_after_losses(k, total, rng, trials if lost else 1, lost)
+            rate = 1 - failures[lost]
             results.append(
                 {
                     "redundancy": redundancy,
@@ -972,40 +986,33 @@ def plot_detection(empirical, fractions, sample_sizes, figure_dir):
     save_figure(figure, figure_dir, "audit_detection")
 
 
-def chunk_failure_by_hits(k, repair):
-    """P(chunk lost | h of its packets corrupted), over every h-subset.
+def smallest_known_attack(k, repair):
+    """Packets of one chunk whose loss is certain to destroy it.
 
-    R10 is not MDS: whether a chunk survives depends on which packets are hit,
-    not only on how many, so each of the 2^(K + r) subsets is checked by rank.
+    Losing every packet whose support holds some source symbol i leaves i out
+    of every remaining support, so the rank drops below K; the smallest such
+    set is an attack an adversary who knows the code structure can mount.
     """
     total = k + repair
     supports = [raptor.symbol_support(k, esi) for esi in range(total)]
-    failures = [0] * (total + 1)
-    counts = [0] * (total + 1)
-    for lost_mask in range(1 << total):
-        system = raptor.Gf2System(k)
-        for index in range(total):
-            if not lost_mask >> index & 1:
-                system.add(supports[index])
-        hits = lost_mask.bit_count()
-        counts[hits] += 1
-        failures[hits] += system.rank < k
-    return [failure / count for failure, count in zip(failures, counts)]
+    return min(sum(support >> i & 1 for support in supports) for i in range(k))
 
 
 def targeted_attack_model(args):
     """P(file lost) when a fraction of packets is corrupted uniformly at random.
 
     With sealing the adversary cannot tell chunks apart, so its corruption is
-    spread uniformly; without it, the smallest set of one chunk's packets whose
-    loss drops the rank below K suffices.
+    spread uniformly; without it, the packets holding one source symbol suffice.
     """
 
     k, repair = default_chunk_code()
     per_chunk = k + repair
-    failure_by_hits = np.asarray(chunk_failure_by_hits(k, repair))
-    smallest_attack = int(np.flatnonzero(failure_by_hits > 0)[0])
-    chunk_size = POLYNOMIAL_LAMBDA * 512
+    trials_per_chunk = 200 if args.quick else 20000
+    failure_by_hits = np.asarray(
+        failure_by_losses(k, per_chunk, np.random.default_rng(7), trials_per_chunk)
+    )
+    smallest_attack = smallest_known_attack(k, repair)
+    chunk_size = DEFAULT_CHUNK_SIZE
     files = {"1 MiB": MIB, "64 MiB": 64 * MIB, "1 GiB": 1024 * MIB}
     fractions = np.concatenate(
         [np.geomspace(1e-5, 0.08, 40), np.linspace(0.085, 0.3, 30)]
