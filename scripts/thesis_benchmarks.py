@@ -35,7 +35,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import hybolt.utils.galois as ga
 from hybolt.audit.audit import Audit
-from hybolt.constant import POLYNOMIAL_LAMBDA, POLYNOMIAL_SET_SIZE
+from hybolt.constant import DEFAULT_REDUNDANCY, POLYNOMIAL_LAMBDA, POLYNOMIAL_SET_SIZE
 from hybolt.encryption import encode as encode_module
 from hybolt.encryption import raptor
 from hybolt.encryption.retrievability import (
@@ -224,7 +224,7 @@ class Deployment:
         return sorted(Path(self.servers[server_index]["storage_location"]).iterdir())
 
 
-def default_chunk_code(redundancy=0.25):
+def default_chunk_code(redundancy=DEFAULT_REDUNDANCY):
     """K and r of a full chunk with HyBolt's default 10% symbol size."""
     chunk_size = POLYNOMIAL_LAMBDA * 512
     symbol_size = math.ceil(0.1 * chunk_size)
@@ -242,7 +242,9 @@ def write_input(path, size, seed=0):
             remaining -= block
 
 
-def encode_file(deployment, input_file, scheme, seal=True, redundancy=0.25):
+def encode_file(
+    deployment, input_file, scheme, seal=True, redundancy=DEFAULT_REDUNDANCY
+):
     deployment.reset()
     metadata_dir = deployment.root / "metadata"
     timer = StageTimer()

@@ -107,10 +107,12 @@ average MAC-and-packet-generation time per chunk after encoding completes.
 
 Each chunk is encoded into its K source packets plus `ceil(redundancy * K)`
 R10 repair packets. Set the ratio with `--redundancy` on `encode` (default
-`0.25`). Unlike RaptorQ, R10 is not close to an MDS code: K received packets
-decode a chunk only some of the time, and a few extra packets are needed for a
-reliable recovery, so a chunk does not always survive the loss of all of its
-repair packets.
+`0.5`). Unlike RaptorQ, R10 is not close to an MDS code: K received packets
+decode a chunk only some of the time, and whether a chunk survives depends on
+which packets are lost. With the default 10% symbol size (K = 10), a
+redundancy of `0.25` (r = 3) already loses a chunk to 15% of single-packet
+losses, because two source symbols appear in no repair symbol; the default
+`0.5` (r = 5) survives every single loss and 98% of double losses.
 
 ### Proof of retrievability
 
@@ -158,9 +160,10 @@ packets to each repaired chunk to widen its margin. A server missing from the
 server file has all of its packets reported lost, and decoding continues
 without it.
 
-With packets balanced over N servers, losing f of them is tolerated while
-`redundancy >= f / (N - f)`. With three servers, for example, `--redundancy
-0.5` is needed to survive one server leaving.
+With packets balanced over N servers, losing f of them requires
+`redundancy >= f / (N - f)`, and R10 needs a few packets beyond that. With
+three servers and K = 10, one server leaving loses 59% of the chunks at the
+default `0.5`, 4.8% at `--redundancy 1.0` and 0.3% at `--redundancy 1.5`.
 
 Disable the proof with `--no-retrievability-proof` on `encode` or `decode`.
 The SHA-256 check after each download stays active either way.

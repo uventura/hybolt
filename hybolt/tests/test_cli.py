@@ -223,7 +223,7 @@ def test_given_retrievability_proof_flag_when_decoding_then_forwards_flag(
 
 
 @pytest.mark.parametrize(
-    ("flag", "expected"), [([], 0.25), (["--redundancy", "0.5"], 0.5)]
+    ("flag", "expected"), [([], 0.5), (["--redundancy", "0.25"], 0.25)]
 )
 def test_given_redundancy_option_when_encoding_then_forwards_redundancy(
     tmp_path, monkeypatch, flag, expected
