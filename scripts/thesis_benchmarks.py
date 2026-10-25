@@ -224,6 +224,14 @@ class Deployment:
         return sorted(Path(self.servers[server_index]["storage_location"]).iterdir())
 
 
+def default_chunk_code(redundancy=0.25):
+    """K and r of a full chunk with HyBolt's default 10% symbol size."""
+    chunk_size = POLYNOMIAL_LAMBDA * 512
+    symbol_size = math.ceil(0.1 * chunk_size)
+    k = raptor.source_symbol_count(chunk_size, symbol_size)
+    return k, max(1, math.ceil(redundancy * k))
+
+
 def write_input(path, size, seed=0):
     rng = np.random.default_rng(seed)
     with open(path, "wb") as target:
@@ -423,10 +431,10 @@ def plot_pipeline(results, figure_dir):
                 label=f"{SCHEME_LABELS[scheme]} (medido)",
                 **series_style(slot),
             )
-    # n * l MACs: K = 11 source blocks per chunk of lambda * 512 bytes.
+    # n * l MACs: K source blocks per chunk of lambda * 512 bytes.
     axis.axhline(
         100
-        * 11
+        * default_chunk_code()[0]
         * POLYNOMIAL_SET_SIZE
         * POLYNOMIAL_LAMBDA
         / (8 * POLYNOMIAL_LAMBDA * 512),
@@ -711,8 +719,8 @@ def symbols_needed_raptorq(packets, transfer_length, symbol_size, rng):
 
 
 def experiment_overhead(args):
-    ks = [11, 100, 1000]
-    trials = {11: 2000, 100: 1000, 1000: 200}
+    ks = [default_chunk_code()[0], 100, 1000]
+    trials = dict(zip(ks, (2000, 1000, 200)))
     if args.quick:
         trials = {k: 20 for k in ks}
     symbol_size = 16
@@ -761,7 +769,7 @@ def plot_overhead(results, figure_dir):
         ("lt", "LT (sóliton robusto)"),
     )
     for axis, k in zip(axes, ks):
-        limit = 3.0 if k <= 11 else 1.6
+        limit = 3.0 if k < 100 else 1.6
         ratios = np.linspace(0.9, limit, 400)
         needed = results[k] if k in results else results[str(k)]
         for slot, (code, label) in enumerate(codes):
@@ -809,8 +817,8 @@ def recoverable_after_losses(k, total, rng, trials, lost):
 
 def experiment_loss(args):
     redundancies = [0.1, 0.25, 0.5, 1.0]
-    # HyBolt's default chunk: 65,024 bytes in 6,500-byte symbols, so K = 11.
-    k = 11
+    # HyBolt's default chunk: 65,024 bytes in 6,503-byte symbols, so K = 10.
+    k, _ = default_chunk_code()
     trials = 50 if args.quick else 2000
     rng = np.random.default_rng(3)
     results = []
@@ -991,7 +999,7 @@ def targeted_attack_model(args):
     loss drops the rank below K suffices.
     """
 
-    k, repair = 11, 3
+    k, repair = default_chunk_code()
     per_chunk = k + repair
     failure_by_hits = np.asarray(chunk_failure_by_hits(k, repair))
     smallest_attack = int(np.flatnonzero(failure_by_hits > 0)[0])
