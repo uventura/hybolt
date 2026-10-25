@@ -15,11 +15,6 @@ from dataclasses import dataclass
 
 from hybolt.encryption import raptor_tables as tables
 
-try:
-    from hybolt.encryption import _raptor10
-except ImportError:  # pragma: no cover - the C extension is optional
-    _raptor10 = None
-
 # Q in the triple generator (Section 5.4.4.4): the largest prime below 2^16.
 _TRIPLE_PRIME = 65521
 _DEGREE_RANGE = 1 << 20
@@ -154,9 +149,10 @@ def intermediate_supports(source_symbols: int) -> tuple[int, ...]:
     params = parameters(source_symbols)
     padding = params.ldpc_symbols + params.half_symbols
     values = [0] * padding + [1 << i for i in range(source_symbols)]
-    solution = solve(
-        constraint_rows(params), values, params.intermediate_symbols, source_symbols
-    )
+    system = Gf2System(params.intermediate_symbols)
+    for row, value in zip(constraint_rows(params), values, strict=True):
+        system.add(row, value)
+    solution = system.solve()
     if solution is None:
         raise ArithmeticError(f"the R10 matrix A is singular for K = {source_symbols}")
     return tuple(solution)
@@ -236,29 +232,6 @@ class Gf2System:
             row, value = self._pivots[column]
             solution[column] = value ^ xor_symbols(solution, row ^ (1 << column))
         return solution
-
-
-def solve(rows, values, columns: int, value_bits: int) -> list[int] | None:
-    """Solve rows * X = values over GF(2); None when the rows have rank < columns."""
-    if _raptor10 is not None:
-        return _solve_native(rows, values, columns, value_bits)
-    system = Gf2System(columns)
-    for row, value in zip(rows, values, strict=True):
-        system.add(row, value)
-    return system.solve()
-
-
-def _solve_native(rows, values, columns, value_bits):
-    row_bytes = (columns + 7) // 8
-    value_bytes = (value_bits + 7) // 8
-    solution = _raptor10.solve(
-        [row.to_bytes(row_bytes, "little") for row in rows],
-        [value.to_bytes(value_bytes, "little") for value in values],
-        columns,
-    )
-    if solution is None:
-        return None
-    return [int.from_bytes(value, "little") for value in solution]
 
 
 class Encoder:
