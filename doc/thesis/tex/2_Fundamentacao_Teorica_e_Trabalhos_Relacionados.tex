@@ -45,7 +45,16 @@ Segundo a convenção adotada, em que o primeiro bit corresponde ao coeficiente 
 
 
 \subsection{HySAIL e Codificação de Blocos}
-O HySAIL \cite{amaral2013hysail,amaral2019hysail} é um protocolo de \acrshort{PoR} que combina códigos de apagamento, responsáveis pela disponibilidade, com um código de autenticação de mensagem (\emph{Message Authentication Code}, \acrshort{MAC}) homomórfico, responsável pela verificação de integridade. O protocolo envolve apenas duas entidades, o usuário, considerado confiável, e um conjunto de $N$ provedores de armazenamento sem distinção entre primários e secundários, e é organizado em cinco fases: Codificação, Distribuição, Decodificação, Auditoria e Redistribuição.
+O HySAIL \cite{amaral2013hysail,amaral2019hysail} é um protocolo de \acrshort{PoR} que combina códigos de apagamento, responsáveis pela disponibilidade, com um código de autenticação de mensagem (\emph{Message Authentication Code}, \acrshort{MAC}) homomórfico, responsável pela verificação de integridade. O protocolo envolve apenas duas entidades, o usuário, considerado confiável, e um conjunto de $N$ provedores de armazenamento sem distinção entre primários e secundários, e é organizado em cinco fases: Codificação, Distribuição, Decodificação, Auditoria e Redistribuição, cujas interações estão representadas na Figura~\ref{fig:hysail_protocolo}.
+
+\begin{figure}[htbp]
+	\centering
+	\begin{adjustbox}{max width=\textwidth}
+		\input{img/tikz/hysail_protocolo}
+	\end{adjustbox}
+	\caption{Entidades e fases do HySAIL. O usuário codifica o arquivo e mantém apenas os metadados; os provedores armazenam os blocos de verificação, respondem às auditorias e participam da Redistribuição. Elaborada pelo autor com base em \cite{amaral2019hysail}.}
+	\label{fig:hysail_protocolo}
+\end{figure}
 
 Na fase de Codificação, o arquivo $F$ é dividido em $n$ blocos de mensagem $m_1, \ldots, m_n$, que são codificados com Online Codes, gerando blocos de verificação $c_j$, cada um resultante do XOR de um subconjunto de blocos de mensagem. Cada bloco de mensagem é interpretado como um polinômio $m_i(x)$ com coeficientes em $GF(2)$, e o usuário gera um conjunto de $l$ polinômios primitivos de grau $\lambda$, $P_1(x), \ldots, P_l(x)$, que funcionam como chaves de desafio. O \acrshort{MAC} do bloco $m_i$ em relação ao desafio $P_j$ é o resto da divisão polinomial
 
@@ -63,7 +72,16 @@ Como a soma em $GF(2)$ coincide com o XOR, a redução módulo $P_j(x)$ é linea
 	\label{eq:hysail_homomorfismo}
 \end{equation}
 
-Essa propriedade permite ao usuário verificar qualquer bloco de verificação $c_e = m_a \oplus m_b$ armazenando somente os \acrshort{MAC}s dos blocos de mensagem: basta combinar $h_{a,j}$ e $h_{b,j}$ e compará-los com o resto que o provedor calcula sobre $c_e$. A memória exigida do usuário é, assim, de $n \cdot l$ \acrshort{MAC}s, independentemente do número de blocos de verificação gerados.
+Essa propriedade permite ao usuário verificar qualquer bloco de verificação $c_e = m_a \oplus m_b$ armazenando somente os \acrshort{MAC}s dos blocos de mensagem: basta combinar $h_{a,j}$ e $h_{b,j}$ e compará-los com o resto que o provedor calcula sobre $c_e$. A memória exigida do usuário é, assim, de $n \cdot l$ \acrshort{MAC}s, independentemente do número de blocos de verificação gerados. A Figura~\ref{fig:mac_homomorfico} ilustra essa comutação entre a codificação e o cálculo do \acrshort{MAC}.
+
+\begin{figure}[htbp]
+	\centering
+	\begin{adjustbox}{max width=\textwidth}
+		\input{img/tikz/mac_homomorfico}
+	\end{adjustbox}
+	\caption{Propriedade homomórfica do \acrshort{MAC} do HySAIL: reduzir módulo $P_j(x)$ e combinar por XOR comutam, de modo que o \acrshort{MAC} de um bloco de verificação é obtido dos \acrshort{MAC}s dos blocos de mensagem.}
+	\label{fig:mac_homomorfico}
+\end{figure}
 
 Na fase de Auditoria, o usuário escolhe um polinômio $P_j$ e um subconjunto aleatório de blocos de verificação armazenados em um provedor, que responde com $\left(\bigoplus_\eta c_\eta(x)\right) \bmod P_j(x)$. A resposta é comparada com a combinação dos \acrshort{MAC}s correspondentes e, havendo divergência, o usuário pode auditar outro provedor ou iniciar a fase de Redistribuição, na qual o bloco corrompido é reconstruído a partir de outros blocos de verificação e enviado a outro provedor, sem que o arquivo inteiro precise ser transferido. O HySAIL admite os modelos limitado, em que o número de auditorias é restrito ao conjunto de polinômios gerados na codificação, e ilimitado \cite{amaral2019hysail}.
 
@@ -100,7 +118,16 @@ Com os conjuntos sorteados $S_1 = \{2\}$, $S_2 = \{1, 2\}$ e $S_3 = \{1, 2, 3\}$
 	c_3 = d_1 \oplus d_2 \oplus d_3 = 0001.
 \end{equation}
 
-Na decodificação, $c_1$ fornece diretamente $d_2$. Removendo $d_2$ dos demais símbolos, obtêm-se $c_2 \oplus d_2 = d_1 = 1010$ e $c_3 \oplus d_2 = d_1 \oplus d_3 = 0111$. Por fim, $0111 \oplus d_1 = 1101 = d_3$, completando a recuperação.
+Na decodificação, $c_1$ fornece diretamente $d_2$. Removendo $d_2$ dos demais símbolos, obtêm-se $c_2 \oplus d_2 = d_1 = 1010$ e $c_3 \oplus d_2 = d_1 \oplus d_3 = 0111$. Por fim, $0111 \oplus d_1 = 1101 = d_3$, completando a recuperação. A Figura~\ref{fig:lt_grafo} representa o exemplo como um grafo bipartido entre símbolos de origem e símbolos codificados, sobre o qual atua o \emph{peeling}.
+
+\begin{figure}[htbp]
+	\centering
+	\begin{adjustbox}{max width=\textwidth}
+		\input{img/tikz/lt_grafo}
+	\end{adjustbox}
+	\caption{Grafo bipartido do exemplo de LT Codes e ordem de recuperação pelo algoritmo de \emph{peeling}. Cada aresta liga um símbolo codificado aos símbolos de origem que o compõem.}
+	\label{fig:lt_grafo}
+\end{figure}
 
 \subsection{Online Codes}
 Os \textbf{Online Codes}, propostos por Maymounkov \cite{maymounkov2002online,maymounkov2003rateless}, são os códigos \emph{fountain} empregados na proposta original do HySAIL. Assim como os LT Codes, eles geram uma quantidade potencialmente ilimitada de símbolos codificados por meio de combinações XOR, diferentemente destes, porém, empregam uma distribuição de grau com grau máximo constante, independente de $k$, o que resulta em codificação e decodificação de complexidade linear. Para compensar a recuperação apenas parcial que essa distribuição proporciona, os Online Codes combinam dois níveis de codificação, um código externo e um código interno.
@@ -133,7 +160,16 @@ Suponha que o receptor obtenha os seguintes blocos de verificação, gerados a p
 	c_3 = a_1 = 0001.
 \end{equation}
 
-Pelo código interno, $c_1$ e $c_3$ fornecem diretamente $d_1$ e $a_1$, e $c_2 \oplus a_1 = 1101 = d_3$. O símbolo $d_2$, que não participa de nenhum bloco recebido, é então recuperado pelo código externo: $d_2 = a_1 \oplus d_1 \oplus d_3 = 0110$.
+Pelo código interno, $c_1$ e $c_3$ fornecem diretamente $d_1$ e $a_1$, e $c_2 \oplus a_1 = 1101 = d_3$. O símbolo $d_2$, que não participa de nenhum bloco recebido, é então recuperado pelo código externo: $d_2 = a_1 \oplus d_1 \oplus d_3 = 0110$. A Figura~\ref{fig:online_codes} resume os dois níveis de codificação do exemplo.
+
+\begin{figure}[htbp]
+	\centering
+	\begin{adjustbox}{max width=\textwidth}
+		\input{img/tikz/online_codes}
+	\end{adjustbox}
+	\caption{Os dois níveis dos Online Codes no exemplo: o código externo acrescenta o símbolo auxiliar $a_1$ à mensagem composta, e o código interno gera os blocos de verificação a partir dela. Elaborada pelo autor com base em \cite{maymounkov2002online}.}
+	\label{fig:online_codes}
+\end{figure}
 
 \subsection{RaptorQ Codes}
 Os \textbf{RaptorQ Codes} \cite{shokrollahi2006raptor,WOS:000381844400033} são códigos \emph{fountain} que, assim como os Online Codes, combinam uma etapa de pré-codificação com uma codificação LT. Sua adoção no HySAIL, em substituição aos Online Codes, constitui o objeto deste trabalho. Assim como nos demais códigos \emph{fountain}, o receptor não precisa obter símbolos específicos, bastando receber uma quantidade suficiente de símbolos codificados para reconstruir os dados originais, o que torna o código adequado a cenários com perdas, como a transmissão em redes não confiáveis e o armazenamento distribuído.
@@ -148,13 +184,31 @@ c_i = \bigoplus_{j \in S_i} v_j,
 
 em que $S_i$ é o conjunto de índices selecionados para o símbolo $c_i$. A diferença em relação ao LT Code isolado é que as relações introduzidas na pré-codificação permitem recuperar símbolos de origem mesmo quando o processo iterativo não encontra imediatamente símbolos de grau 1.
 
-A pré-codificação, contudo, não se limita a operações em $GF(2)$. No padrão RFC~6330 \cite{luby2011rfc6330}, os símbolos intermediários são definidos por um sistema de restrições de dois tipos: as restrições LDPC (\emph{Low-Density Parity-Check}), que combinam símbolos por XOR, e as restrições HDPC (\emph{High-Density Parity-Check}), cujos coeficientes pertencem a $GF(256)$, de modo que cada byte de um símbolo é multiplicado por um elemento do corpo antes de ser somado. A introdução das restrições HDPC sobre $GF(256)$ é a principal diferença em relação ao código Raptor original, cuja pré-codificação opera apenas sobre $GF(2)$ \cite{shokrollahi2006raptor}, e é responsável pela baixa probabilidade de falha do RaptorQ: inferior a 1\% ao receber $K$ símbolos e inferior a $10^{-6}$ ao receber $K + 2$ símbolos \cite{luby2011rfc6330}. O código é ainda sistemático: os símbolos intermediários são calculados de forma que os primeiros $K$ símbolos codificados coincidam com os símbolos de origem.
+A pré-codificação, contudo, não se limita a operações em $GF(2)$. No padrão RFC~6330 \cite{luby2011rfc6330}, os símbolos intermediários são definidos por um sistema de restrições de dois tipos: as restrições LDPC (\emph{Low-Density Parity-Check}), que combinam símbolos por XOR, e as restrições HDPC (\emph{High-Density Parity-Check}), cujos coeficientes pertencem a $GF(256)$, de modo que cada byte de um símbolo é multiplicado por um elemento do corpo antes de ser somado. A introdução das restrições HDPC sobre $GF(256)$ é a principal diferença em relação ao código Raptor original, cuja pré-codificação opera apenas sobre $GF(2)$ \cite{shokrollahi2006raptor}, e é responsável pela baixa probabilidade de falha do RaptorQ: inferior a 1\% ao receber $K$ símbolos e inferior a $10^{-6}$ ao receber $K + 2$ símbolos \cite{luby2011rfc6330}. O código é ainda sistemático: os símbolos intermediários são calculados de forma que os primeiros $K$ símbolos codificados coincidam com os símbolos de origem. A Figura~\ref{fig:raptorq} resume esse processo: os $K$ símbolos de origem, completados até $K'$ símbolos, determinam os $L$ símbolos intermediários, a partir dos quais a etapa LT gera os símbolos identificados pelo \acrshort{ESI}.
+
+\begin{figure}[htbp]
+	\centering
+	\begin{adjustbox}{max width=\textwidth}
+		\input{img/tikz/raptorq}
+	\end{adjustbox}
+	\caption{Estrutura de codificação dos RaptorQ Codes segundo a RFC~6330. Os símbolos com \acrshort{ESI} menor que $K$ reproduzem os símbolos de origem, e os demais são símbolos de reparo, que podem ser gerados em quantidade ilimitada. Elaborada pelo autor com base em \cite{luby2011rfc6330}.}
+	\label{fig:raptorq}
+\end{figure}
 
 Como os símbolos intermediários resultam da solução desse sistema, cada um deles é uma combinação linear dos símbolos de origem com coeficientes em $GF(256)$. Consequentemente, embora a etapa LT combine os símbolos intermediários apenas por XOR, um símbolo de reparo não é o XOR de símbolos de origem, mas uma combinação linear desses símbolos sobre $GF(256)$. Essa é a propriedade que impede o uso direto do \acrshort{MAC} homomórfico do HySAIL, como discutido na Seção~\ref{sec:impacto_mac}.
 
 Na decodificação, o receptor reúne os símbolos codificados recebidos e suas relações de codificação. Inicialmente, são aplicadas eliminações XOR para resolver os símbolos que podem ser obtidos diretamente. As relações restantes são então resolvidas em conjunto com as restrições da pré-codificação, por eliminação gaussiana que envolve operações em $GF(256)$ na parte correspondente às restrições HDPC \cite{luby2011rfc6330}. Desse modo, o RaptorQ combina a geração flexível de símbolos dos LT Codes com uma camada adicional de proteção, reduzindo a probabilidade de falha na recuperação quando são recebidos símbolos suficientes \cite{shokrollahi2006raptor,WOS:000381844400033}.
 
 Essa camada adicional resulta em um \emph{overhead} de recepção reduzido, permitindo recuperar o bloco mesmo após perdas sem exigir a retransmissão de símbolos específicos. Em contrapartida, a pré-codificação e a resolução das relações remanescentes aumentam a complexidade de decodificação em comparação com os LT Codes \cite{WOS:000381844400033}.
+
+A Figura~\ref{fig:degree_distributions} compara as distribuições de grau dos três códigos. A distribuição sóliton robusta dos LT Codes precisa admitir graus até $K$ para cobrir todos os símbolos de origem, e a dos Online Codes, com $\varepsilon = 0{,}01$, chega a 2.115, com grau médio de 10,3 e 8,2, respectivamente. Como a pré-codificação do RaptorQ assume a cobertura dos símbolos que a etapa LT deixa de alcançar, sua distribuição é truncada no grau 30, com grau médio de 4,8, o que reduz o número de operações XOR por símbolo codificado \cite{luby2011rfc6330}.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.8\textwidth]{resultados/degree_distributions.pdf}
+	\caption{Distribuições de grau dos LT Codes (sóliton robusta, com $c = 0{,}1$ e $\delta = 0{,}5$), dos Online Codes e dos RaptorQ Codes (tabela da Seção 5.3.5.2 da RFC~6330). Gerada por \texttt{scripts/thesis\_benchmarks.py}.}
+	\label{fig:degree_distributions}
+\end{figure}
 
 \subsubsection{Exemplo simplificado de codificação e recuperação}%
 Considere os mesmos símbolos de origem dos exemplos anteriores:

@@ -12,43 +12,53 @@
 \contentsline {subsection}{\numberline {2.1.2}Divisão polinomial em $GF(2)$}{7}{subsection.2.1.2}%
 \contentsline {subsubsection}{Exemplo de divisão}{7}{section*.9}%
 \contentsline {subsection}{\numberline {2.1.3}HySAIL e Codificação de Blocos}{8}{subsection.2.1.3}%
-\contentsline {subsection}{\numberline {2.1.4}LT Codes}{9}{subsection.2.1.4}%
-\contentsline {subsubsection}{Exemplo de codificação e decodificação}{10}{section*.10}%
-\contentsline {subsection}{\numberline {2.1.5}Online Codes}{10}{subsection.2.1.5}%
-\contentsline {subsubsection}{Exemplo de codificação e decodificação}{11}{section*.11}%
-\contentsline {subsection}{\numberline {2.1.6}RaptorQ Codes}{12}{subsection.2.1.6}%
-\contentsline {subsubsection}{Exemplo simplificado de codificação e recuperação}{13}{section*.12}%
-\contentsline {section}{\numberline {2.2}Trabalhos Relacionados}{14}{section.2.2}%
-\contentsline {chapter}{\numberline {3}Metodologia de Pesquisa}{15}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Revisão da Literatura}{15}{section.3.1}%
-\contentsline {section}{\numberline {3.2}Provas de Integridade e Disponibilidade}{15}{section.3.2}%
-\contentsline {section}{\numberline {3.3}Avaliação de RaptorQ Codes}{16}{section.3.3}%
-\contentsline {chapter}{\numberline {4}Proposta}{17}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Arquitetura Geral}{17}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Substituição dos Online Codes pelos RaptorQ Codes}{18}{section.4.2}%
-\contentsline {section}{\numberline {4.3}Problemas da Substituição Direta}{18}{section.4.3}%
-\contentsline {section}{\numberline {4.4}Impacto sobre o MAC Homomórfico}{20}{section.4.4}%
-\contentsline {section}{\numberline {4.5}Escolha dos Polinômios de Desafio}{20}{section.4.5}%
-\contentsline {section}{\numberline {4.6}Auditoria no Modelo Limitado}{21}{section.4.6}%
-\contentsline {section}{\numberline {4.7}Redundância}{22}{section.4.7}%
-\contentsline {section}{\numberline {4.8}Redistribuição}{23}{section.4.8}%
-\contentsline {section}{\numberline {4.9}Esquema Compacto e Ilimitado}{23}{section.4.9}%
-\contentsline {section}{\numberline {4.10}Ocultação da Estrutura do Código}{25}{section.4.10}%
-\contentsline {chapter}{\numberline {5}Implementação}{26}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Visão Geral}{26}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Fluxo das Fases}{27}{section.5.2}%
-\contentsline {subsection}{\numberline {5.2.1}Codificação e Distribuição}{27}{subsection.5.2.1}%
-\contentsline {subsection}{\numberline {5.2.2}Auditoria}{27}{subsection.5.2.2}%
-\contentsline {subsection}{\numberline {5.2.3}Redistribuição}{27}{subsection.5.2.3}%
-\contentsline {subsection}{\numberline {5.2.4}Decodificação}{28}{subsection.5.2.4}%
-\contentsline {section}{\numberline {5.3}Organização do Código}{28}{section.5.3}%
-\contentsline {section}{\numberline {5.4}Metadados do Usuário}{29}{section.5.4}%
-\contentsline {section}{\numberline {5.5}Problemas Observados na Substituição Direta}{29}{section.5.5}%
-\contentsline {section}{\numberline {5.6}Simplificações}{30}{section.5.6}%
-\contentsline {section}{\numberline {5.7}Validação}{31}{section.5.7}%
-\contentsline {chapter}{\numberline {6}Resultados}{32}{chapter.6}%
-\contentsline {chapter}{\numberline {7}Conclusão}{33}{chapter.7}%
-\contentsline {chapter}{Refer\^encias}{34}{section*.13}%
+\contentsline {subsection}{\numberline {2.1.4}LT Codes}{10}{subsection.2.1.4}%
+\contentsline {subsubsection}{Exemplo de codificação e decodificação}{11}{section*.10}%
+\contentsline {subsection}{\numberline {2.1.5}Online Codes}{11}{subsection.2.1.5}%
+\contentsline {subsubsection}{Exemplo de codificação e decodificação}{12}{section*.11}%
+\contentsline {subsection}{\numberline {2.1.6}RaptorQ Codes}{13}{subsection.2.1.6}%
+\contentsline {subsubsection}{Exemplo simplificado de codificação e recuperação}{16}{section*.12}%
+\contentsline {section}{\numberline {2.2}Trabalhos Relacionados}{16}{section.2.2}%
+\contentsline {chapter}{\numberline {3}Metodologia de Pesquisa}{18}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Revisão da Literatura}{18}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Provas de Integridade e Disponibilidade}{18}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Avaliação de RaptorQ Codes}{19}{section.3.3}%
+\contentsline {chapter}{\numberline {4}Proposta}{20}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Arquitetura Geral}{20}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Substituição dos Online Codes pelos RaptorQ Codes}{21}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Problemas da Substituição Direta}{21}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Impacto sobre o MAC Homomórfico}{23}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Escolha dos Polinômios de Desafio}{23}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Auditoria no Modelo Limitado}{24}{section.4.6}%
+\contentsline {section}{\numberline {4.7}Redundância}{25}{section.4.7}%
+\contentsline {section}{\numberline {4.8}Redistribuição}{26}{section.4.8}%
+\contentsline {section}{\numberline {4.9}Esquema Compacto e Ilimitado}{27}{section.4.9}%
+\contentsline {section}{\numberline {4.10}Ocultação da Estrutura do Código}{29}{section.4.10}%
+\contentsline {chapter}{\numberline {5}Implementação}{31}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Visão Geral}{31}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Fluxo das Fases}{32}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}Codificação e Distribuição}{32}{subsection.5.2.1}%
+\contentsline {subsection}{\numberline {5.2.2}Auditoria}{32}{subsection.5.2.2}%
+\contentsline {subsection}{\numberline {5.2.3}Redistribuição}{32}{subsection.5.2.3}%
+\contentsline {subsection}{\numberline {5.2.4}Decodificação}{33}{subsection.5.2.4}%
+\contentsline {section}{\numberline {5.3}Organização do Código}{33}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Metadados do Usuário}{34}{section.5.4}%
+\contentsline {section}{\numberline {5.5}Problemas Observados na Substituição Direta}{34}{section.5.5}%
+\contentsline {section}{\numberline {5.6}Simplificações}{36}{section.5.6}%
+\contentsline {section}{\numberline {5.7}Validação}{36}{section.5.7}%
+\contentsline {chapter}{\numberline {6}Resultados}{38}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Ambiente Experimental}{38}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Recuperação e \emph {Overhead} de Recepção}{39}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Custo do MAC Polinomial}{41}{section.6.3}%
+\contentsline {section}{\numberline {6.4}Codificação e Decodificação}{42}{section.6.4}%
+\contentsline {section}{\numberline {6.5}Auditoria}{44}{section.6.5}%
+\contentsline {section}{\numberline {6.6}Memória do Usuário e Armazenamento}{46}{section.6.6}%
+\contentsline {section}{\numberline {6.7}Ocultação da Estrutura e Ataque Dirigido}{47}{section.6.7}%
+\contentsline {section}{\numberline {6.8}Comparação com o HySAIL}{48}{section.6.8}%
+\contentsline {section}{\numberline {6.9}Comparação com Outros Esquemas de PoR}{50}{section.6.9}%
+\contentsline {section}{\numberline {6.10}Síntese}{50}{section.6.10}%
+\contentsline {chapter}{\numberline {7}Conclusão}{52}{chapter.7}%
+\contentsline {chapter}{Refer\^encias}{53}{section*.13}%
 \babel@toc {american}{}\relax 
 \babel@toc {portuguese}{}\relax 
 \babel@toc {american}{}\relax 

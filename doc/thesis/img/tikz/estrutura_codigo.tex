@@ -1,0 +1,44 @@
+\begin{tikzpicture}[
+		interface/.style={draw=serieA!80!black, fill=serieA!25, font=\footnotesize, align=center, inner sep=4pt, text width=42mm},
+		concreta/.style={draw=#1!80!black, fill=#1!10, font=\scriptsize\ttfamily, align=center, inner sep=3pt, text width=42mm},
+		herda/.style={-{Triangle[open, length=2.5mm, width=2.5mm]}, draw=tintaSec, thick},
+		barramento/.style={draw=tintaSec, thick},
+		usa/.style={->, dashed, draw=tintaSec},
+		node distance=3mm and 6mm]
+
+	% Prova de recuperabilidade
+	\node[interface] (rp) {$\langle\langle$interface$\rangle\rangle$\\\texttt{RetrievabilityProof}};
+	\node[concreta=serieB, below=7mm of rp] (poly) {PolynomialRetrievabilityProof};
+	\node[concreta=serieB, below=of poly] (compact) {CompactRetrievabilityProof};
+	\node[concreta=serieB, below=of compact] (disabled) {DisabledRetrievabilityProof};
+	\draw[herda] ($(disabled.west)+(-4mm,0)$) -- ($(rp.west)+(-4mm,0)$) -- (rp.west);
+	\foreach \c in {poly,compact,disabled} \draw[barramento] (\c.west) -- ++(-4mm,0);
+	\node[concreta=serieD, below=7mm of disabled] (ledger) {ChallengeLedger};
+	\node[concreta=serieD, below=of ledger] (keys) {CompactKeys};
+	\draw[usa] (ledger.east) -- ++(5mm,0) |- (poly.east);
+	\draw[usa] (keys.east) -- ++(3mm,0) |- (compact.east);
+
+	% Auditoria
+	\node[interface, right=12mm of rp] (ac) {$\langle\langle$interface$\rangle\rangle$\\\texttt{AuditChallenge}};
+	\node[concreta=serieB, below=7mm of ac] (bounded) {BoundedAuditChallenge};
+	\node[concreta=serieB, below=of bounded] (compactac) {CompactAuditChallenge};
+	\draw[herda] ($(compactac.west)+(-4mm,0)$) -- ($(ac.west)+(-4mm,0)$) -- (ac.west);
+	\foreach \c in {bounded,compactac} \draw[barramento] (\c.west) -- ++(-4mm,0);
+	\node[concreta=serieC, below=7mm of compactac] (audit) {Audit};
+	\node[concreta=serieC, below=of audit] (redist) {Redistribution};
+	\draw[usa] (audit.east) -- ++(4mm,0) |- (compactac.east);
+	\draw[usa] ($(audit.east)+(4mm,0)$) |- (bounded.east);
+
+	% Decodificação
+	\node[interface, right=12mm of ac] (ds) {$\langle\langle$interface$\rangle\rangle$\\\texttt{DecodingStrategy}};
+	\node[concreta=serieB, below=7mm of ds] (rq) {RaptorQDecodingStrategy};
+	\node[concreta=serieB, below=of rq] (lt) {LtDecodingStrategy};
+	\draw[herda] ($(lt.west)+(-4mm,0)$) -- ($(ds.west)+(-4mm,0)$) -- (ds.west);
+	\foreach \c in {rq,lt} \draw[barramento] (\c.west) -- ++(-4mm,0);
+	\node[concreta=serieE, below=7mm of lt] (sealing) {SealingKeys};
+	\node[concreta=serieE, below=of sealing] (server) {Server};
+
+	\node[rotulo, above=2mm of rp] {prova de recuperabilidade};
+	\node[rotulo, above=2mm of ac] {auditoria e redistribuição};
+	\node[rotulo, above=2mm of ds] {decodificação e armazenamento};
+\end{tikzpicture}

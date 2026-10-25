@@ -1,0 +1,23 @@
+\begin{tikzpicture}[node distance=6mm and 14mm]
+	% Usuário
+	\node[caixa=serieA, minimum width=34mm, minimum height=12mm] (arquivo) {Arquivo $F$\\$m_1, \ldots, m_n$};
+	\node[caixa=serieA, below=of arquivo, minimum width=34mm] (codificacao) {\textbf{1. Codificação}\\Online Codes: $c_j = \bigoplus m_i$\\$h_{i,j} = m_i \bmod P_j$};
+	\node[caixa=serieD, below=of codificacao, minimum width=34mm] (metadados) {Metadados mantidos\\$h_{i,j}$, $P_1, \ldots, P_l$,\\composição e local de $c_j$};
+	\draw[seta] (arquivo) -- (codificacao);
+	\draw[seta] (codificacao) -- (metadados);
+	\node[grupo, fit=(arquivo)(codificacao)(metadados), label={[rotulo]above:Usuário (confiável)}] (usuario) {};
+
+	% Provedores
+	\node[servidor, right=42mm of arquivo] (s1) {$S_1$};
+	\node[servidor, below=8mm of s1] (s2) {$S_2$};
+	\node[below=2mm of s2, text=tintaSec] (pontos) {$\vdots$};
+	\node[servidor, below=2mm of pontos] (sn) {$S_N$};
+	\node[grupo, fit=(s1)(s2)(sn), label={[rotulo]above:Provedores de armazenamento}] (provedores) {};
+
+	% Fases
+	\draw[seta, draw=serieA] (codificacao.east) -- node[rotulo, above, sloped] {2. Distribuição de $c_j$} (s1.west);
+	\draw[seta, draw=serieB, transform canvas={yshift=1.5mm}] (metadados.east) -- node[rotulo, above, sloped] {3. Auditoria: $P_j$, lista} (s2.west);
+	\draw[seta, draw=serieB, transform canvas={yshift=-1.5mm}] (s2.west) -- node[rotulo, below, sloped] {$A(x) = \left(\bigoplus c_\eta\right) \bmod P_j$} (metadados.east);
+	\draw[seta, draw=serieC] (sn.west) -- node[rotulo, below, sloped] {5. Decodificação: $c_j$} (metadados.south east);
+	\draw[seta, draw=serieE, dashed] (s1.east) to[bend left=40] node[rotulo, right] {4. Redistribuição:\\$c_{new} = c_a \oplus c_b$} (sn.east);
+\end{tikzpicture}

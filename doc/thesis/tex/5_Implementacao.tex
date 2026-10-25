@@ -40,7 +40,16 @@ Na decodificação, os pacotes de cada \emph{chunk} são transferidos, verificad
 
 \section{Organização do Código}
 
-A prova de recuperabilidade, a auditoria e a decodificação foram organizadas segundo o padrão de projeto \emph{Strategy}, de modo que variantes possam ser substituídas sem alterar o fluxo principal:
+A prova de recuperabilidade, a auditoria e a decodificação foram organizadas segundo o padrão de projeto \emph{Strategy}, de modo que variantes possam ser substituídas sem alterar o fluxo principal. As principais classes estão representadas na Figura~\ref{fig:estrutura_codigo} e descritas a seguir:
+
+\begin{figure}[htbp]
+	\centering
+	\begin{adjustbox}{max width=\textwidth}
+		\input{img/tikz/estrutura_codigo}
+	\end{adjustbox}
+	\caption{Principais classes do HyBolt. As setas com triângulo indicam a realização de uma interface, e as setas tracejadas, dependências.}
+	\label{fig:estrutura_codigo}
+\end{figure}
 
 \begin{itemize}
 	\item \textit{Prova de recuperabilidade:} a interface \texttt{RetrievabilityProof} define o material de prova gerado na codificação (\acrshort{MAC}s do usuário ou etiquetas dos provedores) e as verificações antes e depois de cada transferência. É especializada por \texttt{PolynomialRetrievabilityProof}, que realiza o esquema limitado, por \texttt{CompactRetrievabilityProof}, que realiza o esquema compacto a partir das chaves \texttt{CompactKeys}, e por \texttt{DisabledRetrievabilityProof}, um objeto nulo que permite desabilitar a prova, por exemplo, para medir o custo do restante do protocolo.

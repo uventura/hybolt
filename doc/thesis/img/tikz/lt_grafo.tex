@@ -1,0 +1,30 @@
+\begin{tikzpicture}[node distance=8mm and 16mm]
+	% Símbolos de origem
+	\node[simbolo=serieA] (d1) {$d_1$};
+	\node[simbolo=serieA, right=of d1] (d2) {$d_2$};
+	\node[simbolo=serieA, right=of d2] (d3) {$d_3$};
+	% Símbolos codificados
+	\node[restricao=serieB, below=16mm of d1, minimum size=8mm] (c1) {$c_1$};
+	\node[restricao=serieB, below=16mm of d2, minimum size=8mm] (c2) {$c_2$};
+	\node[restricao=serieB, below=16mm of d3, minimum size=8mm] (c3) {$c_3$};
+
+	\draw[aresta] (c1) -- (d2);
+	\draw[aresta] (c2) -- (d1);
+	\draw[aresta] (c2) -- (d2);
+	\draw[aresta] (c3) -- (d1);
+	\draw[aresta] (c3) -- (d2);
+	\draw[aresta] (c3) -- (d3);
+
+	\node[rotulo, left=4mm of d1] {símbolos\\de origem};
+	\node[rotulo, left=4mm of c1] {símbolos\\codificados};
+	\node[rotulo, below=1mm of c1] {grau 1};
+	\node[rotulo, below=1mm of c2] {grau 2};
+	\node[rotulo, below=1mm of c3] {grau 3};
+
+	% Ordem de decodificação por peeling
+	\node[caixa=serieC, right=18mm of d3, anchor=north west, yshift=4mm, align=left, minimum width=40mm] (passos) {%
+		\textbf{Peeling}\\[2pt]
+		1. $c_1$ tem grau 1: $d_2 = c_1$\\
+		2. remove $d_2$: $c_2 \to d_1$\\
+		3. remove $d_1, d_2$: $c_3 \to d_3$};
+\end{tikzpicture}

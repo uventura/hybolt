@@ -1,0 +1,15 @@
+\begin{tikzpicture}
+	\node[caixa=serieA, minimum width=36mm] (usuario) {\textbf{Usuário}\\guarda $P(x)$, $K$, $id_F$};
+	\node[caixa=serieC, minimum width=36mm, right=62mm of usuario] (provedor) {\textbf{Provedor} $S_i$\\guarda $c_\eta$ e $\sigma_\eta$};
+	\draw[tintaSec, dashed] (usuario.south) -- ++(0,-66mm) coordinate (fimU);
+	\draw[tintaSec, dashed] (provedor.south) -- ++(0,-66mm) coordinate (fimP);
+
+	\node[rotulo, align=left, anchor=north west] at ($(usuario.south)+(2mm,-4mm)$) (sorteio) {sorteia $Q$ e\\$\nu_\eta$, $\deg \nu_\eta < \lambda$};
+	\draw[seta, draw=serieA] ($(usuario.south)+(0,-17mm)$) -- node[rotulo, above] {desafio $\{(\eta, \nu_\eta)\}_{\eta \in Q}$} ($(provedor.south)+(0,-17mm)$);
+
+	\node[rotulo, anchor=north east, align=right] at ($(provedor.south)+(-2mm,-20mm)$) {$\mu = \sum \nu_\eta c_\eta$\\$\tau = \sum \nu_\eta \sigma_\eta$\\(sem redução modular)};
+	\draw[seta, draw=serieC] ($(provedor.south)+(0,-42mm)$) -- node[rotulo, above] {resposta $(\mu, \tau)$, $\approx$ 1 pacote} ($(usuario.south)+(0,-42mm)$);
+
+	\node[caixa=serieD, anchor=north, align=left] at ($(usuario.south)+(0,-47mm)$) {aceita se\\$\left(\mu + \tau + \sum \nu_\eta f_K(id_F, i, \eta)\right)$\\$\bmod P(x) = 0$};
+	\node[rotulo, anchor=north east, align=right] at ($(provedor.south)+(-2mm,-50mm)$) {$P(x)$ nunca é transmitido:\\desafios ilimitados};
+\end{tikzpicture}

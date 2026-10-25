@@ -1,0 +1,11 @@
+\begin{tikzpicture}[node distance=10mm and 30mm]
+	\node[caixa=serieA, minimum width=30mm] (blocos) {$m_a(x),\ m_b(x)$};
+	\node[caixa=serieA, right=of blocos, minimum width=30mm] (xor) {$c_e(x) = m_a(x) \oplus m_b(x)$};
+	\node[caixa=serieD, below=14mm of blocos, minimum width=30mm] (macs) {$h_{a,j},\ h_{b,j}$};
+	\node[caixa=serieD, below=14mm of xor, minimum width=30mm] (resto) {$c_e(x) \bmod P_j(x)$};
+	\draw[seta] (blocos) -- node[rotulo, above] {XOR (codificação)} (xor);
+	\draw[seta] (blocos) -- node[rotulo, left] {$\bmod P_j(x)$} (macs);
+	\draw[seta] (xor) -- node[rotulo, right] {$\bmod P_j(x)$\\(provedor)} (resto);
+	\draw[seta] (macs) -- node[rotulo, below] {XOR (usuário)} (resto);
+	\node[rotulo, below=1mm of $(macs.south)!0.5!(resto.south)$, yshift=-4mm] {$h_{a,j} \oplus h_{b,j} = c_e(x) \bmod P_j(x)$: o usuário verifica $c_e$ sem armazená-lo};
+\end{tikzpicture}

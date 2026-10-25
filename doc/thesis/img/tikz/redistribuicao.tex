@@ -1,0 +1,28 @@
+\begin{tikzpicture}[node distance=4mm and 8mm]
+	\tikzset{pacote/.style={draw=#1!80!black, fill=#1!18, minimum width=8mm, minimum height=6mm, inner sep=1pt, font=\footnotesize}}
+	% Estado inicial: pacotes do chunk i em três provedores
+	\node[servidor, minimum height=26mm, minimum width=18mm] (s1) {};
+	\node[servidor, minimum height=26mm, minimum width=18mm, right=6mm of s1] (s2) {};
+	\node[servidor, minimum height=26mm, minimum width=18mm, right=6mm of s2] (s3) {};
+	\foreach \s in {1,2,3} \node[above=0mm of s\s, font=\small] {$S_\s$};
+	\node[pacote=serieA] at ($(s1.center)+(0,4mm)$) {0};
+	\node[pacote=serieB] at ($(s1.center)+(0,-4mm)$) {12};
+	\node[pacote=serieA, fill=red!25, draw=red!70!black] (corr) at ($(s2.center)+(0,4mm)$) {4};
+	\node[pacote=serieA] at ($(s2.center)+(0,-4mm)$) {7};
+	\node[pacote=serieA] at ($(s3.center)+(0,4mm)$) {9};
+	\draw[red!70!black, thick] (corr.north west) -- (corr.south east) (corr.north east) -- (corr.south west);
+
+	% Passos
+	\node[caixa=serieB, right=14mm of s3, yshift=12mm, minimum width=52mm, align=left] (p1) {1. auditoria detecta o pacote 4 corrompido};
+	\node[caixa=serieD, below=of p1, minimum width=52mm, align=left] (p2) {2. decodifica o \emph{chunk} com os pacotes\\\phantom{2. }cujo SHA-256 confere};
+	\node[caixa=serieA, below=of p2, minimum width=52mm, align=left] (p3) {3. recodifica e gera o reparo com ESI\\\phantom{3. }inédito $t$ (contador nos metadados)};
+	\node[caixa=serieC, below=of p3, minimum width=52mm, align=left] (p4) {4. grava em $S_3$, o provedor do \emph{chunk}\\\phantom{4. }com menos pacotes, e remove o pacote 4};
+	\draw[seta] (p1) -- (p2);
+	\draw[seta] (p2) -- (p3);
+	\draw[seta] (p3) -- (p4);
+
+	\node[pacote=serieB, below=12mm of s3, xshift=0mm] (novo) {$t$};
+	\draw[seta, draw=serieC] (novo.north) -- ($(s3.south)+(0,1mm)$);
+	\node[rotulo, left=2mm of novo] {novo símbolo de reparo};
+	\node[rotulo, below=3mm of novo.south -| s1, anchor=north, align=left] (leg) {\tikz\node[pacote=serieA, minimum width=4mm, minimum height=3mm]{}; origem\quad\tikz\node[pacote=serieB, minimum width=4mm, minimum height=3mm]{}; reparo};
+\end{tikzpicture}

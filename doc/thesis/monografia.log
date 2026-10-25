@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.6.14)  24 OCT 2026 21:09
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.6.14)  24 OCT 2026 22:03
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -576,16 +576,406 @@ Package glossaries Info: Writing glossary file monografia.acn on input line 178
 \c@definition=\count323
 \c@apendice=\count324
 \c@anexo=\count325
+) (/usr/share/texlive/texmf-dist/tex/latex/pgf/frontendlayer/tikz.sty
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/basiclayer/pgf.sty
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/utilities/pgfrcs.sty
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/utilities/pgfutil-common.tex
+\pgfutil@everybye=\toks36
+\pgfutil@tempdima=\dimen176
+\pgfutil@tempdimb=\dimen177
 )
-LaTeX Font Info:    Trying to load font information for T1+lmr on input line 26
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/utilities/pgfutil-latex.def
+\pgfutil@abb=\box61
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/utilities/pgfrcs.code.tex
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/pgf.revision.tex)
+Package: pgfrcs 2023-01-15 v3.1.10 (3.1.10)
+))
+Package: pgf 2023-01-15 v3.1.10 (3.1.10)
+
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/basiclayer/pgfcore.sty
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/systemlayer/pgfsys.sty
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/systemlayer/pgfsys.code.tex
+Package: pgfsys 2023-01-15 v3.1.10 (3.1.10)
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex
+\pgfkeys@pathtoks=\toks37
+\pgfkeys@temptoks=\toks38
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/utilities/pgfkeyslibraryfiltered
+.code.tex
+\pgfkeys@tmptoks=\toks39
+))
+\pgf@x=\dimen178
+\pgf@y=\dimen179
+\pgf@xa=\dimen180
+\pgf@ya=\dimen181
+\pgf@xb=\dimen182
+\pgf@yb=\dimen183
+\pgf@xc=\dimen184
+\pgf@yc=\dimen185
+\pgf@xd=\dimen186
+\pgf@yd=\dimen187
+\w@pgf@writea=\write6
+\r@pgf@reada=\read3
+\c@pgf@counta=\count326
+\c@pgf@countb=\count327
+\c@pgf@countc=\count328
+\c@pgf@countd=\count329
+\t@pgf@toka=\toks40
+\t@pgf@tokb=\toks41
+\t@pgf@tokc=\toks42
+\pgf@sys@id@count=\count330
+ (/usr/share/texlive/texmf-dist/tex/generic/pgf/systemlayer/pgf.cfg
+File: pgf.cfg 2023-01-15 v3.1.10 (3.1.10)
+)
+Driver file for pgf: pgfsys-pdftex.def
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-pdftex.def
+File: pgfsys-pdftex.def 2023-01-15 v3.1.10 (3.1.10)
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-common-pdf.de
+f
+File: pgfsys-common-pdf.def 2023-01-15 v3.1.10 (3.1.10)
+)))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/systemlayer/pgfsyssoftpath.code.
+tex
+File: pgfsyssoftpath.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfsyssoftpath@smallbuffer@items=\count331
+\pgfsyssoftpath@bigbuffer@items=\count332
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/systemlayer/pgfsysprotocol.code.
+tex
+File: pgfsysprotocol.code.tex 2023-01-15 v3.1.10 (3.1.10)
+))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcore.code.tex
+Package: pgfcore 2023-01-15 v3.1.10 (3.1.10)
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathutil.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathparser.code.tex
+\pgfmath@dimen=\dimen188
+\pgfmath@count=\count333
+\pgfmath@box=\box62
+\pgfmath@toks=\toks43
+\pgfmath@stack@operand=\toks44
+\pgfmath@stack@operation=\toks45
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.basic.code
+.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.trigonomet
+ric.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.random.cod
+e.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.comparison
+.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.base.code.
+tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.round.code
+.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.misc.code.
+tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.integerari
+thmetics.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathcalc.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmathfloat.code.tex
+\c@pgfmathroundto@lastzeros=\count334
+))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfint.code.tex)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepoints.code.te
+x
+File: pgfcorepoints.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@picminx=\dimen189
+\pgf@picmaxx=\dimen190
+\pgf@picminy=\dimen191
+\pgf@picmaxy=\dimen192
+\pgf@pathminx=\dimen193
+\pgf@pathmaxx=\dimen194
+\pgf@pathminy=\dimen195
+\pgf@pathmaxy=\dimen196
+\pgf@xx=\dimen197
+\pgf@xy=\dimen198
+\pgf@yx=\dimen199
+\pgf@yy=\dimen256
+\pgf@zx=\dimen257
+\pgf@zy=\dimen258
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathconstruct.
+code.tex
+File: pgfcorepathconstruct.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@path@lastx=\dimen259
+\pgf@path@lasty=\dimen260
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathusage.code
+.tex
+File: pgfcorepathusage.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@shorten@end@additional=\dimen261
+\pgf@shorten@start@additional=\dimen262
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorescopes.code.te
+x
+File: pgfcorescopes.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfpic=\box63
+\pgf@hbox=\box64
+\pgf@layerbox@main=\box65
+\pgf@picture@serial@count=\count335
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcoregraphicstate.c
+ode.tex
+File: pgfcoregraphicstate.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgflinewidth=\dimen263
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransformation
+s.code.tex
+File: pgfcoretransformations.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@pt@x=\dimen264
+\pgf@pt@y=\dimen265
+\pgf@pt@temp=\dimen266
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorequick.code.tex
+File: pgfcorequick.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreobjects.code.t
+ex
+File: pgfcoreobjects.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathprocessing
+.code.tex
+File: pgfcorepathprocessing.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorearrows.code.te
+x
+File: pgfcorearrows.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfarrowsep=\dimen267
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreshade.code.tex
+File: pgfcoreshade.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@max=\dimen268
+\pgf@sys@shading@range@num=\count336
+\pgf@shadingcount=\count337
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreimage.code.tex
+File: pgfcoreimage.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreexternal.code.
+tex
+File: pgfcoreexternal.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfexternal@startupbox=\box66
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorelayers.code.te
+x
+File: pgfcorelayers.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransparency.c
+ode.tex
+File: pgfcoretransparency.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepatterns.code.
+tex
+File: pgfcorepatterns.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/basiclayer/pgfcorerdf.code.tex
+File: pgfcorerdf.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/modules/pgfmoduleshapes.code.tex
+File: pgfmoduleshapes.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfnodeparttextbox=\box67
+) (/usr/share/texlive/texmf-dist/tex/generic/pgf/modules/pgfmoduleplot.code.tex
+File: pgfmoduleplot.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-0-65
+.sty
+Package: pgfcomp-version-0-65 2023-01-15 v3.1.10 (3.1.10)
+\pgf@nodesepstart=\dimen269
+\pgf@nodesepend=\dimen270
+)
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-1-18
+.sty
+Package: pgfcomp-version-1-18 2023-01-15 v3.1.10 (3.1.10)
+)) (/usr/share/texlive/texmf-dist/tex/latex/pgf/utilities/pgffor.sty
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/utilities/pgfkeys.sty
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex))
+(/usr/share/texlive/texmf-dist/tex/latex/pgf/math/pgfmath.sty
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/utilities/pgffor.code.tex
+Package: pgffor 2023-01-15 v3.1.10 (3.1.10)
+\pgffor@iter=\dimen271
+\pgffor@skip=\dimen272
+\pgffor@stack=\toks46
+\pgffor@toks=\toks47
+))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/tikz.code.tex
+Package: tikz 2023-01-15 v3.1.10 (3.1.10)
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/libraries/pgflibraryplothandlers
+.code.tex
+File: pgflibraryplothandlers.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@plot@mark@count=\count338
+\pgfplotmarksize=\dimen273
+)
+\tikz@lastx=\dimen274
+\tikz@lasty=\dimen275
+\tikz@lastxsaved=\dimen276
+\tikz@lastysaved=\dimen277
+\tikz@lastmovetox=\dimen278
+\tikz@lastmovetoy=\dimen279
+\tikzleveldistance=\dimen280
+\tikzsiblingdistance=\dimen281
+\tikz@figbox=\box68
+\tikz@figbox@bg=\box69
+\tikz@tempbox=\box70
+\tikz@tempbox@bg=\box71
+\tikztreelevel=\count339
+\tikznumberofchildren=\count340
+\tikznumberofcurrentchild=\count341
+\tikz@fig@count=\count342
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/modules/pgfmodulematrix.code.tex
+File: pgfmodulematrix.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfmatrixcurrentrow=\count343
+\pgfmatrixcurrentcolumn=\count344
+\pgf@matrix@numberofcolumns=\count345
+)
+\tikz@expandcount=\count346
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibrarytopaths.code.tex
+File: tikzlibrarytopaths.code.tex 2023-01-15 v3.1.10 (3.1.10)
+))) (./img/tikz/estilo.tex
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/libraries/pgflibraryarrows.meta.
+code.tex
+File: pgflibraryarrows.meta.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfarrowinset=\dimen282
+\pgfarrowlength=\dimen283
+\pgfarrowwidth=\dimen284
+\pgfarrowlinewidth=\dimen285
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibrarypositioning.code.tex
+File: tikzlibrarypositioning.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibraryfit.code.tex
+File: tikzlibraryfit.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibrarycalc.code.tex
+File: tikzlibrarycalc.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibrarybackgrounds.code.tex
+File: tikzlibrarybackgrounds.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@layerbox@background=\box72
+\pgf@layerboxsaved@background=\box73
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibraryshapes.geometric.code.tex
+File: tikzlibraryshapes.geometric.code.tex 2023-01-15 v3.1.10 (3.1.10)
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/libraries/shapes/pgflibraryshape
+s.geometric.code.tex
+File: pgflibraryshapes.geometric.code.tex 2023-01-15 v3.1.10 (3.1.10)
+))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibraryshapes.multipart.code.tex
+File: tikzlibraryshapes.multipart.code.tex 2023-01-15 v3.1.10 (3.1.10)
+
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/libraries/shapes/pgflibraryshape
+s.multipart.code.tex
+File: pgflibraryshapes.multipart.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfnodepartlowerbox=\box74
+\pgfnodeparttwobox=\box75
+\pgfnodepartthreebox=\box76
+\pgfnodepartfourbox=\box77
+\pgfnodeparttwentybox=\box78
+\pgfnodepartnineteenbox=\box79
+\pgfnodeparteighteenbox=\box80
+\pgfnodepartseventeenbox=\box81
+\pgfnodepartsixteenbox=\box82
+\pgfnodepartfifteenbox=\box83
+\pgfnodepartfourteenbox=\box84
+\pgfnodepartthirteenbox=\box85
+\pgfnodeparttwelvebox=\box86
+\pgfnodepartelevenbox=\box87
+\pgfnodeparttenbox=\box88
+\pgfnodepartninebox=\box89
+\pgfnodeparteightbox=\box90
+\pgfnodepartsevenbox=\box91
+\pgfnodepartsixbox=\box92
+\pgfnodepartfivebox=\box93
+))
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibrarydecorations.pathreplacing.code.tex
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tik
+zlibrarydecorations.code.tex
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/modules/pgfmoduledecorations.cod
+e.tex
+\pgfdecoratedcompleteddistance=\dimen286
+\pgfdecoratedremainingdistance=\dimen287
+\pgfdecoratedinputsegmentcompleteddistance=\dimen288
+\pgfdecoratedinputsegmentremainingdistance=\dimen289
+\pgf@decorate@distancetomove=\dimen290
+\pgf@decorate@repeatstate=\count347
+\pgfdecorationsegmentamplitude=\dimen291
+\pgfdecorationsegmentlength=\dimen292
+)
+\tikz@lib@dec@box=\box94
+)
+(/usr/share/texlive/texmf-dist/tex/generic/pgf/libraries/decorations/pgflibrary
+decorations.pathreplacing.code.tex)))
+(/usr/share/texlive/texmf-dist/tex/latex/adjustbox/adjustbox.sty
+Package: adjustbox 2022/10/17 v1.3a Adjusting TeX boxes (trim, clip, ...)
+
+(/usr/share/texlive/texmf-dist/tex/latex/adjustbox/adjcalc.sty
+Package: adjcalc 2012/05/16 v1.1 Provides advanced setlength with multiple back
+-ends (calc, etex, pgfmath)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/adjustbox/trimclip.sty
+Package: trimclip 2020/08/19 v1.2 Trim and clip general TeX material
+
+(/usr/share/texlive/texmf-dist/tex/latex/collectbox/collectbox.sty
+Package: collectbox 2022/10/17 v0.4c Collect macro arguments as boxes
+\collectedbox=\box95
+)
+\tc@llx=\dimen293
+\tc@lly=\dimen294
+\tc@urx=\dimen295
+\tc@ury=\dimen296
+Package trimclip Info: Using driver 'tc-pdftex.def'.
+
+(/usr/share/texlive/texmf-dist/tex/latex/adjustbox/tc-pdftex.def
+File: tc-pdftex.def 2019/01/04 v2.2 Clipping driver for pdftex
+))
+\adjbox@Width=\dimen297
+\adjbox@Height=\dimen298
+\adjbox@Depth=\dimen299
+\adjbox@Totalheight=\dimen300
+\adjbox@pwidth=\dimen301
+\adjbox@pheight=\dimen302
+\adjbox@pdepth=\dimen303
+\adjbox@ptotalheight=\dimen304
+
+(/usr/share/texlive/texmf-dist/tex/latex/ifoddpage/ifoddpage.sty
+Package: ifoddpage 2022/10/18 v1.2 Conditionals for odd/even page detection
+\c@checkoddpage=\count348
+)
+(/usr/share/texlive/texmf-dist/tex/latex/varwidth/varwidth.sty
+Package: varwidth 2009/03/30 ver 0.92;  Variable-width minipages
+\@vwid@box=\box96
+\sift@deathcycles=\count349
+\@vwid@loff=\dimen305
+\@vwid@roff=\dimen306
+))
+LaTeX Font Info:    Trying to load font information for T1+lmr on input line 30
 .
+
 (/usr/share/texmf/tex/latex/lm/t1lmr.fd
 File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 (/usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2024-01-04 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count326
-\l__pdf_internal_box=\box61
+\l__color_backend_stack_int=\count350
+\l__pdf_internal_box=\box97
 )
 (./monografia.aux
 (/usr/share/texlive/texmf-dist/tex/generic/babel/locale/pt/babel-portuguese.tex
@@ -593,31 +983,31 @@ Package babel Info: Importing basic data for portuguese
 (babel)             from babel-pt.ini. Reported on input line 11.
 )
 Package babel Info: Hyphen rules for 'portuguese' set to \l@english
-(babel)             (\language0). Reported on input line 253.
+(babel)             (\language0). Reported on input line 379.
  (/usr/share/texlive/texmf-dist/tex/generic/babel/locale/en/babel-english.tex
 Package babel Info: Importing basic data for english
 (babel)             from babel-en.ini. Reported on input line 11.
 ))
 \openout1 = `monografia.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 30.
+LaTeX Font Info:    ... okay on input line 30.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 30.
+LaTeX Font Info:    ... okay on input line 30.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 30.
+LaTeX Font Info:    ... okay on input line 30.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 30.
+LaTeX Font Info:    ... okay on input line 30.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 30.
+LaTeX Font Info:    ... okay on input line 30.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 30.
+LaTeX Font Info:    ... okay on input line 30.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 30.
+LaTeX Font Info:    ... okay on input line 30.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 30.
+LaTeX Font Info:    ... okay on input line 30.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 30.
+LaTeX Font Info:    ... okay on input line 30.
 
 babelbib: Set bibliography fall-back language to american
 babelbib: english.bdf loaded because language english defined.
@@ -634,17 +1024,17 @@ babelbib: Load BibTeX extensions \bibsamerican for american
 babelbib: Set language for keywords in the bibliography fixed to american
 (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count327
-\scratchdimen=\dimen176
-\scratchbox=\box62
-\nofMPsegments=\count328
-\nofMParguments=\count329
-\everyMPshowfont=\toks36
-\MPscratchCnt=\count330
-\MPscratchDim=\dimen177
-\MPnumerator=\count331
-\makeMPintoPDFobject=\count332
-\everyMPtoPDFconversion=\toks37
+\scratchcounter=\count351
+\scratchdimen=\dimen307
+\scratchbox=\box98
+\nofMPsegments=\count352
+\nofMParguments=\count353
+\everyMPshowfont=\toks48
+\MPscratchCnt=\count354
+\MPscratchDim=\dimen308
+\MPnumerator=\count355
+\makeMPintoPDFobject=\count356
+\everyMPtoPDFconversion=\toks49
 ) (/usr/share/texlive/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
 Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
@@ -688,10 +1078,10 @@ e
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-Package hyperref Info: Link coloring OFF on input line 26.
+Package hyperref Info: Link coloring OFF on input line 30.
 (./monografia.out) (./monografia.out)
-\@outlinefile=\write6
-\openout6 = `monografia.out'.
+\@outlinefile=\write7
+\openout7 = `monografia.out'.
 
  (./monografia.glsdefs)
 (/usr/share/texlive/texmf-dist/tex/latex/oberdiek/hypcap.sty
@@ -703,26 +1093,26 @@ Package: letltxmacro 2019/12/03 v1.6 Let assignment for LaTeX macros (HO)
 \len@brasiliaw=\skip67
 \len@uadesch=\skip68
 \len@uacaph=\skip69
-LaTeX Font Info:    Trying to load font information for T1+ua1 on input line 26
+LaTeX Font Info:    Trying to load font information for T1+ua1 on input line 30
 .
-LaTeX Font Info:    No file T1ua1.fd. on input line 26.
+LaTeX Font Info:    No file T1ua1.fd. on input line 30.
 
 
 LaTeX Font Warning: Font shape `T1/ua1/b/n' undefined
-(Font)              using `T1/cmr/m/n' instead on input line 26.
+(Font)              using `T1/cmr/m/n' instead on input line 30.
 
 
 LaTeX Font Warning: Font shape `T1/cmr/m/n' in size <20> not available
-(Font)              size <20.74> substituted on input line 26.
+(Font)              size <20.74> substituted on input line 30.
 
 
 LaTeX Font Warning: Font shape `T1/ua1/b/n' in size <20> not available
-(Font)              size <20.74> substituted on input line 26.
+(Font)              size <20.74> substituted on input line 30.
 
-<img/positivo_cor.pdf, id=184, 119.44624pt x 60.225pt>
+<img/positivo_cor.pdf, id=228, 119.44624pt x 60.225pt>
 File: img/positivo_cor.pdf Graphic file (type pdf)
 <use img/positivo_cor.pdf>
-Package pdftex.def Info: img/positivo_cor.pdf  used on input line 26.
+Package pdftex.def Info: img/positivo_cor.pdf  used on input line 30.
 (pdftex.def)             Requested size: 61.76747pt x 31.14256pt.
 \len@lskipoffset=\skip70
 \len@lskipoffset=\skip71
@@ -740,39 +1130,39 @@ dvips/cm-super/cm-super-t1.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-ec.enc}
 \len@uacaph=\skip74
 File: img/positivo_cor.pdf Graphic file (type pdf)
 <use img/positivo_cor.pdf>
-Package pdftex.def Info: img/positivo_cor.pdf  used on input line 26.
+Package pdftex.def Info: img/positivo_cor.pdf  used on input line 30.
 (pdftex.def)             Requested size: 61.76747pt x 31.14256pt.
 \len@lskipoffset=\skip75
 \len@lskipoffset=\skip76
-LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 2
-6.
+LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 3
+0.
  (/usr/share/texmf/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OML+lmm on input line 2
-6.
+LaTeX Font Info:    Trying to load font information for OML+lmm on input line 3
+0.
 
 (/usr/share/texmf/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 
-26.
+30.
 
 (/usr/share/texmf/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 
-26.
+30.
 
 (/usr/share/texmf/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12> on input line 26.
+(Font)              <12> on input line 30.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 26.
+(Font)              <8> on input line 30.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 26.
+(Font)              <6> on input line 30.
  [2
 
 ] (./tex/resumo.tex) [3
@@ -788,27 +1178,33 @@ babelbib: Set language for keywords in the bibliography fixed to american
 
 {/usr/share/texmf/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/share/texmf/fonts/enc/
 dvips/lm/lm-rm.enc}])
-\tf@toc=\write7
-\openout7 = `monografia.toc'.
+\tf@toc=\write8
+\openout8 = `monografia.toc'.
 
- [6] (./monografia.lof)
-\tf@lof=\write8
-\openout8 = `monografia.lof'.
+ [6] (./monografia.lof
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 1
+1.
 
- [7
+(/usr/share/texmf/tex/latex/lm/t1lmtt.fd
+File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+) [7
 
-]
-(./monografia.lot)
-\tf@lot=\write9
-\openout9 = `monografia.lot'.
+])
+\tf@lof=\write9
+\openout9 = `monografia.lof'.
 
- (./tex/siglas.tex
-\@gls@deffile=\write10
-\openout10 = `monografia.glsdefs'.
+ [8] (./monografia.lot)
+\tf@lot=\write10
+\openout10 = `monografia.lot'.
 
-) (./monografia.acr [8
 
-]) [9
+(./tex/siglas.tex
+\@gls@deffile=\write11
+\openout11 = `monografia.glsdefs'.
+
+) (./monografia.acr [9
+
+]) [10
 
 
 ]
@@ -842,34 +1238,49 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `math shift' on input line 19.
 
-[7] [8] [9{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathex.enc}] [10] [11]
-[12] [13]) [14]
+[7] (./img/tikz/hysail_protocolo.tex
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <10.95> on input line 3.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <5> on input line 18.
+) [8] (./img/tikz/mac_homomorfico.tex)
+[9{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathex.enc}] [10]
+(./img/tikz/lt_grafo.tex) [11] [12] (./img/tikz/online_codes.tex) [13]
+(./img/tikz/raptorq.tex) [14]
+<img/resultados/degree_distributions.pdf, id=621, 392.3847pt x 248.57825pt>
+File: img/resultados/degree_distributions.pdf Graphic file (type pdf)
+<use img/resultados/degree_distributions.pdf>
+Package pdftex.def Info: img/resultados/degree_distributions.pdf  used on input
+ line 208.
+(pdftex.def)             Requested size: 364.19667pt x 230.72401pt.
+ [15 <./img/resultados/degree_distributions.pdf>]) [16] [17]
 Chapter 3.
-(./tex/3_Metodologia_de_Pesquisa.tex [15
+(./tex/3_Metodologia_de_Pesquisa.tex [18
 
-]) [16]
+]) [19]
 Chapter 4.
 (./tex/4_Proposta.tex
-<img/Hysail-Architecture.png, id=492, 1087.06125pt x 364.86313pt>
+<img/Hysail-Architecture.png, id=706, 1087.06125pt x 364.86313pt>
 File: img/Hysail-Architecture.png Graphic file (type png)
 <use img/Hysail-Architecture.png>
 Package pdftex.def Info: img/Hysail-Architecture.png  used on input line 4.
 (pdftex.def)             Requested size: 364.19667pt x 122.24242pt.
- [17
+ [20
 
  <./img/Hysail-Architecture.png>]
 Overfull \hbox (24.4562pt too wide) in paragraph at lines 20--20
 []\T1/lmr/bx/n/17.28 Substituição dos On-line Codes pe-los Rap-torQ Codes 
  []
 
-[18] [19] [20] [21] [22]
-Overfull \hbox (1.76166pt too wide) in paragraph at lines 115--116
+(./img/tikz/hybolt_fluxo.tex) [21] [22] [23] [24] [25]
+(./img/tikz/redistribuicao.tex) [26]
+Overfull \hbox (1.76166pt too wide) in paragraph at lines 133--134
 \T1/lmr/m/n/12 As adap-tações an-te-ri-ores man-têm duas lim-i-tações iner-ente
 s ao mod-elo lim-i-tado: a memória
  []
 
-[23]
-Overfull \hbox (6.02797pt too wide) in paragraph at lines 140--141
+[27]
+Overfull \hbox (6.02797pt too wide) in paragraph at lines 158--159
 []\T1/lmr/m/n/12 A cor-reção decorre da lin-eari-dade da re-dução mó-dulo $\OML
 /lmm/m/it/12 P\OT1/lmr/m/n/12 (\OML/lmm/m/it/12 x\OT1/lmr/m/n/12 )$\T1/lmr/m/n/
 12 : como $\OML/lmm/m/it/12 ^^[[] \OMS/lmsy/m/n/12 ^^Q \OML/lmm/m/it/12 c[] \OT
@@ -877,40 +1288,150 @@ Overfull \hbox (6.02797pt too wide) in paragraph at lines 140--141
  ^^Q\OT1/lmr/m/n/12 )
  []
 
-[24]) [25]
+(./img/tikz/auditoria_compacta.tex) [28] [29]) [30]
 Chapter 5.
-(./tex/5_Implementacao.tex
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 5
-.
- (/usr/share/texmf/tex/latex/lm/t1lmtt.fd
-File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-) [26
+(./tex/5_Implementacao.tex [31
 
-]
-[27]
-Overfull \hbox (83.56027pt too wide) in paragraph at lines 46--47
+] [32] (./img/tikz/estrutura_codigo.tex
+Overfull \hbox (3.74843pt too wide) in paragraph at lines 11--11
+ [][]\T1/lmtt/m/n/8 PolynomialRetrievabilityProof 
+ []
+
+)
+Overfull \hbox (83.56027pt too wide) in paragraph at lines 55--56
 \T1/lmr/m/n/12 fi-cações antes e de-pois de cada trans-fer-ên-cia. É es-pe-cial
 -izada por \T1/lmtt/m/n/12 PolynomialRetrievabilityProof\T1/lmr/m/n/12 ,
  []
 
 
-Overfull \hbox (29.15833pt too wide) in paragraph at lines 46--47
+Overfull \hbox (29.15833pt too wide) in paragraph at lines 55--56
 \T1/lmr/m/n/12 quema com-pacto a par-tir das chaves \T1/lmtt/m/n/12 CompactKeys
 \T1/lmr/m/n/12 , e por \T1/lmtt/m/n/12 DisabledRetrievabilityProof\T1/lmr/m/n/1
 2 ,
  []
 
-[28] [29] [30]) [31]
+[33]
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[34] [35]) [36] [37]
 Chapter 6.
-(./tex/6_Resultados.tex) [32
+(./tex/6_Resultados.tex [38
 
 ]
+<img/resultados/reception_overhead.pdf, id=906, 398.77167pt x 240.33162pt>
+File: img/resultados/reception_overhead.pdf Graphic file (type pdf)
+<use img/resultados/reception_overhead.pdf>
+Package pdftex.def Info: img/resultados/reception_overhead.pdf  used on input l
+ine 19.
+(pdftex.def)             Requested size: 455.24411pt x 274.3806pt.
+ [39 <./img/resultados/reception_overhead.pdf>]
+<img/resultados/loss_tolerance.pdf, id=965, 393.32573pt x 243.33058pt>
+File: img/resultados/loss_tolerance.pdf Graphic file (type pdf)
+<use img/resultados/loss_tolerance.pdf>
+Package pdftex.def Info: img/resultados/loss_tolerance.pdf  used on input line 
+53.
+(pdftex.def)             Requested size: 386.96027pt x 239.398pt.
+
+[40]
+<img/resultados/mac_runtime.pdf, id=976, 392.667pt x 244.63362pt>
+File: img/resultados/mac_runtime.pdf Graphic file (type pdf)
+<use img/resultados/mac_runtime.pdf>
+Package pdftex.def Info: img/resultados/mac_runtime.pdf  used on input line 67.
+
+(pdftex.def)             Requested size: 386.96027pt x 241.08311pt.
+ [41 <./img/resultados/loss_tolerance.pdf>]
+<img/resultados/encode_runtime.pdf, id=1032, 392.52586pt x 243.33058pt>
+File: img/resultados/encode_runtime.pdf Graphic file (type pdf)
+<use img/resultados/encode_runtime.pdf>
+Package pdftex.def Info: img/resultados/encode_runtime.pdf  used on input line 
+81.
+(pdftex.def)             Requested size: 386.96027pt x 239.89552pt.
+<img/resultados/decode_runtime.pdf, id=1033, 392.52586pt x 243.33058pt>
+File: img/resultados/decode_runtime.pdf Graphic file (type pdf)
+<use img/resultados/decode_runtime.pdf>
+Package pdftex.def Info: img/resultados/decode_runtime.pdf  used on input line 
+88.
+(pdftex.def)             Requested size: 386.96027pt x 239.89552pt.
+<img/resultados/encode_stages.pdf, id=1034, 436.15446pt x 181.50548pt>
+File: img/resultados/encode_stages.pdf Graphic file (type pdf)
+<use img/resultados/encode_stages.pdf>
+Package pdftex.def Info: img/resultados/encode_stages.pdf  used on input line 9
+7.
+(pdftex.def)             Requested size: 455.24411pt x 189.46193pt.
+<img/resultados/audit_runtime.pdf, id=1038, 392.3847pt x 243.33058pt>
+File: img/resultados/audit_runtime.pdf Graphic file (type pdf)
+<use img/resultados/audit_runtime.pdf>
+Package pdftex.def Info: img/resultados/audit_runtime.pdf  used on input line 1
+11.
+(pdftex.def)             Requested size: 386.96027pt x 239.96979pt.
+ [42 <./img/resultados/mac_runtime.pdf>] [43 <./img/resultados/encode_runtime.p
+df> <./img/resultados/decode_runtime.pdf>]
+<img/resultados/audit_detection.pdf, id=1184, 387.711pt x 244.89894pt>
+File: img/resultados/audit_detection.pdf Graphic file (type pdf)
+<use img/resultados/audit_detection.pdf>
+Package pdftex.def Info: img/resultados/audit_detection.pdf  used on input line
+ 122.
+(pdftex.def)             Requested size: 386.96027pt x 244.43869pt.
+ [44 <./img/resultados/encode_stages.pdf>] [45 <./img/resultados/audit_runtime.
+pdf> <./img/resultados/audit_detection.pdf>]
+<img/resultados/metadata_size.pdf, id=1323, 386.72293pt x 243.33058pt>
+File: img/resultados/metadata_size.pdf Graphic file (type pdf)
+<use img/resultados/metadata_size.pdf>
+Package pdftex.def Info: img/resultados/metadata_size.pdf  used on input line 1
+36.
+(pdftex.def)             Requested size: 386.96027pt x 243.4785pt.
+ [46 <./img/resultados/metadata_size.pdf>]
+<img/resultados/targeted_attack.pdf, id=1382, 387.56984pt x 296.41652pt>
+File: img/resultados/targeted_attack.pdf Graphic file (type pdf)
+<use img/resultados/targeted_attack.pdf>
+Package pdftex.def Info: img/resultados/targeted_attack.pdf  used on input line
+ 152.
+(pdftex.def)             Requested size: 386.96027pt x 295.95442pt.
+ [47 <./img/resultados/targeted_attack.pdf>]
+<img/resultados/hysail_comparison.pdf, id=1436, 403.58653pt x 231.71355pt>
+File: img/resultados/hysail_comparison.pdf Graphic file (type pdf)
+<use img/resultados/hysail_comparison.pdf>
+Package pdftex.def Info: img/resultados/hysail_comparison.pdf  used on input li
+ne 168.
+(pdftex.def)             Requested size: 455.24411pt x 261.38423pt.
+
+Overfull \hbox (53.03839pt too wide) in paragraph at lines 177--188
+ [][] 
+ []
+
+[48] [49 <./img/resultados/hysail_comparison.pdf>]
+Underfull \hbox (badness 10000) in paragraph at lines 208--208
+[]\T1/lmr/bx/n/10 Juels--
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 208--208
+[]\T1/lmr/bx/n/10 Shacham--
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 208--208
+[]\T1/lmr/bx/n/10 HyBolt
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 208--209
+[]\T1/lmr/bx/n/10 HyBolt
+ []
+
+
+Underfull \hbox (badness 1231) in paragraph at lines 215--215
+[]\T1/lmr/m/n/10 Ocultação da es-tru-
+ []
+
+) [50] [51]
 Chapter 7.
-(./tex/7_Conclusao.tex) [33
+(./tex/7_Conclusao.tex) [52
 
 ] (./monografia.bbl (./monografia.brf)
-\tf@brf=\write11
-\openout11 = `monografia.brf'.
+\tf@brf=\write12
+\openout12 = `monografia.brf'.
 
 
 babelbib: Using the BibTeX style's default font for `name'.
@@ -924,10 +1445,10 @@ babelbib: Using the BibTeX style's default font for `ISBN'.
 babelbib: Using the BibTeX style's default font for `ISSN'.
 babelbib: Using the BibTeX style's default font for `url'.
 babelbib: Using the BibTeX style's default font for `numeral'.
-[34
+[53
 
 
-]) [35] [36] (./monografia.aux)
+]) [54] [55] (./monografia.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -940,32 +1461,46 @@ LaTeX Font Warning: Size substitutions with differences
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
 Package rerunfilecheck Info: File `monografia.out' has not changed.
-(rerunfilecheck)             Checksum: 62AAFF0178816CD485C5BBF3C03B0922;7428.
-Package rerunfilecheck Info: File `monografia.brf' has not changed.
-(rerunfilecheck)             Checksum: 3CD1F7990945CF5CB5DC2E0CC9802CE2;3166.
+(rerunfilecheck)             Checksum: 1B47F551FF54584F943E18225F98EF79;9386.
+
+Package rerunfilecheck Warning: File `monografia.brf' has changed.
+(rerunfilecheck)                Rerun to get bibliographical references right.
+
+Package rerunfilecheck Info: Checksums for `monografia.brf':
+(rerunfilecheck)             Before: 7D4B28FE07949ACDF490BD2FABF97B92;4487
+(rerunfilecheck)             After:  7F98B4005034964253486CD94D90E89C;4849.
  ) 
 Here is how much of TeX's memory you used:
- 19654 strings out of 476182
- 334877 string characters out of 5795595
- 1934975 words of memory out of 5000000
- 41104 multiletter control sequences out of 15000+600000
- 620308 words of font info for 73 fonts, out of 8000000 for 9000
+ 33517 strings out of 476182
+ 651563 string characters out of 5795595
+ 1948975 words of memory out of 5000000
+ 54599 multiletter control sequences out of 15000+600000
+ 670652 words of font info for 94 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 109i,9n,107p,2346b,758s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/share/texmf/fonts/type1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/ty
-pe1/public/lm/lmex10.pfb></usr/share/texmf/fonts/type1/public/lm/lmmi12.pfb></u
-sr/share/texmf/fonts/type1/public/lm/lmmi6.pfb></usr/share/texmf/fonts/type1/pu
-blic/lm/lmmi8.pfb></usr/share/texmf/fonts/type1/public/lm/lmr12.pfb></usr/share
-/texmf/fonts/type1/public/lm/lmr8.pfb></usr/share/texmf/fonts/type1/public/lm/l
-mri12.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy10.pfb></usr/share/texmf/
-fonts/type1/public/lm/lmsy8.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt12.
-pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1000.pfb></usr/share/texm
-f/fonts/type1/public/cm-super/sfrm2074.pfb>
-Output written on monografia.pdf (45 pages, 391194 bytes).
+ 109i,14n,107p,2346b,1448s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/share/texmf/fonts/type1/public/lm/lmbx10.pfb></usr/share/texmf/fonts/ty
+pe1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/type1/public/lm/lmbxi10.pfb></
+usr/share/texmf/fonts/type1/public/lm/lmex10.pfb></usr/share/texmf/fonts/type1/
+public/lm/lmmi10.pfb></usr/share/texmf/fonts/type1/public/lm/lmmi12.pfb></usr/s
+hare/texmf/fonts/type1/public/lm/lmmi6.pfb></usr/share/texmf/fonts/type1/public
+/lm/lmmi7.pfb></usr/share/texmf/fonts/type1/public/lm/lmmi8.pfb></usr/share/tex
+mf/fonts/type1/public/lm/lmr10.pfb></usr/share/texmf/fonts/type1/public/lm/lmr1
+2.pfb></usr/share/texmf/fonts/type1/public/lm/lmr7.pfb></usr/share/texmf/fonts/
+type1/public/lm/lmr8.pfb></usr/share/texmf/fonts/type1/public/lm/lmri10.pfb></u
+sr/share/texmf/fonts/type1/public/lm/lmri12.pfb></usr/share/texmf/fonts/type1/p
+ublic/lm/lmsy10.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy7.pfb></usr/sha
+re/texmf/fonts/type1/public/lm/lmsy8.pfb></usr/share/texmf/fonts/type1/public/l
+m/lmtt10.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt12.pfb></usr/share/tex
+mf/fonts/type1/public/lm/lmtt8.pfb></usr/share/texmf/fonts/type1/public/cm-supe
+r/sfrm1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm2074.pfb>
+Output written on monografia.pdf (65 pages, 803832 bytes).
 PDF statistics:
- 849 PDF objects out of 1000 (max. 8388607)
- 762 compressed objects within 8 object streams
- 165 named destinations out of 1000 (max. 500000)
- 371 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1793 PDF objects out of 2073 (max. 8388607)
+ 1173 compressed objects within 12 object streams
+ 219 named destinations out of 1000 (max. 500000)
+ 523 words of extra memory for PDF output out of 10000 (max. 10000000)
 

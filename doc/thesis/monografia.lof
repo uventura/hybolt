@@ -3,11 +3,32 @@
 \babel@toc {american}{}\relax 
 \addvspace {10\p@ }
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Entidades e fases do HySAIL. O usuário codifica o arquivo e mantém apenas os metadados; os provedores armazenam os blocos de verificação, respondem às auditorias e participam da Redistribuição. Elaborada pelo autor com base em \cite {amaral2019hysail}.}}{9}{figure.2.1}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Propriedade homomórfica do \acrshort {MAC} do HySAIL: reduzir módulo $P_j(x)$ e combinar por XOR comutam, de modo que o \acrshort {MAC} de um bloco de verificação é obtido dos \acrshort {MAC}s dos blocos de mensagem.}}{9}{figure.2.2}%
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Grafo bipartido do exemplo de LT Codes e ordem de recuperação pelo algoritmo de \emph {peeling}. Cada aresta liga um símbolo codificado aos símbolos de origem que o compõem.}}{11}{figure.2.3}%
+\contentsline {figure}{\numberline {2.4}{\ignorespaces Os dois níveis dos Online Codes no exemplo: o código externo acrescenta o símbolo auxiliar $a_1$ à mensagem composta, e o código interno gera os blocos de verificação a partir dela. Elaborada pelo autor com base em \cite {maymounkov2002online}.}}{13}{figure.2.4}%
+\contentsline {figure}{\numberline {2.5}{\ignorespaces Estrutura de codificação dos RaptorQ Codes segundo a RFC~6330. Os símbolos com \acrshort {ESI} menor que $K$ reproduzem os símbolos de origem, e os demais são símbolos de reparo, que podem ser gerados em quantidade ilimitada. Elaborada pelo autor com base em \cite {luby2011rfc6330}.}}{14}{figure.2.5}%
+\contentsline {figure}{\numberline {2.6}{\ignorespaces Distribuições de grau dos LT Codes (sóliton robusta, com $c = 0{,}1$ e $\delta = 0{,}5$), dos Online Codes e dos RaptorQ Codes (tabela da Seção 5.3.5.2 da RFC~6330). Gerada por \texttt {scripts/thesis\_benchmarks.py}.}}{15}{figure.2.6}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Arquitetura Geral do HySAIL}}{17}{figure.4.1}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Arquitetura Geral do HySAIL}}{20}{figure.4.1}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Fluxo de Codificação e Distribuição proposto: cada \emph {chunk} é codificado com RaptorQ, cada pacote é cifrado e recebe o material de prova, e os pacotes são distribuídos entre os provedores, enquanto o usuário mantém apenas os metadados.}}{22}{figure.4.2}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Redistribuição proposta: o pacote corrompido não é reproduzido, mas substituído por um novo símbolo de reparo, com \acrshort {ESI} inédito, gravado no provedor do \emph {chunk} com menos pacotes.}}{27}{figure.4.3}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Rodada de auditoria no esquema compacto. O provedor combina pacotes e etiquetas sem conhecer $P(x)$, e o usuário verifica a resposta com sua chave. Elaborada pelo autor com base em \cite {shacham2008compact}.}}{28}{figure.4.4}%
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Principais classes do HyBolt. As setas com triângulo indicam a realização de uma interface, e as setas tracejadas, dependências.}}{34}{figure.5.1}%
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {6.1}{\ignorespaces Fração das decodificações concluídas em função do número de símbolos recebidos, normalizado por $K$, para RaptorQ, Online Codes e LT Codes.}}{39}{figure.6.1}%
+\contentsline {figure}{\numberline {6.2}{\ignorespaces \emph {Chunks} recuperados em função da fração de pacotes perdidos, para três valores de redundância. As linhas verticais indicam a densidade de corrupção tolerada $\alpha = r / (K + r)$.}}{41}{figure.6.2}%
+\contentsline {figure}{\numberline {6.3}{\ignorespaces Tempo de cálculo de $m(x) \bmod P(x)$, com $\deg P = 127$, em função do tamanho do bloco. Os valores do HySAIL foram extraídos da Figura~5.5 de \cite {amaral2013hysail}.}}{42}{figure.6.3}%
+\contentsline {figure}{\numberline {6.4}{\ignorespaces Tempo de codificação e distribuição em função do tamanho do arquivo, para os esquemas compacto e limitado e sem prova de recuperabilidade.}}{43}{figure.6.4}%
+\contentsline {figure}{\numberline {6.5}{\ignorespaces Tempo de decodificação em função do tamanho do arquivo. Nos esquemas com prova, cada pacote transferido é verificado antes de ser entregue ao decodificador.}}{43}{figure.6.5}%
+\contentsline {figure}{\numberline {6.6}{\ignorespaces Decomposição do tempo de codificação de um arquivo de 1~MiB por etapa. A etapa ``outros'' reúne a leitura do arquivo, a geração das chaves e o cálculo do \emph {hash} do arquivo.}}{44}{figure.6.6}%
+\contentsline {figure}{\numberline {6.7}{\ignorespaces Tempo de uma rodada de auditoria sobre três provedores, com todos os pacotes ou com $s = 50$ pacotes por provedor.}}{45}{figure.6.7}%
+\contentsline {figure}{\numberline {6.8}{\ignorespaces Fração das rodadas de auditoria que detectaram corrupção em função do número de pacotes amostrados por provedor, para 0,9\% (3 pacotes) e 4,9\% (16 pacotes) de pacotes corrompidos.}}{45}{figure.6.8}%
+\contentsline {figure}{\numberline {6.9}{\ignorespaces Metadados mantidos pelo usuário, em porcentagem do tamanho do arquivo. A linha pontilhada indica o valor que o esquema limitado ocuparia com os \acrshort {MAC}s empacotados em bits.}}{46}{figure.6.9}%
+\contentsline {figure}{\numberline {6.10}{\ignorespaces Probabilidade de perda do arquivo em função da fração de pacotes corrompidos, com ocultação (corrupção uniforme) e sem ocultação (linhas pontilhadas: $r + 1$ pacotes de um único \emph {chunk}), para arquivos de 1~MiB, 64~MiB e 1~GiB.}}{47}{figure.6.10}%
+\contentsline {figure}{\numberline {6.11}{\ignorespaces Tempos de codificação e decodificação do HySAIL, segundo as Figuras 5 e 6 de \cite {amaral2019hysail}, e do HyBolt para arquivos de 50, 100 e 500~MB. A decodificação não possui etapa RaptorQ isolada.}}{49}{figure.6.11}%
 \addvspace {10\p@ }
 \babel@toc {american}{}\relax 
 \babel@toc {portuguese}{}\relax 

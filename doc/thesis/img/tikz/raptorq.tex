@@ -1,0 +1,23 @@
+\begin{tikzpicture}[node distance=5mm and 8mm]
+	\node[caixa=serieA, minimum width=24mm, minimum height=15mm] (origem) {$K$ símbolos\\de origem\\$d_1, \ldots, d_K$};
+	\node[caixa=serieD, right=of origem, minimum width=30mm, minimum height=15mm] (pre) {\textbf{Pré-codificação}\\$S$ restrições LDPC ($GF(2)$)\\$H$ restrições HDPC ($GF(256)$)};
+	\node[caixa=serieA, right=of pre, minimum width=24mm, minimum height=15mm] (inter) {$L = K' + S + H$\\símbolos\\intermediários};
+	\node[caixa=serieB, right=of inter, minimum width=20mm, minimum height=15mm] (lt) {\textbf{Codificação}\\\textbf{LT}\\(XOR)};
+	\draw[seta] (origem) -- (pre);
+	\draw[seta] (pre) -- (inter);
+	\draw[seta] (inter) -- (lt);
+
+	% Pacotes de saída
+	\node[restricao=serieA, minimum width=12mm, minimum height=7mm, below=16mm of origem.south west, anchor=north west, xshift=14mm] (p0) {\footnotesize $0$};
+	\node[restricao=serieA, minimum width=12mm, minimum height=7mm, right=1mm of p0] (p1) {\footnotesize $1$};
+	\node[restricao=serieA, minimum width=12mm, minimum height=7mm, right=1mm of p1] (p2) {\footnotesize $\cdots$};
+	\node[restricao=serieA, minimum width=12mm, minimum height=7mm, right=1mm of p2] (p3) {\footnotesize $K-1$};
+	\node[restricao=serieB, minimum width=12mm, minimum height=7mm, right=6mm of p3] (p4) {\footnotesize $K$};
+	\node[restricao=serieB, minimum width=12mm, minimum height=7mm, right=1mm of p4] (p5) {\footnotesize $K+1$};
+	\node[restricao=serieB, minimum width=12mm, minimum height=7mm, right=1mm of p5] (p6) {\footnotesize $\cdots$};
+	\node[rotulo, left=2mm of p0] {ESI};
+	\coordinate (saida) at ($(p0.north west)!0.5!(p6.north east)+(0,5mm)$);
+	\draw[seta] (lt.south) |- (saida) -- ($(saida)+(0,-4mm)$);
+	\draw[decorate, decoration={brace, mirror, amplitude=4pt}, draw=tintaSec] ($(p0.south west)+(0,-1mm)$) -- node[rotulo, below=5pt] {símbolos de origem\\(código sistemático)} ($(p3.south east)+(0,-1mm)$);
+	\draw[decorate, decoration={brace, mirror, amplitude=4pt}, draw=tintaSec] ($(p4.south west)+(0,-1mm)$) -- node[rotulo, below=5pt] {símbolos de reparo\\(quantidade ilimitada)} ($(p6.south east)+(0,-1mm)$);
+\end{tikzpicture}

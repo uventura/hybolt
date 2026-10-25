@@ -27,7 +27,16 @@ Online Codes em HySAIL é utilizado em HySAIL da seguinte forma:
 \item Durante a decodificação, os blocos codificados são recuperados e utilizados para reconstruir os blocos originais.
 \end{itemize}
 
-Na proposta deste trabalho, cada bloco de tamanho limitado do arquivo (\emph{chunk}) é dividido em $K$ símbolos de origem e codificado com RaptorQ \cite{luby2011rfc6330}, que produz os $K$ símbolos de origem, emitidos de forma sistemática, seguidos de $r$ símbolos de reparo. Cada símbolo codificado, aqui denominado pacote, é identificado pelo seu \emph{Encoding Symbol Identifier} (\acrshort{ESI}) e substitui o bloco de verificação do HySAIL original nas fases de Distribuição, Auditoria e Redistribuição.
+Na proposta deste trabalho, cada bloco de tamanho limitado do arquivo (\emph{chunk}) é dividido em $K$ símbolos de origem e codificado com RaptorQ \cite{luby2011rfc6330}, que produz os $K$ símbolos de origem, emitidos de forma sistemática, seguidos de $r$ símbolos de reparo. Cada símbolo codificado, aqui denominado pacote, é identificado pelo seu \emph{Encoding Symbol Identifier} (\acrshort{ESI}) e substitui o bloco de verificação do HySAIL original nas fases de Distribuição, Auditoria e Redistribuição. A Figura~\ref{fig:hybolt_fluxo} resume o fluxo proposto para a Codificação e a Distribuição, detalhado nas seções seguintes.
+
+\begin{figure}[htbp]
+	\centering
+	\begin{adjustbox}{max width=\textwidth}
+		\input{img/tikz/hybolt_fluxo}
+	\end{adjustbox}
+	\caption{Fluxo de Codificação e Distribuição proposto: cada \emph{chunk} é codificado com RaptorQ, cada pacote é cifrado e recebe o material de prova, e os pacotes são distribuídos entre os provedores, enquanto o usuário mantém apenas os metadados.}
+	\label{fig:hybolt_fluxo}
+\end{figure}
 
 \section{Problemas da Substituição Direta}
 \label{sec:problemas_substituicao}
@@ -105,7 +114,16 @@ O parâmetro $\varepsilon$ também determina quantos provedores podem deixar o s
 
 Nos Online Codes, um bloco de verificação corrompido pode ser reconstruído pelo XOR de outros blocos de verificação, sem transferir o arquivo, graças à codificação local \cite{maymounkov2003rateless,amaral2019hysail}. Os símbolos de reparo do RaptorQ não admitem essa reconstrução local, pois dependem dos símbolos intermediários de todo o bloco de origem. A proposta reconstrói, por isso, apenas o \emph{chunk} afetado: o \emph{chunk} é decodificado a partir de seus pacotes íntegros, cuja integridade é confirmada pelo \emph{hash} SHA-256 armazenado, e recodificado.
 
-Em vez de reproduzir o pacote corrompido, a proposta explora a propriedade \emph{fountain} do RaptorQ, que permite gerar um número ilimitado de símbolos de reparo distintos a partir do mesmo bloco de origem \cite{luby2011rfc6330}. Cada pacote perdido é substituído por um novo símbolo de reparo, cujo \acrshort{ESI} nunca foi utilizado no \emph{chunk}, controlado por um contador mantido nos metadados. O novo pacote recebe \emph{hash}, etiqueta ou \acrshort{MAC}s próprios e é armazenado no provedor que menos pacotes do \emph{chunk} possui, excluído aquele em que a perda foi detectada. Como a codificação RaptorQ é determinística para os mesmos dados e parâmetros, a recodificação é validada antes de qualquer alteração, regenerando um pacote íntegro já armazenado e comparando-o com seu \emph{hash}. O uso de \acrshort{ESI}s inéditos evita que o mesmo conteúdo seja entregue novamente a um provedor que possa ter retido a cópia anterior, e permite, na mesma operação, gerar símbolos de reparo adicionais que ampliam a margem $r$ de um \emph{chunk} que perdeu pacotes, por exemplo, quando um provedor deixa o sistema.
+Em vez de reproduzir o pacote corrompido, a proposta explora a propriedade \emph{fountain} do RaptorQ, que permite gerar um número ilimitado de símbolos de reparo distintos a partir do mesmo bloco de origem \cite{luby2011rfc6330}. Cada pacote perdido é substituído por um novo símbolo de reparo, cujo \acrshort{ESI} nunca foi utilizado no \emph{chunk}, controlado por um contador mantido nos metadados. O novo pacote recebe \emph{hash}, etiqueta ou \acrshort{MAC}s próprios e é armazenado no provedor que menos pacotes do \emph{chunk} possui, excluído aquele em que a perda foi detectada. Como a codificação RaptorQ é determinística para os mesmos dados e parâmetros, a recodificação é validada antes de qualquer alteração, regenerando um pacote íntegro já armazenado e comparando-o com seu \emph{hash}. O uso de \acrshort{ESI}s inéditos evita que o mesmo conteúdo seja entregue novamente a um provedor que possa ter retido a cópia anterior, e permite, na mesma operação, gerar símbolos de reparo adicionais que ampliam a margem $r$ de um \emph{chunk} que perdeu pacotes, por exemplo, quando um provedor deixa o sistema. A Figura~\ref{fig:redistribuicao} ilustra o procedimento.
+
+\begin{figure}[htbp]
+	\centering
+	\begin{adjustbox}{max width=\textwidth}
+		\input{img/tikz/redistribuicao}
+	\end{adjustbox}
+	\caption{Redistribuição proposta: o pacote corrompido não é reproduzido, mas substituído por um novo símbolo de reparo, com \acrshort{ESI} inédito, gravado no provedor do \emph{chunk} com menos pacotes.}
+	\label{fig:redistribuicao}
+\end{figure}
 
 A divisão do arquivo em \emph{chunks} de, por padrão, no máximo $\lambda \cdot 512$ bytes (65.024 bytes para $\lambda = 127$) limita o volume transferido em cada Redistribuição a um único \emph{chunk}, independentemente do tamanho do arquivo. Essa é a principal concessão da substituição em relação ao HySAIL original: a Redistribuição deixa de ser estritamente local, mas seu custo permanece limitado e independente do tamanho de $F$.
 
@@ -137,7 +155,16 @@ Em uma auditoria, o usuário escolhe um conjunto $Q$ de pacotes do provedor e co
 	\label{eq:verificacao_compacta}
 \end{equation}
 
-A correção decorre da linearidade da redução módulo $P(x)$: como $\sigma_\eta \equiv c_\eta + f_K(id_F, i_\eta, \eta) \pmod{P(x)}$, tem-se $\tau \equiv \mu + \sum_\eta \nu_\eta f_K(id_F, i_\eta, \eta)$, e a soma em $GF(2)$ de um termo consigo mesmo é nula.
+A correção decorre da linearidade da redução módulo $P(x)$: como $\sigma_\eta \equiv c_\eta + f_K(id_F, i_\eta, \eta) \pmod{P(x)}$, tem-se $\tau \equiv \mu + \sum_\eta \nu_\eta f_K(id_F, i_\eta, \eta)$, e a soma em $GF(2)$ de um termo consigo mesmo é nula. A Figura~\ref{fig:auditoria_compacta} apresenta a troca de mensagens de uma rodada.
+
+\begin{figure}[htbp]
+	\centering
+	\begin{adjustbox}{max width=\textwidth}
+		\input{img/tikz/auditoria_compacta}
+	\end{adjustbox}
+	\caption{Rodada de auditoria no esquema compacto. O provedor combina pacotes e etiquetas sem conhecer $P(x)$, e o usuário verifica a resposta com sua chave. Elaborada pelo autor com base em \cite{shacham2008compact}.}
+	\label{fig:auditoria_compacta}
+\end{figure}
 
 Como $P(x)$ nunca é transmitido, um mesmo polinômio pode ser utilizado em um número ilimitado de auditorias, e a memória do usuário reduz-se a $P(x)$, $K$ e $id_F$, que ocupam 64 bytes, independentemente do tamanho do arquivo. Para que um provedor responda $(\mu', \tau') \neq (\mu, \tau)$ e ainda seja aceito, a diferença $\delta(x) = (\mu' - \mu) + (\tau' - \tau)$ deve ser divisível por $P(x)$. Um polinômio não nulo de grau $d$ possui no máximo $d / \lambda$ fatores irredutíveis distintos de grau $\lambda$, entre os aproximadamente $2^\lambda / \lambda$ polinômios irredutíveis desse grau, de modo que, para $P(x)$ uniforme e desconhecido pelo provedor, a probabilidade de aceitação de uma resposta incorreta fixada é limitada por cerca de $d / 2^\lambda$, desprezível para $\lambda = 127$. Os coeficientes aleatórios $\nu_\eta$ também eliminam o cancelamento de erros idênticos: dois pacotes alterados pelo mesmo erro $e(x)$ só se anulam se $P(x)$ dividir $(\nu_a + \nu_b)\, e(x)$, o que ocorre com a mesma probabilidade desprezível. A garantia de extração, isto é, de que respostas aceitas com probabilidade não desprezível permitem reconstruir os pacotes por álgebra linear sobre respostas a desafios distintos, segue o argumento de Shacham e Waters para o esquema de chave privada \cite{shacham2008compact} e deve ser formalizada para a instanciação aqui proposta.
 

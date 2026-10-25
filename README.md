@@ -136,6 +136,15 @@ With packets balanced over N servers, losing f of them is tolerated while
 Disable the proof with `--no-retrievability-proof` on `encode` or `decode`.
 The SHA-256 check after each download stays active either way.
 
+### Linear MAC prototype
+
+[`hybolt/encryption/linear_mac.py`](hybolt/encryption/linear_mac.py) is a
+prototype MAC that is linear over RaptorQ's GF(256): each byte is embedded in
+GF(2^128) and the MAC is `sum(phi(c_i) * s^i)` at a secret point `s`. The MAC
+of any RaptorQ packet, including repair packets generated later, is derived
+from the MACs of the K source symbols by running the RaptorQ encoder over them
+(`derive_packet_macs`). It is not wired into `encode`, `audit` or `decode` yet.
+
 ### Hiding the code structure
 
 By default, packets are sealed before distribution. Each one is encrypted
@@ -205,3 +214,15 @@ python scripts/fountain_codes_tests.py
 
 The script writes `logs/fountain_codes_runtime.png`. Use `--sizes`,
 `--samples`, and `--loss-count` to change its workload.
+
+Reproduce the measurements and figures of the thesis results chapter with:
+
+```sh
+python scripts/thesis_benchmarks.py all
+```
+
+Raw data goes to `logs/thesis/` and PDF figures to `doc/thesis/img/resultados/`.
+Name experiments to run a subset (`degrees`, `mac`, `overhead`, `loss`,
+`pipeline`, `detection`, `hysail`), pass `--quick` for tiny workloads, or
+`replot` to redraw the slow experiments from the saved data. The full run
+encodes files of up to 500 MB and takes about 15 minutes.

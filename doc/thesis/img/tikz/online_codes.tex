@@ -1,0 +1,29 @@
+\begin{tikzpicture}[node distance=8mm and 12mm]
+	% Mensagem composta
+	\node[simbolo=serieA] (d1) {$d_1$};
+	\node[simbolo=serieA, right=of d1] (d2) {$d_2$};
+	\node[simbolo=serieA, right=of d2] (d3) {$d_3$};
+	\node[simbolo=serieD, right=of d3] (a1) {$a_1$};
+	\node[grupo, fit=(d1)(d2)(d3)(a1), label={[rotulo]left:mensagem\\composta $\mathbf{v}$}] (composta) {};
+
+	% Código externo
+	\node[restricao=serieD, above=14mm of $(d2)!0.5!(d3)$] (externo) {};
+	\node[rotulo, right=2mm of externo] {código externo: $a_1 = d_1 \oplus d_2 \oplus d_3$};
+	\foreach \v in {d1,d2,d3,a1} \draw[aresta, draw=serieD!80!black] (externo) -- (\v);
+
+	% Código interno
+	\node[restricao=serieB, below=18mm of d1, minimum size=8mm] (c1) {$c_1$};
+	\node[restricao=serieB, below=18mm of d3, minimum size=8mm, xshift=10mm] (c2) {$c_2$};
+	\node[restricao=serieB, below=18mm of a1, minimum size=8mm, xshift=10mm] (c3) {$c_3$};
+	\draw[aresta] (c1) -- (d1);
+	\draw[aresta] (c2) -- (d3);
+	\draw[aresta] (c2) -- (a1);
+	\draw[aresta] (c3) -- (a1);
+	\node[rotulo, left=4mm of c1] {código interno:\\blocos de verificação};
+
+	\node[caixa=serieC, right=12mm of a1, align=left] {%
+		\textbf{Decodificação}\\[2pt]
+		1. $c_1, c_3 \Rightarrow d_1, a_1$\\
+		2. $c_2 \oplus a_1 \Rightarrow d_3$\\
+		3. externo $\Rightarrow d_2$};
+\end{tikzpicture}
