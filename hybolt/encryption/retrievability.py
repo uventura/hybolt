@@ -189,13 +189,19 @@ class CompactKeys:
     polynomial: np.ndarray
     prf_key: bytes
     file_id: bytes
+    # Secret multiplier; without it a server can move c's low lambda bits into the tag.
+    # Keys saved before it existed load as 1 and keep that weaker behaviour.
+    alpha: int = 1
 
     @classmethod
     def generate(cls):
+        polynomial = ga.generate_challenge_polynomial()
+        degree = ga.polynomial_degree(polynomial)
         return cls(
-            polynomial=ga.generate_challenge_polynomial(),
+            polynomial=polynomial,
             prf_key=secrets.token_bytes(32),
             file_id=secrets.token_bytes(16),
+            alpha=secrets.randbelow((1 << degree) - 2) + 2,
         )
 
     @property
@@ -218,18 +224,22 @@ class CompactKeys:
 
     def tag(self, chunk_index, packet_index, data) -> int:
         remainder = ga.gf2_mod(ga.bytes_to_poly_int(data), self.modulus)
-        return remainder ^ self.mask(chunk_index, packet_index)
+        return self.scale(remainder) ^ self.mask(chunk_index, packet_index)
+
+    def scale(self, value) -> int:
+        """alpha * value mod P."""
+        return ga.gf2_mod(ga.gf2_clmul(self.alpha, value), self.modulus)
 
 
 class CompactRetrievabilityProof(RetrievabilityProof):
     """Unbounded scheme in the style of Shacham and Waters' private-key PoR.
 
-    Servers store sigma = (c mod P) xor f_K(file, chunk, ESI) next to each packet.
-    A challenge sends random coefficients nu; the server answers
-    mu = sum(nu * c) and tau = sum(nu * sigma) without knowing P, and the client
-    accepts when (mu xor tau xor sum(nu * f_K)) mod P = 0. P is never revealed,
-    so challenges can be repeated indefinitely, and the client keeps only P,
-    the PRF key and the file id.
+    Servers store sigma = alpha * (c mod P) xor f_K(file, chunk, ESI) next to each
+    packet. A challenge sends random coefficients nu; the server answers
+    mu = sum(nu * c) and tau = sum(nu * sigma) without knowing P or alpha, and the
+    client accepts when (tau xor alpha * mu xor sum(nu * f_K)) mod P = 0. P is never
+    revealed, so challenges can be repeated indefinitely, and the client keeps only
+    P, alpha, the PRF key and the file id.
     """
 
     scheme = COMPACT_SCHEME
@@ -280,7 +290,10 @@ class CompactRetrievabilityProof(RetrievabilityProof):
             masks ^= ga.gf2_clmul(
                 coefficient, self.keys.mask(chunk_index, packet_index)
             )
-        return ga.gf2_mod(mu ^ tau ^ masks, self.keys.modulus) == 0
+        return ga.gf2_mod(
+            tau ^ self.keys.scale(ga.gf2_mod(mu, self.keys.modulus)) ^ masks,
+            self.keys.modulus,
+        ) == 0
 
 
 def create_retrievability_proof(

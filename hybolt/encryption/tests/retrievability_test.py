@@ -236,7 +236,8 @@ def test_given_compact_keys_when_tagging_then_tag_is_remainder_masked_by_positio
     tag = keys.tag(2, 5, data)
 
     remainder = ga.gf2_mod(ga.bytes_to_poly_int(data), keys.modulus)
-    assert tag == remainder ^ keys.mask(2, 5)
+    assert tag == keys.scale(remainder) ^ keys.mask(2, 5)
+    assert keys.alpha > 1
     assert tag.bit_length() <= keys.degree
     assert keys.mask(2, 5) != keys.mask(2, 6)
     assert keys.mask(2, 5) != keys.mask(3, 5)
@@ -282,6 +283,17 @@ def test_given_two_packets_with_identical_errors_when_challenging_then_rejects()
     proof, packets = _compact_packets()
     for packet in packets[:2]:
         packet.data = bytes(byte ^ 0xFF for byte in packet.data)
+
+    assert proof.challenge(CompactServer(packets), _refs(packets)) is False
+
+
+def test_given_low_bits_moved_into_tags_when_challenging_then_rejects():
+    proof, packets = _compact_packets()
+    low = (1 << proof.keys.degree) - 1
+    for packet in packets:
+        value = ga.bytes_to_poly_int(packet.data)
+        packet.data = (value & ~low).to_bytes(len(packet.data), "big")
+        packet.tag ^= value & low
 
     assert proof.challenge(CompactServer(packets), _refs(packets)) is False
 
