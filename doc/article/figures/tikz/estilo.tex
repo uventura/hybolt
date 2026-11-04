@@ -1,0 +1,33 @@
+% Estilo comum dos diagramas TikZ da tese.
+\usetikzlibrary{arrows.meta,positioning,fit,calc,backgrounds,shapes.geometric,shapes.multipart,decorations.pathreplacing}
+
+% Cores categóricas, na mesma ordem dos gráficos gerados por
+% scripts/thesis_benchmarks.py.
+\definecolor{serieA}{HTML}{2A78D6}
+\definecolor{serieB}{HTML}{EB6834}
+\definecolor{serieC}{HTML}{1BAF7A}
+\definecolor{serieD}{HTML}{EDA100}
+\definecolor{serieE}{HTML}{6250D6}
+\definecolor{tinta}{HTML}{0B0B0B}
+\definecolor{tintaSec}{HTML}{52514E}
+\definecolor{fundo}{HTML}{F4F3F0}
+
+\tikzset{
+	>={Stealth[length=2.2mm]},
+	every node/.style={font=\small},
+	caixa/.style={draw=#1!80!black, fill=#1!12, rounded corners=2pt, align=center,
+		minimum height=8mm, inner sep=4pt, text=tinta},
+	caixa/.default=serieA,
+	simbolo/.style={draw=#1!80!black, fill=#1!15, circle, minimum size=8mm,
+		inner sep=0pt, text=tinta},
+	simbolo/.default=serieA,
+	restricao/.style={draw=#1!80!black, fill=#1!25, rectangle, minimum size=6mm,
+		inner sep=1pt, text=tinta},
+	restricao/.default=serieB,
+	seta/.style={->, thick, draw=tintaSec},
+	aresta/.style={thick, draw=tintaSec},
+	rotulo/.style={font=\footnotesize, text=tintaSec, align=center},
+	grupo/.style={draw=tintaSec, dashed, rounded corners=4pt, inner sep=6pt},
+	servidor/.style={cylinder, shape border rotate=90, aspect=0.25, draw=serieC!80!black,
+		fill=serieC!15, minimum width=13mm, minimum height=11mm, align=center, text=tinta},
+}

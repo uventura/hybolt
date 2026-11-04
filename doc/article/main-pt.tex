@@ -1,56 +1,19 @@
 \documentclass[portuguese]{sbc2025}%
 
-%\usepackage{graphicx}% já está incluido na classe
-%\usepackage[utf8]{inputenc} % obsoleto, desnecessário
+% A classe sbc2025 exige lualatex ou xelatex (ver scripts/build_article.sh).
 
-\usepackage[misc,geometry]{ifsym} 
+\usepackage[misc,geometry]{ifsym}
 \usepackage{hyperref}
-
-%%%%  %\usepackage{fontspec}
-
-%% Os problemas com a classe eram originados por carregarem ambos os
-%% pacotes fontenc e fontspec simultaneamente. Agora a classe detecta
-%% qual engine está em uso e se for o pdflates então carrega o
-%% fontenc. Se forem o xelatex ou lualatex então carrega o
-%% fontspec. Eu particularemnte prefiro o lualatex ou o xetex
-
-
-% \usepackage{fontawesome} %%% incluido na classe. Desnecessário
-% chamá-lo aqui
-
-
-%%%% \usepackage{academicons}
-%%%% outro encrenqueiro que se tornou desnecessario. Deste typeface só
-%%%% se usava o glifo do orcid e o codigo interno bombava.
-%%%% Substitui pelo pacote orcidlink (carregado internamete na classe)
-%%%% e consertei o codigo na classe.
-
-
-%\usepackage{color} % carregada dentro da classe
-%\usepackage{hyperref} % carregada dentro da classe
-
 \usepackage{aas_macros}
 \usepackage[bottom]{footmisc}
 \usepackage{float}
 \usepackage{booktabs}
-
-%\usepackage{supertabular}
-%\usepackage{multicol}
-%\usepackage{multirow}
-%% O pacote tabularray é muito melhor para
-% a criacao de tabela complexas e/ou loooongas; tudo de modo simples.
-%% Torna o uso de multicol e multirow desnecessarios
-
-\usepackage{tabularray}
-
-
-\usepackage{afterpage}
 \usepackage{url}
-\usepackage{pifont}
-
+\usepackage{tikz}
+\usepackage{adjustbox}
+\input{figures/tikz/estilo}
 
 \setcitestyle{square}
-
 
 \definecolor{engtitle}{rgb}{0.5,0.5,0.5}
 \definecolor{orcidlogo}{rgb}{0.37,0.48,0.13}
@@ -60,36 +23,25 @@
 \hypersetup{colorlinks,breaklinks,
             linkcolor=darkblue,urlcolor=darkblue,
             anchorcolor=darkblue,citecolor=darkblue}
-%\hypersetup{colorlinks,citecolor=blue,linkcolor=blue,urlcolor=blue}
-
-%%%%%%% IMPORTANT: We disable hyperlinks by default with this line, to avoid the error "\pdfendlink ended up in different nesting level" while writing.
-%\hypersetup{draft}
 
 \jid{SOL-Pre}
 \jtitle{SOL Preprints, 2026}
-%\issn{2316-9915}
 \doi{10.5753/sol.2026.0003}
 \copyrightstatement{This work is licensed under a Creative Commons Attribution 4.0 International License}
-\jyear{202X}
+\jyear{2026}
 
 \category{Artigo de Pesquisa/Research Paper}
-\title[Template SOL Preprints para trabalhos em português]{Apresentando o template para o SOL Preprints 2026 - Versão para trabalhos em português}
-\engtitle{\textcolor{engtitle}{Presenting the SOL Preprints template for 2026 - Version for works in Portuguese}}
+\title[HyBolt: Raptor R10 no HySAIL]{HyBolt: substituição dos Online Codes pelo Raptor R10 na camada de armazenamento HySAIL}
+\engtitle{\textcolor{engtitle}{HyBolt: replacing Online Codes with Raptor R10 in the HySAIL storage layer}}
 
-%THE ORCID IS MANDATORY FOR EACH AUTHOR IN JBCS
-\author[Viterbo et al. 2026]{
+% TODO: completar nomes, ORCID e e-mails conforme a folha de rosto da dissertação.
+\author[Autor et al. 2026]{
 
-\affil{\textbf{José Viterbo}~\orcid{0000-0002-0339-6624}
-\\Universidade Federal Fluminense~\ror{02rjhbb08}
-\\\href{mailto:viterbo@ic.uff.br}{\textit{viterbo@ic.uff.br}}}
+\affil{\textbf{Autor}
+\\Universidade de Brasília}
 
-\affil{\textbf{Roberto Pereira}~\orcid{0000-0003-3052-3016}
-\\Universidade Federal do Paraná~\ror{05syd6y78}
-\\\href{mailto:rpereira@inf.ufpr.br}{\textit{rpereira@inf.ufpr.br}}}
-
-\affil{\textbf{Cristiano Maciel Falcão}~\orcid{0000-0002-2431-8457}
-\\Universidade Federal de Mato Grosso~\ror{01mqvjv41}
-\\\href{mailto:cmaciel@ufmt.br}{\textit{cmaciel@ufmt.br}}}
+\affil{\textbf{Orientador}
+\\Universidade de Brasília}
 
 }
 
@@ -100,19 +52,19 @@
 \maketitle
 
 \begin{abstract-pt}
-Este texto, em formato de artigo científico, tem por objetivo apresentar o novo modelo para artigos da SBC, descrevendo suas principais características e explicando como deve ser utilizado. Esta versão, mais especificamente, deve ser utilizada exclusivamente para artigos escritos em português que serão publicados em alguma série de anais de eventos na SBC OpenLib. O resumo em português, como pode-se notar neste exemplo, deve vir antes do resumo em inglês (abstract) e ter entre 500 e 750 palavras.
+O HySAIL é uma camada de armazenamento em nuvem que combina códigos de apagamento e um código de autenticação de mensagem (MAC) polinomial homomórfico para oferecer provas de recuperabilidade (PoR) sobre dados distribuídos entre múltiplos provedores. A proposta original emprega Online Codes, cujo \emph{overhead} de recepção é elevado para blocos pequenos. Este trabalho apresenta o HyBolt, implementação do HySAIL que substitui os Online Codes pelo Raptor R10 (RFC~5053). Por operar exclusivamente em $GF(2)$, o R10 preserva o MAC homomórfico e a redistribuição local, propriedades que o RaptorQ não mantém. Propõem-se, ainda, uma auditoria ponderada imune ao cancelamento de erros, um esquema compacto com auditorias ilimitadas e a ocultação da estrutura do código. Os experimentos, conduzidos na mesma máquina para ambos os códigos, indicam custo computacional equivalente, \emph{overhead} de recepção de 5 a 36 vezes menor e, com a mesma redundância, tolerância à perda de 14\% dos pacotes de cada \emph{chunk}, ao passo que os Online Codes não toleram com segurança a perda de nenhum.
 \end{abstract-pt}
 
 \begin{abstract-en}
-This text, formatted as a scientific article, aims to present the new SBC paper template, describing its main features and explaining how it should be used. This version, more specifically, should be used exclusively for articles written in Portuguese that will be published in any event proceeding series at SBC OpenLib. The abstract in Portuguese, as you can see in this example, must be before the abstract in English and must have between 500 and 750 words.
+HySAIL is a cloud storage layer that combines erasure codes with a homomorphic polynomial message authentication code (MAC) to provide proofs of retrievability (PoR) for data spread across multiple providers. Its original design relies on Online Codes, whose reception overhead is high for small blocks. This work presents HyBolt, a HySAIL implementation that replaces Online Codes with Raptor R10 (RFC~5053). Since R10 operates solely over $GF(2)$, it preserves the homomorphic MAC and local redistribution, properties that RaptorQ does not retain. We further propose a weighted audit immune to error cancellation, a compact scheme with unbounded audits, and hiding of the code structure. Experiments run on the same machine for both codes show equivalent computational cost, a reception overhead 5 to 36 times lower and, under the same redundancy, tolerance to the loss of 14\% of the packets of each chunk, whereas Online Codes cannot safely tolerate the loss of any.
 \end{abstract-en}
 
 \begin{pchaves}
-Anais de evento, Modelo, SBC OpenLib, Indexação
+Prova de recuperabilidade, Códigos \emph{fountain}, Raptor R10, Armazenamento em nuvem, HySAIL
 \end{pchaves}
 
 \begin{keywords}
-Proceedings, Template, SBC OpenLib, Indexing
+Proof of retrievability, Fountain codes, Raptor R10, Cloud storage, HySAIL
 \end{keywords}
 
 \begin{dates}
@@ -121,293 +73,146 @@ Proceedings, Template, SBC OpenLib, Indexing
 {\sffamily\textbf{Publicado/Published:}} DD Mmm YYYY
 \end{dates}
 
-
-%\begin{license}
-%Published under the Creative Commons Attribution 4.0 International Public License (CC BY 4.0)
-%\end{license}
-
 \end{frontmatter}
 
 
 \section{Introdução}
 \label{sec:intro}
 
-A classe \textsl{sbc2025} é projetada para trabalhar com os \textit{engines} pdftex e luatex. Dessa forma, deve-se compilar o documento 
-\begin{enumerate}
-    \item no Overleaf, ajustando no menu opção de compilação para \textbf{xelatex} ou \textbf{lualatex}.\footnote{Os engines são denominados xetex e luatex. Já os comandos de compilação são \textsl{xelatex} e \textsl{lualatex}.}
-    \item se compilando localmente, na sua IDE faça o ajuste do compilador. Se usuário raiz, no terminal de comando, digite \textsl{xelatex filename} ou \textsl{lualatex filename}. Não é necessário digitar a extensão \textsl{tex}.
-\end{enumerate}
+O armazenamento em nuvem tornou-se a base de serviços que acumulam volumes da ordem de centenas de \emph{exabytes}, mas transfere a custódia dos dados para provedores cuja infraestrutura o cliente não controla. Nesse cenário, é necessário verificar periodicamente que os dados permanecem íntegros e recuperáveis sem transferi-los por completo, problema tratado pelas provas de recuperabilidade (\emph{Proofs of Retrievability}, PoR) \cite{juels2007pors,shacham2008compact}.
 
-A classe \textsl{sbc2025} inclui internamente os seguintes pacotes:
-\begin{itemize}
-    \item xcolor
-    \item graphicx
-    \item amsmath amssymb
-    \item hyperref
-    \item babel
-\end{itemize}
-\noindent consequentemente, não há necessidade de incluí-los no preâmbulo.
+O HySAIL \cite{amaral2013hysail,amaral2019hysail} é uma PoR para múltiplos provedores que codifica o arquivo com Online Codes \cite{maymounkov2002online}, distribui os blocos codificados entre os provedores e verifica sua integridade por meio de um MAC polinomial homomórfico em relação ao XOR. Essa propriedade permite auditar qualquer bloco a partir dos MACs dos blocos de mensagem e reconstruir localmente blocos corrompidos. Os Online Codes, contudo, exigem um número elevado de símbolos excedentes quando os blocos são pequenos, o que leva o HySAIL a codificar o arquivo inteiro e encarece a recuperação de partes dele.
 
-{\bfseries Quem tentar compilar usando a opção \texttt{pdflatex} no Overleaf vai receber uma mensagem de erro solicitando o usuário a ajustar a opção de compilação.}
+Este trabalho avalia a substituição dos Online Codes pelos Raptor Codes \cite{shokrollahi2006raptor} padronizados na RFC~5053 (R10) \cite{luby2007rfc5053}. As contribuições são: (i) a demonstração de que o R10, ao contrário do RaptorQ \cite{luby2011rfc6330}, preserva o MAC homomórfico e a redistribuição local do HySAIL; (ii) adaptações do protocolo ao R10, incluindo a divisão em \emph{chunks}, uma auditoria ponderada e a geração verificada dos polinômios de desafio; (iii) um esquema compacto com auditorias ilimitadas e a ocultação da estrutura do código; e (iv) o HyBolt, implementação de código aberto, avaliada experimentalmente contra os Online Codes na mesma máquina. A Seção~\ref{sec:fundamentacao} apresenta a fundamentação; a Seção~\ref{sec:proposta}, a proposta; a Seção~\ref{sec:metodologia}, a metodologia; a Seção~\ref{sec:resultados}, os resultados; e a Seção~\ref{sec:conclusao}, as conclusões.
 
-Para a pergunta \textit{Por que não funciona com o \texttt{pdflatex}}?  A resposta é: \textbf{fontes!} Pdflatex usa um esquema de codificação de fontes complexo. 
-O fonte \texttt{academicons}\footnote{Do fonte em questão usa-se apenas o glifo associado ao Orchid.} não tem as definições necessárias para uso com o \texttt{pdflatex}. Enquanto isso não for realizado, \texttt{pdflatex} não pode ser usado. 
+\section{Fundamentação e Trabalhos Relacionados}
+\label{sec:fundamentacao}
 
-\section{Diferenças entre \texttt{fontenc} e \texttt{fontspec}}
+No HySAIL, o arquivo é dividido em $n$ blocos de mensagem $m_i$, interpretados como polinômios sobre $GF(2)$. O usuário sorteia $l$ polinômios primitivos de grau $\lambda$, $P_1, \ldots, P_l$, e armazena apenas os MACs $h_{i,j}(x) = m_i(x) \bmod P_j(x)$. Como a soma em $GF(2)$ coincide com o XOR, a redução é linear, e o MAC de um bloco de verificação $c = m_a \oplus m_b$ é $h_{a,j} \oplus h_{b,j}$. A família $m(x) \bmod P(x)$ é 2-universal, de modo que a probabilidade de falsificação é limitada por $2^{-\lambda}$ \cite{amaral2019hysail}. O protocolo organiza-se nas fases de Codificação, Distribuição, Auditoria, Redistribuição e Decodificação.
 
-Os dois pacotes do título da seção pertencem a ``universos'' distintos e não devem ser ambos incluídos no mesmo preâmbulo sob a pena de conflitos.
+Os códigos \emph{fountain} geram um fluxo potencialmente ilimitado de símbolos, dos quais qualquer subconjunto suficientemente grande recupera a mensagem. Os LT Codes \cite{luby2002lt} empregam uma distribuição de grau sóliton; os Online Codes \cite{maymounkov2002online} e os Raptor Codes \cite{shokrollahi2006raptor} acrescentam uma pré-codificação que permite grau médio constante. O R10 é sistemático, admite de 4 a 8.192 símbolos de origem por bloco e realiza todas as operações em $GF(2)$. Consequentemente, todo símbolo codificado de identificador (ESI) $\eta$ é o XOR dos símbolos de origem de um suporte $X_\eta$, determinado apenas por $K$ e $\eta$:
+\begin{equation}
+c_\eta = \textstyle\bigoplus_{i \in X_\eta} d_i .
+\label{eq:suporte}
+\end{equation}
+O RaptorQ \cite{luby2011rfc6330} aproxima-se de um código MDS, mas suas restrições em $GF(256)$ tornam cada símbolo de reparo uma combinação linear sobre $GF(256)$, que não comuta com a redução módulo $P_j(x)$; com ele, o usuário precisaria armazenar um MAC por pacote e decodificar o bloco para redistribuí-lo.
 
-O pacote \texttt{fontspec} lida com o universo dos fontes Truetype e/ou Opentype. De forma super simplificada, o pacote \texttt{fontspec} foi originalmente desenvolvido para contornar o problema dos fontes hardwired do \LaTeX\ e dar liberdade para uso de quaquer fonte TrueType ou Opentype  disponíveis no computador do usuário. O pacote também disponibiliza scripts para diferentes padrões de línguas: lembre que as línguas romanas, como o português, se escreve da esquerda para a direita. No entanto, em outras, a escriva se realiza da direita para a esquerda. Nem vou dizer que há aquelas em que uma linha vai da esquerda para a direita e a linha seguinte da direita para a esquerda. E se fosse na vertical? O \texttt{fontspec} é seu amigo nessas situações.
+Entre as PoR clássicas, Juels e Kaliski \cite{juels2007pors} utilizam sentinelas e ocultam por cifragem e permutação a estrutura do código, enquanto Shacham e Waters \cite{shacham2008compact} propõem etiquetas lineares que permitem auditorias ilimitadas com uma chave de tamanho constante; Bowers et al. \cite{bowers2009proofs} analisam ambos os modelos. Esses esquemas, entretanto, consideram um único provedor e não preveem a redistribuição de blocos entre provedores, aspecto central do HySAIL.
 
-A distribuição TeXlive---a qual é usada pelo Overleaf---instala uma vasta gama de fontes: por exemplo, o \textbf{TeX Gyre Termes} é o equivalente livre e gratuito do fonte \textbf{Times New Roman}. Devo lembrar que jornais e revistas científicas padronizam o fonte a ser utilizado. Se possível, aconselho a leitura do manual do pacote.  
+\section{Proposta: HyBolt}
+\label{sec:proposta}
 
-Obs: para os engines xetex e luatex não é obrigatório realizar a inclusão do pacote \texttt{fontspec}. A omissão faz o engine assumir valores default para fonte e suas propriedades.\footnote{Por simplicidade venho usando o termo \textsc{fonte} como sinônimo do termo \textsc{typeface}. No entanto, os profissionais de tipografia distinguem os dois termos.}
+A Figura~\ref{fig:fluxo} resume o fluxo de Codificação e Distribuição proposto. O arquivo é dividido em \emph{chunks} de $K = 100$ símbolos de 6.500 bytes, e cada \emph{chunk} é codificado com o R10, gerando os $K$ símbolos de origem e $r = \lceil \varepsilon K \rceil$ símbolos de reparo, com $\varepsilon = 0{,}25$ por padrão. A divisão em \emph{chunks} decorre do limite de símbolos da norma, do custo da Redistribuição, que transfere cerca de $K/2$ pacotes, e da independência entre \emph{chunks} na memória; o valor $K = 100$ equilibra a tolerância a perdas e o volume transferido em cada reparo.
 
+\begin{figure*}[t]
+	\centering
+	\begin{adjustbox}{max width=0.92\textwidth}
+		\input{figures/tikz/hybolt_fluxo}
+	\end{adjustbox}
+	\caption{Fluxo de Codificação e Distribuição do HyBolt: cada \emph{chunk} é codificado com o R10, cada pacote é cifrado e recebe o material de prova, e os pacotes são distribuídos entre os provedores, enquanto o usuário mantém apenas os metadados.}
+	\label{fig:fluxo}
+\end{figure*}
 
-Para o engine pdftex, o pacote a ser incluido deveria ser o \textbf{fontenc}. A inclusão desse pacote faz com que o engine leia arquivos de definição, e outros associados e com isso executa uma ligação ``estrita'' ao fonte.  
+\paragraph{MAC derivado e desafios.} Pela Equação~\eqref{eq:suporte}, o MAC esperado de qualquer pacote, inclusive de símbolos de reparo gerados posteriormente, é $h_{\eta,j} = \bigoplus_{i \in X_\eta} h_{i,j}$, de modo que o usuário mantém apenas $n \cdot l$ MACs e não precisa armazenar a composição dos pacotes. Cada polinômio de desafio é obtido por amostragem com rejeição e validado pelo teste de irredutibilidade de Rabin \cite{rabin1980probabilistic}; como $2^{127} - 1$ é primo, todo polinômio irredutível de grau $\lambda = 127$ é primitivo.
 
+\paragraph{Auditoria ponderada.} A resposta original, o XOR dos pacotes desafiados, permite que dois pacotes alterados pelo mesmo erro $e(x)$ se anulem. O HyBolt pondera cada pacote por uma potência secreta de $x$, com expoentes distintos $k_\eta < 2^{32}$:
+\begin{equation}
+A(x) = \textstyle\left(\sum_{\eta} x^{k_\eta} c_\eta(x)\right) \bmod P_j(x).
+\end{equation}
+Como $x$ tem ordem $2^\lambda - 1$ módulo um polinômio primitivo, o cancelamento exigiria $k_a \equiv k_b \pmod{2^\lambda - 1}$, o que é impossível.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+\paragraph{Redistribuição.} Um pacote corrompido é substituído por um símbolo de reparo de ESI inédito $t$, cujo suporte o usuário expressa, por eliminação gaussiana em $GF(2)$, como a diferença simétrica dos suportes de um subconjunto $Q$ de pacotes íntegros; o novo pacote é $c_t = \bigoplus_{q \in Q} c_q$. O \emph{chunk} nunca é decodificado, e cada reparo transfere, em média, 49 pacotes, cerca de 320~KB.
+
+\paragraph{Esquema compacto.} O modelo limitado revela cada $P_j$ ao provedor e, portanto, admite apenas $l$ auditorias e exige do usuário memória proporcional ao arquivo. Inspirado em Shacham e Waters \cite{shacham2008compact}, o HyBolt associa a cada pacote a etiqueta $\sigma_\eta = (c_\eta \bmod P) + f_K(id_F, i, \eta)$, em que $P$ é um polinômio primitivo secreto e $f_K$ uma função pseudoaleatória (HMAC-SHA-256). O provedor responde com combinações lineares $\mu = \sum \nu_\eta c_\eta$ e $\tau = \sum \nu_\eta \sigma_\eta$, que o usuário verifica sem revelar $P$. As auditorias tornam-se ilimitadas, e as chaves ocupam 64 bytes.
+
+\paragraph{Ocultação da estrutura.} Como o R10 não é MDS e sua estrutura é pública, um adversário pode corromper os sete pacotes que contêm um mesmo símbolo de origem e tornar o \emph{chunk} irrecuperável, contra os $r + 1 = 26$ que um código MDS exigiria. Para impedir esse ataque, cada pacote é cifrado com um fluxo SHAKE-256 e armazenado sob um nome pseudoaleatório, seguindo \cite{juels2007pors,bowers2009proofs}; a cifragem é linear em $GF(2)$ e preserva o MAC derivado.
+
+\section{Metodologia e Ambiente Experimental}
+\label{sec:metodologia}
+
+Para que a comparação não dependa de medidas publicadas em outro equipamento, os Online Codes foram implementados no próprio HyBolt e executados no mesmo fluxo que o R10, variando apenas o código \emph{fountain}. O R10 foi implementado a partir da norma e validado byte a byte contra a biblioteca independente \texttt{gofountain}, e a aritmética em $GF(2)[x]$ foi implementada como extensão em C. Os experimentos foram executados em um Intel Core i7-11390H com 8~GB de memória, sob WSL2 e Python~3.13, com três provedores simulados por diretórios locais, o que exclui a latência de rede. Utilizaram-se os parâmetros padrão ($\lambda = 127$, $K = 100$, $\varepsilon = 0{,}25$, $l = 40$) e dados pseudoaleatórios, e cada arquivo decodificado foi comparado byte a byte com o original. As simulações de recuperação utilizaram 2.000, 1.000 e 200 repetições para $K = 10$, 100 e 1.000, e todos os resultados são reproduzidos pelo script \texttt{scripts/thesis\_benchmarks.py}.
+
+\section{Resultados}
+\label{sec:resultados}
+
+\paragraph{\emph{Overhead} de recepção.} A Figura~\ref{fig:overhead} e a Tabela~\ref{tab:overhead} comparam o número de símbolos necessário à recuperação. O R10 exigiu um número aproximadamente constante de símbolos excedentes, de 1,4 a 2,7, que corresponde a 1,8\% de $K$ no \emph{chunk} padrão, contra 34\% dos Online Codes. O RaptorQ recuperou com exatamente $K$ símbolos em mais de 99\% dos casos, mas, como discutido, é incompatível com o MAC homomórfico.
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=\columnwidth]{figures/reception_overhead.pdf}
+	\caption{Fração das decodificações concluídas em função do número de símbolos recebidos, normalizado por $K$.}
+	\label{fig:overhead}
+\end{figure}
+
+\begin{table}[t]
+	\centering
+	\caption{Símbolos adicionais médios necessários à recuperação, em porcentagem de $K$.}
+	\label{tab:overhead}
+	\small
+	\begin{tabular}{@{}lrrr@{}}
+		\toprule
+		\textbf{Código} & $K = 10$ & $K = 100$ & $K = 1.000$ \\
+		\midrule
+		Raptor R10   & 14,1\% & 1,8\%   & 0,27\%   \\
+		RaptorQ      & 0,05\% & 0,005\% & 0,0005\% \\
+		Online Codes & 64,9\% & 34,3\%  & 9,7\%    \\
+		LT Codes     & 56,4\% & 32,5\%  & 17,3\%   \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\paragraph{Tolerância a perdas.} A Figura~\ref{fig:perdas} apresenta a recuperação de um \emph{chunk} em função da fração de pacotes perdidos. Com $\varepsilon = 0{,}25$, o R10 tolerou a perda de 18 dos 125 pacotes (14,4\%) em pelo menos 99\% dos casos, próximo do limite MDS de 20\%. Os Online Codes, embora armazenem 143 pacotes por \emph{chunk}, tornaram-se irrecuperáveis em 7,4\% dos casos com a perda de um único pacote e em 42\% com a perda de cinco. Com $\varepsilon = 0{,}5$, as perdas toleradas foram de 43 pacotes com o R10 e de apenas dois com os Online Codes.
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=\columnwidth]{figures/codec_loss.pdf}
+	\caption{\emph{Chunks} de $K = 100$ símbolos recuperados em função da fração de pacotes perdidos, com R10 e Online Codes, estimados por 4.000 ordens aleatórias.}
+	\label{fig:perdas}
+\end{figure}
+
+\paragraph{Desempenho.} O custo dos dois códigos mostrou-se equivalente: a mediana foi de 2,8~ms para codificar e 3,5~ms para decodificar um \emph{chunk} com o R10, contra 2,6 e 3,2~ms com os Online Codes. A diferença está no volume de dados: os Online Codes armazenam 1,45 vez o arquivo, contra 1,27, e a decodificação recebeu em média 136,3 pacotes por \emph{chunk}, contra 101,5, o que tornou a decodificação sem prova de 23\% a 75\% mais lenta. No esquema compacto, um arquivo de 64~MiB foi codificado em 2,2~s (29~MiB/s), e os metadados do usuário convergiram para 2,7\% do arquivo, contra 154\% do esquema limitado para 1~MiB. A redução polinomial em C calculou o MAC de um bloco de 40~KiB em 0,11~ms, ao passo que a implementação original do HySAIL reportava 62~s \cite{amaral2013hysail}, em outro equipamento.
+
+\paragraph{Auditoria e ocultação.} Com 5,1\% dos pacotes de um provedor corrompidos, uma amostra de 50 pacotes detectou a corrupção em 96\% das rodadas, em concordância com a probabilidade teórica $1 - (1 - \beta)^s$. A Figura~\ref{fig:ataque} mostra o efeito da ocultação: para um arquivo de 1~GiB, a fração de pacotes que o adversário precisa corromper para que a perda do arquivo se torne possível passa de 0,0034\% para cerca de 4\%, e para que se torne mais provável que a recuperação, para 8,5\%. Com 4\% de corrupção, uma auditoria de 50 pacotes por provedor a detecta em ao menos um dos três provedores com probabilidade superior a 99,8\%, o que permite iniciar a Redistribuição antes da perda de dados.
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=\columnwidth]{figures/targeted_attack.pdf}
+	\caption{Probabilidade de perda do arquivo em função da fração de pacotes corrompidos, com ocultação (corrupção uniforme) e sem ocultação (linhas pontilhadas: ataque dirigido a um \emph{chunk}).}
+	\label{fig:ataque}
+\end{figure}
 
 \section{Aspectos Éticos}
 \label{sec:ethics}
 
-Manuscripts must explicitly \textbf{indicate how the ethical issues of the research were addressed and managed}, including the research approval by an ethics committee when applicable. We encourage the authors to make their datasets, methods, software, transcripts, and other additional materials available for the readers. All the supplementary material the authors provided will appear on the paper's publication page in case of acceptance. Follow this template when preparing your manuscript for submission.
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum \citep{ref1}. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat \citep{ref2}. 
-
-\begin{table}[!ht]
-\caption{Exemplo de legenda de tabela.}
-\centering
-\begin{tabular}{@{}cc@{}}
-\hline\hline
-Dimensão & Classificação\\
-\hline%
- 1  & 0.6232 \\
- 2  & 0.9635 \\ 
- 3  & 0.9724 \\ 
- 4  & 0.9690 \\ 
- 5  & 0.9840 \\ 
- 6  & 0.9842 \\ 
- 7  & 0.9873 \\ 
- 8  & 0.9884 \\
- 9  & 0.9873 \\ 
- 10 & 0.9898 \\ 
- 11 & 0.9914 \\
-\hline\hline
-\end{tabular}
-\label{tab1}
-\end{table}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum (see \textbf{ Table~\ref{tab1}}). \textcolor{red!50!black}{Tabelas! Essa é outra questão que me irrita quando vejo que a mesma foi produzida por ferramenta online!} Tabelas são elementos importantes na comunicação de dados e é um dos aspectos mais difíceis de se lidar em tipografia. Por outro lado, tabelas deveriam ser entidades simples de se projetar. Assim, recomendo fortemente o uso do pacote \texttt{tabularray}. 
-
-\begin{table}[!ht]
-\caption{Exemplo de legenda de tabela.}
-\centering
-\begin{tblr}{%
-columns={c},
-row{even}={gray9},
-row{1}={bg=red!10, font=\bfseries}
-}
-\hline
-Dimensão & Classificação\\
-\hline%
- 1  & 0.6 \\
- 2  & 0.963 \\ 
- 3  & 0.97 \\ 
- 4  & 0.9690 \\ 
- 5  & 0.9840 \\ 
- 6  & 0.98423 \\ 
- 7  & 0.9873 \\ 
- 8  & 0.9884 \\
- 9  & 0.9873 \\ 
- 10 & 0.9898 \\ 
- 11 & 0.991 \\
-\end{tblr}
-\label{tab1-1}
-\end{table}
-
-
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum \citep{ref3}, dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat~\citep{ref4}.
-
-
- 
-\section{Exemplo de Título Nível 1 (Seção)}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-\subsection{Exemplo de Título Nível 2 (Subseção)}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-\begin{quotation}
-\textit{This is a longer quotation. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et magna aliqua. 
-}\end{quotation} 
-
-\subsubsection{Exemplo de Título Nível 3 (Subsubseção)}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-\paragraph{Exemplo de Título Nível 4 (Parágrafo).}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. 
-Let
-\[
-x=(x_1,\dots,x_n)\in R^n
-\]be an \(n\)-dimensional vector. The sparse PCA problem can be written as
-\begin{equation}\label{eq1}
-\max\limits_{x}\{x^TAx-\rho\|x\|_0:x^Tx=1\},
-\end{equation}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur\break equation (\ref{eq1}). 
-\[\max\limits_{x}\{x^TAx :x^Tx=1\}.\]
-If $A$ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
-
-
-Equation (\ref{eq1}) is a special case of the following sparse generalized eigenvector problem (GEV):
-\begin{equation}\label{GEV}
-\max\limits_{x}\{x^TAx-\rho \|x\|_0: x^TBx\leq 1\},
-\end{equation}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. 
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum \textbf{Table~\ref{tab2}}.
-
-\section{Exemplo de Título Nível 1}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-
-\begin{table*}
-\caption{Exemplo de legenda de tabela.  Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit.} 
-\centering
-\begin{tabular*}{\textwidth}{@{}c\x c\x c\x c\x c\x c\x c\x c\x c\x c\x c\x c@{}}
-\hline \hline
- Número   &  Vel (km/h)   & $\alpha$ (m/s$^2$)    &  $\epsilon^{(1)}$  &  $\epsilon^{(2)}$ 
-         & $\delta^{(1)}$ & $\delta^{(2)}$  &  $\delta^{(3)}$    & $\gamma^{(1)}$ 
-         & $\gamma^{(2)}$ & $\alpha^{(1)}$  & $\alpha^{(2)}$ \\
-%
-\hline
- 1 & 3.5 & 2.0 & 0.20 & -0.05 & 0.00 & -0.20 & -0.05 & 0.20 & ~0.05 & 20 & 10 \\ 
- 2 & 2.5 & 1.5 & 0.10 & -0.15 & 0.05 & -0.15 & ~0.00 & 0.10 & -0.05 & 20 & 40 \\ 
- 3 & 3.0 & 1.8 & 0.20 & -0.05 & 0.25 & ~0.05 & ~0.20 & 0.15 & ~0.00 & 20 & 70$^a$ \\
-\hline \hline
-\end{tabular*}\label{tab2}
-\end{table*}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-\begin{itemize}
-\item Esse é um exemplo de lista de tópicos. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.
-\item Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.
-\item Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.
-\end{itemize}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-\begin{enumerate}%
-\item Esse é um exemplo de lista numerada. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.
-\item Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.
-\item Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.
-\end{enumerate}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-
-\subsection{Exemplo de Título Nível 2}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum \textbf{Figure \ref{Fig1}}.
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figures/citation-year.png}
-\caption{Exemplo de legenda de figura.}\label{Fig1}
-\end{center}
-\end{figure}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum \textbf{Figure \ref{Fig2}}.
-
-\begin{figure*}
-\begin{center}
-\includegraphics[width=30pc]{figures/citation-year.png}
-\caption{{Exemplo de legenda de figura.}}
- \label{Fig2}
-\end{center}
-\end{figure*}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-
-
-\paragraph{Exemplo de Título Nível 4.}
-
-Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+A pesquisa não envolveu seres humanos nem dados pessoais: todos os experimentos utilizaram arquivos de bytes pseudoaleatórios e provedores simulados localmente, razão pela qual não foi necessária a apreciação por comitê de ética. Os ataques avaliados foram executados apenas sobre dados sintéticos, com o propósito de dimensionar as defesas propostas.
 
 \section{Conclusão}
+\label{sec:conclusao}
 
-Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+Este trabalho mostrou que a substituição dos Online Codes pelo Raptor R10 preserva as propriedades estruturais do HySAIL, o MAC homomórfico e a Redistribuição local, que o RaptorQ não preservaria, e que, com o mesmo custo computacional, o R10 reduz o \emph{overhead} de recepção de 5 a 36 vezes e eleva a tolerância a perdas de um \emph{chunk} de nenhum para 14\% dos pacotes. O esquema compacto elimina as limitações do modelo limitado, e a ocultação da estrutura eleva em mais de três ordens de grandeza a corrupção necessária para destruir um arquivo grande.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum \citep{ref5}.
-
+Como limitações, o R10 não é MDS, o que torna inadequados \emph{chunks} pequenos; com três provedores, tolerar a saída de um deles exige $\varepsilon \ge 0{,}6$; e a garantia de extração do esquema compacto ainda deve ser formalizada. Trabalhos futuros incluem essa formalização, a verificação pública por auditores delegados \cite{armknecht2021outsourcing}, a otimização da gravação e da cifragem dos pacotes, que dominam o tempo de codificação, e a avaliação em provedores de nuvem reais.
 
 \begin{declarations}
 
-\begin{acknowledgements}
-ESTA DECLARAÇÃO É OPCIONAL. Este é um texto de agradecimentos com várias linhas. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-\end{acknowledgements}
-
-\begin{funding}
-ESTA DECLARAÇÃO É OPCIONAL. Esta pesquisa foi financiada por lorem ipsum dolor sit amet, consectetur adipiscing elit.
-\end{funding}
-
 \begin{contributions}
-ESTA DECLARAÇÃO É OBRIGATÓRIA. Sugerimos que os autores descrevam sua contribuição usando a Taxonomia CRediT (\href{https://credit.niso.org/}{https://credit.niso.org/}) como neste exemplo: JV contribuiu para a concepção deste estudo. CB, RP e CM realizaram os experimentos. JV é o principal contribuidor e escritor deste manuscrito. Todos os autores leram e aprovaram o manuscrito final. 
+O primeiro autor concebeu a proposta, implementou o HyBolt, conduziu os experimentos e redigiu o manuscrito. O segundo autor supervisionou a pesquisa e revisou o manuscrito. Todos os autores leram e aprovaram a versão final.
 \end{contributions}
 
 \begin{interests}
-ESTA DECLARAÇÃO É OBRIGATÓRIA. Se não houver conflitos de interesse, os autores devem declarar: ``Os autores declaram que não têm nenhum conflito de interesses''. Caso contrário, a declaração deve ser: ``Os autores declaram que têm os seguintes conflito de interesses: lorem ipsum dolor sit amet, consectetur adipiscing elit.''
+Os autores declaram que não têm nenhum conflito de interesses.
 \end{interests}
 
 \begin{materials}
-ESTA DECLARAÇÃO É OBRIGATÓRIA. 
-  Se os autores estiverem disponibilizando seus dados e/ou códigos
-  abertamente, a declaração deve ser: ``Os conjuntos de dados (e/ou
-  softwares) gerados e/ou analisados durante o estudo atual estão
-  disponíveis em \ldots''. Caso contrário, a declaração deve ser: ``Os
-  conjuntos de dados (e/ou softwares) gerados e/ou analisados durante
-  o estudo atual serão feitos mediante solicitação''.
+O código-fonte do HyBolt, os scripts de experimentos e os dados brutos que reproduzem as figuras deste artigo estão disponíveis no repositório do projeto.
 \end{materials}
 
 \begin{furtherinformation}
-ESTA DECLARAÇÃO É DESEJÁVEL. Informações adicionais relevantes, como, por exemplo, a aprovação em comitê de ética ou o uso de ferramentas de IA generativa no desenvolvimento do artigo. Essa declaração é opcional, se não houver nada a ser acrescentado, pode ser deixada em branco
+Este artigo resume a dissertação de mestrado que propôs o HyBolt. Ferramentas de IA generativa foram utilizadas como apoio à redação, e todo o conteúdo foi revisado pelos autores.
 \end{furtherinformation}
 \end{declarations}
-
-
 
 \bibliographystyle{apalike-sol}
 \bibliography{refs}
 
 \end{document}
-
-Se os autores estiverem disponibilizando seus dados e/ou códigos abertamente,
- a declaração deve ser: ``Os conjuntos de dados (e/ou softwares)
- gerados e/ou analisados ​​durante o estudo atual estão disponíveis em
- lorem ipsum dolor sit amet''. Caso contrário, a declaração deve ser:
- ``Os conjuntos de dados (e/ou softwares) gerados e/ou analisados durante o estudo atual serão
-  feitos mediante solicitação''.
