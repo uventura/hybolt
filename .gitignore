@@ -10,6 +10,12 @@ logs/
 # LaTeX thesis build artifacts
 doc/thesis/monografia.{acn,acr,alg,aux,bbl,blg,glg,glo,gls,glsdefs,ist,lof,log,out,pdf,toc}
 doc/thesis/monografia.pdflatex.*.log
+
+# LaTeX article build artifacts
+doc/article/*.aux
+doc/article/*.bbl
+doc/article/*.blg
+doc/article/*.out
 *.log
 
 # Native extension build output
