@@ -74,7 +74,7 @@ def plot_overhead(results, figure_dir):
 
 
 def plot_codec_loss(rows, figure_dir):
-    figure, axis = plt.subplots(figsize=(COLUMN_WIDTH, 1.9), layout="constrained")
+    figure, axis = plt.subplots(figsize=(COLUMN_WIDTH, 1.75), layout="constrained")
     labels = dict(CODES)
     for row in rows:
         codec_slot = [code for code, _ in CODES].index(row["codec"])
@@ -91,14 +91,14 @@ def plot_codec_loss(rows, figure_dir):
             ),
         )
     axis.set_xlabel("pacotes perdidos no chunk (%)")
-    axis.set_ylabel("chunks recuperados (%)")
+    axis.set_ylabel("recuperados (%)")
     axis.set_xlim(0, 40)
     figure.legend(ncol=2, loc="outside lower center")
     save_figure(figure, figure_dir, "codec_loss")
 
 
 def plot_attack(attack, figure_dir):
-    figure, axis = plt.subplots(figsize=(COLUMN_WIDTH, 2.0), layout="constrained")
+    figure, axis = plt.subplots(figsize=(COLUMN_WIDTH, 1.85), layout="constrained")
     files = {label: data for label, data in attack.items() if isinstance(data, dict)}
     for slot, (label, data) in enumerate(files.items()):
         axis.plot(
@@ -117,7 +117,7 @@ def plot_attack(attack, figure_dir):
         )
     axis.set_xscale("log")
     axis.set_xlabel("pacotes corrompidos (% do arquivo)")
-    axis.set_ylabel("perda do arquivo (%)")
+    axis.set_ylabel("perda (%)")
     handles, labels = axis.get_legend_handles_labels()
     order = [0, 2, 4, 1, 3, 5]
     figure.legend(

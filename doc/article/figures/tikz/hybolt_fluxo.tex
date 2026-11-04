@@ -6,7 +6,7 @@
 	\node[below=0mm of ch1, text=tintaSec] (chd) {$\vdots$};
 	\draw[seta] (arquivo.east) -- (ch0.west);
 	\draw[seta] (arquivo.east) -- (ch1.west);
-	\node[rotulo, above=1mm of ch0] {$\le \lambda \cdot 512$ bytes};
+	\node[rotulo, above=1mm of ch0] {$K = 100$ símbolos};
 
 	% Codificação de um chunk
 	\node[caixa=serieD, right=of ch0, minimum width=22mm, yshift=-5mm, minimum height=14mm] (rq) {Raptor R10\\$K$ origem\\$+\ r = \lceil \varepsilon K \rceil$};
@@ -23,11 +23,10 @@
 	\draw[seta] (prova.east) -- (s1.west);
 	\draw[seta] (prova.east) -- (s2.west);
 	\draw[seta] (prova.east) -- (s3.west);
-	\node[rotulo, above=1mm of s1] {embaralhamento\\e alocação circular};
 
 	% Metadados do usuário
 	\node[caixa=serieC, below=12mm of selo, minimum width=70mm, align=left] (meta) {%
-		\textbf{Metadados do usuário:} chaves de cifragem e de nomeação, $P(x)$, chave da PRF e $id_F$\\
+		\textbf{Metadados do usuário:} chaves de cifragem e de nomeação, $P(x)$, $\alpha$, chave da PRF e $id_F$\\
 		(compacto) ou $P_1, \ldots, P_l$ e MACs (limitado), além de ESI, provedor e SHA-256 de cada pacote};
 	\draw[seta, dashed] (rq.south) -- (rq.south |- meta.north);
 	\draw[seta, dashed] (selo.south) -- (meta.north -| selo.south);
