@@ -18,6 +18,10 @@
 % sbc2025 sets \declname only via babel caption hooks, which may not fire under LuaLaTeX.
 \providecommand{\declname}{Declarações complementares}
 
+\usepackage{amsthm}
+\newtheorem{teorema}{Teorema}
+\renewcommand{\proofname}{Prova}
+
 \definecolor{engtitle}{rgb}{0.5,0.5,0.5}
 \definecolor{orcidlogo}{rgb}{0.37,0.48,0.13}
 \definecolor{unilogo}{rgb}{0.16, 0.26, 0.58}
@@ -55,11 +59,11 @@
 \maketitle
 
 \begin{abstract-pt}
-O HySAIL é uma camada de armazenamento em nuvem que combina códigos de apagamento e um código de autenticação de mensagem (MAC) polinomial homomórfico para oferecer provas de recuperabilidade (PoR) de dados distribuídos entre múltiplos provedores. A proposta original utiliza Online Codes, que exigem muitos blocos excedentes para recuperar arquivos divididos em blocos pequenos. Este trabalho apresenta o HyBolt, implementação do HySAIL que substitui os Online Codes pelo Raptor R10, padronizado na RFC~5053. Como o R10 opera exclusivamente sobre $GF(2)$, a substituição preserva o MAC homomórfico e a redistribuição local de blocos. Também são propostos uma auditoria ponderada, que impede o cancelamento de erros, um esquema compacto com número ilimitado de auditorias e a ocultação da estrutura do código. Os experimentos, realizados na mesma máquina para os dois códigos, mostram custo computacional equivalente, \emph{overhead} de recepção de 5 a 36 vezes menor e, com a mesma redundância, tolerância à perda de 14\% dos pacotes de cada bloco do arquivo com o R10, enquanto os Online Codes não toleram com segurança a perda de nenhum pacote.
+O HySAIL é uma camada de armazenamento em nuvem que combina códigos de apagamento e um código de autenticação de mensagem (MAC) polinomial homomórfico para oferecer provas de recuperabilidade (PoR) de dados distribuídos entre múltiplos provedores. A proposta original utiliza Online Codes, que exigem muitos blocos excedentes para recuperar arquivos divididos em blocos pequenos. Este trabalho apresenta o HyBolt, implementação do HySAIL que substitui os Online Codes pelo Raptor R10, padronizado na RFC~5053. Como o R10 opera exclusivamente sobre $GF(2)$, a substituição preserva o MAC homomórfico e a redistribuição local de blocos. Também são propostas uma auditoria ponderada, que impede o cancelamento de erros, e a ocultação da estrutura do código, e a segurança do esquema é demonstrada, como no HySAIL, por teoremas de integridade e disponibilidade. Os experimentos, realizados na mesma máquina para os dois códigos, mostram custo computacional equivalente, \emph{overhead} de recepção de 5 a 36 vezes menor e, com a mesma redundância, tolerância à perda de 14\% dos pacotes de cada bloco do arquivo com o R10, enquanto os Online Codes não toleram com segurança a perda de nenhum pacote.
 \end{abstract-pt}
 
 \begin{abstract-en}
-HySAIL is a cloud storage layer that combines erasure codes with a homomorphic polynomial message authentication code (MAC) to provide proofs of retrievability (PoR) for data spread across multiple providers. Its original design uses Online Codes, which require many extra blocks to recover files split into small blocks. This work presents HyBolt, a HySAIL implementation that replaces Online Codes with Raptor R10, standardized in RFC~5053. Since R10 operates solely over $GF(2)$, the replacement preserves the homomorphic MAC and the local redistribution of blocks. We also propose a weighted audit that prevents error cancellation, a compact scheme with an unbounded number of audits, and hiding of the code structure. Experiments run on the same machine for both codes show equivalent computational cost, a reception overhead 5 to 36 times lower and, under the same redundancy, tolerance to the loss of 14\% of the packets of each file block with R10, whereas Online Codes cannot safely tolerate the loss of any packet.
+HySAIL is a cloud storage layer that combines erasure codes with a homomorphic polynomial message authentication code (MAC) to provide proofs of retrievability (PoR) for data spread across multiple providers. Its original design uses Online Codes, which require many extra blocks to recover files split into small blocks. This work presents HyBolt, a HySAIL implementation that replaces Online Codes with Raptor R10, standardized in RFC~5053. Since R10 operates solely over $GF(2)$, the replacement preserves the homomorphic MAC and the local redistribution of blocks. We also propose a weighted audit that prevents error cancellation and hiding of the code structure, and, as in HySAIL, prove the scheme's security through integrity and availability theorems. Experiments run on the same machine for both codes show equivalent computational cost, a reception overhead 5 to 36 times lower and, under the same redundancy, tolerance to the loss of 14\% of the packets of each file block with R10, whereas Online Codes cannot safely tolerate the loss of any packet.
 \end{abstract-en}
 
 \begin{pchaves}
@@ -89,8 +93,8 @@ O HySAIL \citep{amaral2019hysail} é um protocolo de PoR que codifica o arquivo 
 Este trabalho avalia a substituição dos Online Codes pelo Raptor R10, padronizado na RFC~5053 \citep{luby2007rfc5053}. As principais contribuições são as seguintes:
 \begin{itemize}
 	\item A demonstração de que o R10 preserva o MAC homomórfico e a redistribuição local do HySAIL.
-	\item A análise do uso dos polinômios de desafio e um esquema compacto em que eles nunca são revelados ao provedor, o que torna as auditorias ilimitadas.
-	\item Uma auditoria ponderada e a ocultação da estrutura do código frente aos provedores.
+	\item Uma auditoria ponderada, imune ao cancelamento de erros, e a ocultação da estrutura do código frente aos provedores.
+	\item A prova de segurança do esquema, no formato do HySAIL, com teoremas de integridade, disponibilidade e segurança.
 	\item O HyBolt, implementação de código aberto, comparada experimentalmente com os Online Codes na mesma máquina.
 \end{itemize}
 
@@ -161,52 +165,59 @@ A Figura~\ref{fig:fluxo} apresenta o fluxo de Codificação e Distribuição pro
 
 Pela Equação~\eqref{eq:suporte}, o MAC esperado de qualquer pacote, inclusive de pacotes de reparo gerados posteriormente, é obtido por $h_{\eta,j} = \bigoplus_{i \in X_\eta} h_{i,j}$. Dessa forma, o usuário continua armazenando apenas $n \cdot l$ MACs e não precisa registrar a composição de cada pacote.
 
-Na Auditoria original, o provedor responde com o XOR dos pacotes desafiados. Com essa resposta, dois pacotes alterados pelo mesmo erro $e(x)$ se anulam e a corrupção passa despercebida. Para evitar esse cancelamento no esquema limitado, o HyBolt pondera cada pacote por uma potência de $x$ sorteada a cada desafio, com expoentes distintos $k_\eta < 2^{32}$, e o provedor responde $A(x) = \left(\sum_{\eta} x^{k_\eta} c_\eta(x)\right) \bmod P_j(x)$. Como $x$ tem ordem $2^\lambda - 1$ módulo um polinômio primitivo, dois erros iguais só se anulariam se $k_a \equiv k_b \pmod{2^\lambda - 1}$, o que não ocorre para expoentes distintos menores que $2^{32}$.
+Como no HySAIL, cada rodada de Auditoria utiliza um novo polinômio $P_j$ do conjunto gerado na Codificação, até que os $l$ polinômios se esgotem. O usuário envia ao provedor $P_j$, um conjunto $Q$ de pacotes e expoentes distintos $k_\eta < 2^{32}$, sorteados a cada rodada, e o provedor responde
+\begin{equation}
+A(x) = \textstyle\left(\sum_{\eta \in Q} x^{k_\eta} c_\eta(x)\right) \bmod P_j(x),
+\label{eq:auditoria}
+\end{equation}
+que o usuário compara com $\left(\sum_{\eta \in Q} x^{k_\eta} h_{\eta,j}(x)\right) \bmod P_j(x)$. A ponderação por $x^{k_\eta}$ substitui o XOR simples do HySAIL, no qual dois pacotes alterados pelo mesmo erro se anulam. Se as respostas divergirem, os pacotes de $Q$ são verificados individualmente com o mesmo $P_j$ para localizar os corrompidos, que são então redistribuídos.
 
 \subsection{Redistribuição}
 
 Quando um pacote corrompido é identificado, ele não é reproduzido, mas substituído por um novo pacote de reparo, com identificador $t$ ainda não utilizado. O usuário expressa o suporte $X_t$ como combinação dos suportes de um subconjunto $Q$ de pacotes íntegros, por eliminação gaussiana em $GF(2)$, e o novo pacote é obtido por $c_t = \bigoplus_{q \in Q} c_q$. O \emph{chunk} nunca precisa ser decodificado, e cada reparo transfere, em média, 49 pacotes, cerca de 320~KB.
 
-\subsection{Polínômios de Desafio e Prova de Recuperabilidade}
-\label{sec:por}
-
-No HySAIL, a Auditoria envia o polinômio de desafio $P_j$ ao provedor, que responde com o resto da divisão dos pacotes desafiados por $P_j$. Após essa revelação, um provedor desonesto pode guardar apenas os restos $c_\eta \bmod P_j$, de $\lambda$ bits por pacote, descartar os dados e responder corretamente a qualquer desafio futuro com o mesmo polinômio. Cada polinômio garante a recuperabilidade, portanto, somente na primeira vez em que é utilizado. O HyBolt oferece dois esquemas, comparados na Tabela~\ref{tab:por}.
-
-No esquema limitado, que preserva o modelo do HySAIL, o polinômio continua sendo enviado ao provedor, mas cada $P_j$ é usado uma única vez. Seu índice é registrado nos metadados antes do envio, de modo que nem uma interrupção do processo leva à sua reutilização. O arquivo admite, assim, $l$ auditorias, incluindo o desafio feito a cada decodificação, e precisa ser recodificado depois disso.
-
-No esquema compacto, adotado por padrão e baseado em Shacham e Waters \citeyearpar{shacham2008compact}, o polinômio nunca é enviado. O usuário gera um polinômio primitivo secreto $P$, um multiplicador secreto $\alpha$ de grau menor que $\lambda$, uma chave $\kappa$ e um identificador $id_F$ do arquivo, e o provedor armazena, junto a cada pacote $\eta$ do \emph{chunk} $i$, a etiqueta
-\begin{equation}
-\sigma_\eta = \left(\alpha \, c_\eta\right) \bmod P + f_\kappa(id_F, i, \eta),
-\end{equation}
-em que $f_\kappa$ é uma função pseudoaleatória baseada em HMAC-SHA-256 e a soma ocorre em $GF(2)$. Na Auditoria, o usuário envia apenas os índices de um conjunto $Q$ de pacotes e coeficientes aleatórios $\nu_\eta$, polinômios de grau menor que $\lambda$. O provedor calcula, sem redução modular, $\mu = \sum_{\eta \in Q} \nu_\eta c_\eta$ e $\tau = \sum_{\eta \in Q} \nu_\eta \sigma_\eta$, e o usuário aceita a resposta se
-\begin{equation}
-\textstyle\left(\tau + \alpha \mu + \sum_{\eta \in Q} \nu_\eta f_\kappa(id_F, i_\eta, \eta)\right) \bmod P = 0.
-\end{equation}
-
-A segurança do esquema apoia-se em cinco argumentos. Primeiro, a verificação é correta, pois a redução módulo $P$ preserva somas e produtos, o que leva a $\tau \equiv \alpha \mu + \sum \nu_\eta f_\kappa \pmod P$. Segundo, as etiquetas não revelam $P$ nem $\alpha$, pois a máscara pseudoaleatória as torna indistinguíveis de valores aleatórios para quem não conhece $\kappa$, e o vínculo com $(id_F, i, \eta)$ impede reutilizá-las em outras posições ou arquivos. Terceiro, o multiplicador $\alpha$ é indispensável. Sem ele, o provedor poderia mover os $\lambda$ coeficientes de menor grau de cada pacote, que a redução módulo $P$ não altera, para a etiqueta, que continuaria válida, falha que confirmamos experimentalmente. Quarto, uma resposta incorreta só é aceita se a diferença em relação à resposta correta for divisível por $P$. Um polinômio de grau $d$ possui no máximo $d/\lambda$ fatores irredutíveis de grau $\lambda$, entre os cerca de $2^\lambda/\lambda$ existentes, de modo que essa probabilidade é da ordem de $d/2^\lambda$, cerca de $2^{-111}$ para pacotes de 6.500 bytes. Como $P$ nunca é revelado, o limite vale a cada auditoria, e a probabilidade acumulada em $N$ auditorias é de no máximo $N \cdot 2^{-111}$. Quinto, os coeficientes $\nu_\eta$, sorteados a cada desafio, impedem que erros iguais em pacotes distintos se anulem. A garantia de extração, isto é, de que respostas aceitas permitem reconstruir os pacotes, segue o argumento de Shacham e Waters e ainda deve ser formalizada para o MAC polinomial.
-
-\begin{table}[t]
-	\centering
-	\caption{Polinômios de desafio e propriedades da prova de recuperabilidade.}
-	\label{tab:por}
-	\footnotesize
-	\setlength{\tabcolsep}{3pt}
-	\begin{tabular}{@{}llll@{}}
-		\toprule
-		\textbf{Aspecto} & \textbf{HySAIL} & \textbf{Limitado} & \textbf{Compacto} \\
-		\midrule
-		Polinômio enviado & sim & sim, uso único & não \\
-		Auditorias seguras & $l$ & $l$ & ilimitadas \\
-		Material de prova do usuário & $n \cdot l$ MACs & $n \cdot l$ MACs & chaves (80 bytes) \\
-		Resposta & $\lambda$ bits & $\lambda$ bits & $\approx$ 1 pacote \\
-		Cancelamento de erros & possível & impedido & impedido \\
-		\bottomrule
-	\end{tabular}
-\end{table}
-
 \subsection{Ocultação da Estrutura}
 
 Como o R10 não é MDS e sua estrutura é pública, um adversário poderia corromper os sete pacotes que contêm um mesmo símbolo de origem e tornar o \emph{chunk} irrecuperável, contra os $r + 1 = 26$ que um código MDS exigiria. Para impedir esse ataque, cada pacote é cifrado com um fluxo de chave SHAKE-256 e armazenado sob um nome pseudoaleatório, seguindo \citet{juels2007pors} e \citet{bowers2009proofs}. Como a cifragem também é um XOR com um fluxo de chave $k_\eta$, o MAC esperado do pacote cifrado continua derivável, como $h_{\eta,j} \oplus (k_\eta \bmod P_j)$.
+
+\section{Prova de Segurança}
+\label{sec:por}
+
+Seguindo o HySAIL \citep{amaral2019hysail}, a segurança do HyBolt é analisada quanto à integridade, mostrando que forjar a resposta de uma Auditoria tem probabilidade desprezível, e quanto à disponibilidade, mostrando quando um \emph{chunk} permanece recuperável.
+
+\paragraph{Modelo adversarial.} Adota-se o Modelo de Corrupção Limitada do HySAIL. O adversário pode acessar todos os $N$ provedores, mas, em cada rodada, corrompe no máximo uma fração $\beta$ dos pacotes armazenados. Cada rodada tem três etapas: o adversário corrompe os pacotes, o usuário realiza a Auditoria com um novo polinômio $P_j$ e, se detectar corrupção, executa a Redistribuição. Os provedores respondem a partir dos pacotes que armazenam, e, com a ocultação da estrutura, o adversário não distingue os \emph{chunks} e corrompe pacotes escolhidos uniformemente.
+
+\begin{teorema}[Integridade]
+Seja $P$ sorteado uniformemente entre os polinômios primitivos de grau $\lambda$ sobre $GF(2)$. Para quaisquer polinômios distintos $a(x)$ e $b(x)$ de grau menor que $D$,
+\begin{equation}
+\Pr\left[a(x) \bmod P(x) = b(x) \bmod P(x)\right] \le \frac{D}{2^\lambda - 2}.
+\label{eq:integridade}
+\end{equation}
+\end{teorema}
+
+\begin{proof}
+Os restos coincidem se, e somente se, $P$ divide $a - b$, polinômio não nulo de grau menor que $D$. Por ser irredutível, $P$ seria um dos fatores irredutíveis de grau $\lambda$ de $a - b$, que são no máximo $D/\lambda$. Como $2^{127} - 1$ é primo, existem $(2^\lambda - 2)/\lambda$ polinômios primitivos de grau $\lambda = 127$, e a razão entre as duas quantidades resulta na Equação~\eqref{eq:integridade}.
+\end{proof}
+
+Na Auditoria, se os pacotes de $Q$ foram alterados pelos erros $e_\eta$, a resposta é aceita somente se $P_j$ dividir $E(x) = \sum_{\eta \in Q} x^{k_\eta} e_\eta(x)$, de grau menor que $D = B + 2^{32}$, em que $B$ é o tamanho do pacote em bits. Pelo Teorema~1, essa probabilidade é de no máximo $2^{-95}$ para pacotes de 6.500 bytes, e de $2^{-111}$ na verificação individual de um pacote, com $D = B$. A ponderação garante que $E$ não se anule para dois erros iguais $e \not\equiv 0 \pmod{P_j}$, pois $(x^{k_a} + x^{k_b})\,e \equiv 0$ exigiria $x^{k_a - k_b} \equiv 1 \pmod{P_j}$, o que é impossível, já que $x$ tem ordem $2^\lambda - 1$ módulo um polinômio primitivo e $0 < |k_a - k_b| < 2^{32}$.
+
+\begin{teorema}[Disponibilidade]
+Um \emph{chunk} cujos pacotes íntegros têm identificadores $R$ é recuperável se, e somente se, os suportes $\{X_\eta : \eta \in R\}$, vistos como vetores de $GF(2)^K$, têm posto $K$.
+\end{teorema}
+
+\begin{proof}
+Pela Equação~\eqref{eq:suporte}, cada pacote íntegro fornece uma equação linear sobre os $K$ símbolos de origem. Se o posto for $K$, o sistema tem solução única, obtida por eliminação gaussiana. Se for menor, existe um vetor não nulo ortogonal a todos os suportes, e duas mensagens que diferem por ele produzem os mesmos pacotes, de modo que nenhum decodificador as distingue.
+\end{proof}
+
+Como os suportes dependem apenas de $K$ e dos identificadores, a probabilidade $p_R(h)$ de um \emph{chunk} se tornar irrecuperável após a corrupção de $h$ pacotes é calculada exatamente, sem os dados, e é apresentada na Seção~\ref{sec:resultados}.
+
+\begin{teorema}[Segurança]
+Em cada rodada, a probabilidade de o HyBolt aceitar dados corrompidos ou perder um \emph{chunk} com $h$ pacotes corrompidos é de no máximo $2^{-95} + p_R(h)$.
+\end{teorema}
+
+\begin{proof}
+A falha ocorre se uma resposta forjada for aceita ou se o \emph{chunk} se tornar irrecuperável, e a desigualdade da união limita sua probabilidade pela soma dos limites dos Teoremas~1 e~2, sem supor independência entre os eventos.
+\end{proof}
 
 \section{Resultados Experimentais}
 \label{sec:resultados}
@@ -246,14 +257,14 @@ Com 5,1\% dos pacotes de um provedor corrompidos, uma amostra de 50 pacotes dete
 \section{Conclusão}
 \label{sec:conclusao}
 
-O HyBolt mostra que a substituição dos Online Codes pelo Raptor R10 preserva o MAC homomórfico e a Redistribuição local do HySAIL com o mesmo custo computacional, reduz o \emph{overhead} de recepção de 5 a 36 vezes e eleva a tolerância a perdas de cada \emph{chunk} de nenhum pacote para 14\%. Quanto à prova de recuperabilidade, o esquema limitado mantém o envio dos polinômios de desafio ao provedor, mas impede sua reutilização, enquanto o esquema compacto nunca revela o polinômio e, por isso, admite auditorias ilimitadas com probabilidade de falsificação desprezível.
+O HyBolt mostra que a substituição dos Online Codes pelo Raptor R10 preserva o MAC homomórfico e a Redistribuição local do HySAIL com o mesmo custo computacional, reduz o \emph{overhead} de recepção de 5 a 36 vezes e eleva a tolerância a perdas de cada \emph{chunk} de nenhum pacote para 14\%. Quanto à prova de recuperabilidade, os teoremas mostram que forjar uma resposta da Auditoria tem probabilidade de no máximo $2^{-95}$ e que a recuperação de cada \emph{chunk} é decidida pelo posto dos suportes dos pacotes íntegros.
 
-Como limitação, a garantia de extração do esquema compacto ainda precisa ser formalizada, o que se soma, como trabalhos futuros, à verificação pública por auditores delegados \citep{armknecht2021outsourcing} e à avaliação em provedores de nuvem reais.
+Como trabalhos futuros, destacam-se a verificação pública por auditores delegados \citep{armknecht2021outsourcing} e a avaliação em provedores de nuvem reais.
 
 \begin{declarations}
 
 \begin{contributions}
-O primeiro autor implementou o HyBolt, e o segundo supervisionou a pesquisa.
+O primeiro autor implementou o HyBolt e o segundo orientou a pesquisa.
 \end{contributions}
 
 \begin{interests}
@@ -265,7 +276,7 @@ O código e os dados estão disponíveis no repositório do projeto.
 \end{materials}
 
 \begin{furtherinformation}
-Ferramentas de IA generativa apoiaram a redação, revisada pelos autores.
+IA generativa apoiou a redação, revisada pelos autores.
 \end{furtherinformation}
 \end{declarations}
 
