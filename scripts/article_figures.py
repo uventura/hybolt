@@ -90,7 +90,7 @@ def plot_codec_loss(rows, figure_dir):
                 rf"$\varepsilon$ = {decimal(row['redundancy'])} ({total})"
             ),
         )
-    axis.set_xlabel("pacotes perdidos no chunk (%)")
+    axis.set_xlabel("blocos perdidos no chunk (%)")
     axis.set_ylabel("recuperados (%)")
     axis.set_xlim(0, 40)
     figure.legend(ncol=2, loc="outside lower center")
@@ -116,7 +116,7 @@ def plot_attack(attack, figure_dir):
             label=f"{label}, sem ocultação",
         )
     axis.set_xscale("log")
-    axis.set_xlabel("pacotes corrompidos (% do arquivo)")
+    axis.set_xlabel("blocos corrompidos (% do arquivo)")
     axis.set_ylabel("perda (%)")
     handles, labels = axis.get_legend_handles_labels()
     order = [0, 2, 4, 1, 3, 5]
