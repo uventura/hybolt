@@ -156,14 +156,14 @@ O suporte é determinado apenas por $K$ e $\eta$. O R10 não é MDS: a recupera�
 \section{Proposta: HyBolt}
 \label{sec:proposta}
 
-A Figura~\ref{fig:fluxo} apresenta o fluxo de Codificação e Distribuição proposto. O arquivo é dividido em \emph{chunks}, isto é, partes independentes de $K = 100$ símbolos de origem de 6.500 bytes. Cada \emph{chunk} é codificado com o R10, que gera os $K$ símbolos de origem e $r = \lceil \varepsilon K \rceil$ símbolos de reparo, com redundância $\varepsilon = 0{,}25$ por padrão. Cada um desses símbolos codificados é armazenado como um bloco: é cifrado, recebe o material de prova e é enviado a um dos provedores. O valor $K = 100$ equilibra a tolerância a perdas e o volume transferido em cada reparo.
+A Figura~\ref{fig:fluxo} apresenta o fluxo de Codificação e Distribuição proposto. O arquivo é dividido em \emph{chunks}, isto é, partes independentes de $K = 100$ símbolos de origem de 6.500 bytes. Cada \emph{chunk} é codificado com o R10, que gera os $K$ símbolos de origem e $r = \lceil \varepsilon K \rceil$ símbolos de reparo, com redundância $\varepsilon = 0{,}25$ por padrão. Cada um desses símbolos codificados é armazenado como um bloco, que é cifrado e enviado a um dos provedores. O usuário, por sua vez, guarda apenas os MACs $h_{i,j}$ dos símbolos de origem, usados na Auditoria, e o \emph{hash} SHA-256 de cada bloco, usado para conferi-lo quando é transferido. O valor $K = 100$ equilibra a tolerância a perdas e o volume transferido em cada reparo.
 
 \begin{figure*}[t]
 	\centering
 	\begin{adjustbox}{max width=0.72\textwidth}
 		\input{figures/tikz/hybolt_fluxo}
 	\end{adjustbox}
-	\caption{Fluxo de Codificação e Distribuição do HyBolt. Cada \emph{chunk} é codificado com o R10, cada bloco é cifrado e recebe o material de prova, e os blocos são distribuídos entre os provedores, enquanto o usuário mantém apenas os metadados.}
+	\caption{Fluxo de Codificação e Distribuição do HyBolt. Cada \emph{chunk} é codificado com o R10, cada bloco é cifrado e enviado a um dos provedores, e o usuário mantém apenas os metadados, com os MACs dos símbolos de origem e o \emph{hash} de cada bloco.}
 	\label{fig:fluxo}
 \end{figure*}
 
