@@ -169,7 +169,14 @@ que o usuário compara com $\left(\bigoplus_{\eta \in Q} x^{k_\eta} h_{\eta,j}(x
 
 \subsection{Redistribuição}
 
-Quando um pacote corrompido é identificado, ele não é reproduzido, mas substituído por um novo pacote de reparo, com identificador $t$ ainda não utilizado. O usuário expressa o suporte $X_t$ como combinação dos suportes de um subconjunto $Q$ de pacotes íntegros, por eliminação gaussiana em $GF(2)$, e o novo pacote é obtido por $c_t = \bigoplus_{q \in Q} c_q$. O \emph{chunk} nunca precisa ser decodificado, e cada reparo transfere, em média, 49 pacotes, cerca de 320~KB.
+Quando a Auditoria identifica um pacote corrompido, o HyBolt não reconstrói esse mesmo pacote. Em vez disso, gera um novo pacote de reparo para o \emph{chunk}, com um identificador $t$ ainda não utilizado, e o envia a outro provedor. O procedimento tem três passos:
+\begin{enumerate}
+	\item O usuário calcula o suporte $X_t$ do novo pacote, que depende apenas de $K$ e $t$.
+	\item Usando somente os metadados, o usuário encontra, por eliminação gaussiana em $GF(2)$, um conjunto $Q$ de pacotes íntegros cujos suportes, combinados por XOR, resultam em $X_t$, dando preferência aos pacotes que combinam poucos símbolos, como os próprios símbolos de origem.
+	\item O usuário transfere apenas os pacotes de $Q$, confere e decifra cada um e obtém o novo pacote por $c_t = \bigoplus_{q \in Q} c_q$.
+\end{enumerate}
+
+Como exemplo ilustrativo, considere um \emph{chunk} com $K = 4$ símbolos de origem, armazenado nos pacotes $c_0 = d_1$, $c_1 = d_2$, $c_2 = d_3$, $c_3 = d_4$, $c_4 = d_1 \oplus d_2 \oplus d_4$ e $c_5 = d_2 \oplus d_3$, e suponha que $c_1$ foi corrompido. Se o novo pacote, de identificador $t = 6$, tiver suporte $X_6 = \{d_2, d_4\}$, a eliminação gaussiana encontra $X_6 = X_5 \oplus X_2 \oplus X_3$, pois $(d_2 \oplus d_3) \oplus d_3 \oplus d_4 = d_2 \oplus d_4$. Assim, $c_6 = c_5 \oplus c_2 \oplus c_3$ é obtido sem usar o pacote corrompido $c_1$, embora $d_2$ faça parte do seu suporte, e sem decodificar o \emph{chunk}. Com o \emph{chunk} padrão de $K = 100$ símbolos, cada reparo transfere, em média, 49 pacotes, cerca de 320~KB.
 
 \subsection{Ocultação da Estrutura}
 
