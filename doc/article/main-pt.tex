@@ -17,6 +17,7 @@
 
 % sbc2025 sets \declname only via babel caption hooks, which may not fire under LuaLaTeX.
 \providecommand{\declname}{Declarações complementares}
+\raggedbottom
 
 \definecolor{engtitle}{rgb}{0.5,0.5,0.5}
 \definecolor{orcidlogo}{rgb}{0.37,0.48,0.13}
@@ -81,6 +82,8 @@ Proof of retrievability, Fountain codes, Raptor R10, Cloud storage, HySAIL
 
 \section{Introdução}
 \label{sec:intro}
+
+A produção de dados cresce com a digitalização de atividades cotidianas e científicas. Em 2021, o Amazon S3 acumulava mais de 100 trilhões de objetos, cerca de 500~EB, e o tráfego de vídeo da Netflix alcançou aproximadamente 51~EB \citep{frontiersbigdata}. Na ciência, os experimentos do \emph{Large Hadron Collider} gravam cerca de 160~PB por ano, mesmo após filtrar a maior parte dos dados brutos \citep{frontiersbigdata}. Esse volume também sustenta a inteligência artificial, e a quantidade de dados usada para treinar modelos de ponta aumentou cerca de 30.000 vezes desde 2008 \citep{energyandai}. Grande parte desses dados é armazenada em nuvem, sob a custódia de terceiros.
 
 O armazenamento em nuvem oferece redução de custos e elasticidade, mas o usuário abre mão do controle físico sobre seus dados. As provas de recuperabilidade (\emph{Proofs of Retrievability}, PoR) \citep{juels2007pors,shacham2008compact} permitem ao usuário verificar que um arquivo permanece íntegro e recuperável sem transferi-lo por completo.
 
