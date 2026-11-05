@@ -147,12 +147,12 @@ Os Online Codes \citep{maymounkov2002online} e os Raptor Codes combinam uma pré
 	\end{tabular}
 \end{table}
 
-No R10, a mensagem é dividida em $K$ símbolos de origem $d_1, \ldots, d_K$, trechos de mesmo tamanho que, no HyBolt, compõem um \emph{chunk} do arquivo. O código é sistemático, ou seja, os $K$ primeiros símbolos codificados, $c_0, \ldots, c_{K-1}$, são os próprios símbolos de origem, e os seguintes são símbolos de reparo. Todas as suas operações ocorrem em $GF(2)$, de modo que cada símbolo codificado $c_\eta$, identificado por um número $\eta$, é o XOR dos símbolos de origem cujos índices pertencem a um conjunto $X_\eta \subseteq \{1, \ldots, K\}$, aqui denominado suporte:
+No R10, a mensagem é dividida em $K$ símbolos de origem $d_1, \ldots, d_K$, trechos de mesmo tamanho que, no HyBolt, compõem um \emph{chunk} do arquivo. O código é sistemático, ou seja, os $K$ primeiros símbolos codificados, $c_0, \ldots, c_{K-1}$, são os próprios símbolos de origem, e os seguintes são símbolos de reparo. Todas as suas operações ocorrem em $GF(2)$, de modo que cada símbolo codificado $c_\eta$, identificado por um número $\eta$, é o XOR dos símbolos de origem cujos rótulos pertencem a um conjunto $x_\eta \subseteq \{1, \ldots, K\}$, como no par $\langle i, x_i \rangle$ do HySAIL \citep{amaral2019hysail}:
 \begin{equation}
-c_\eta = \textstyle\bigoplus_{i \in X_\eta} d_i .
-\label{eq:suporte}
+c_\eta = \textstyle\bigoplus_{i \in x_\eta} d_i .
+\label{eq:rotulos}
 \end{equation}
-O suporte é determinado apenas por $K$ e $\eta$. No R10, a recuperação é possível se, e somente se, os suportes dos símbolos recebidos, vistos como vetores de $GF(2)^K$, tiverem posto $K$, o que em geral exige alguns símbolos além de $K$.
+Os rótulos $x_\eta$ são determinados apenas por $K$ e $\eta$. No R10, a recuperação é possível se, e somente se, os conjuntos de rótulos dos símbolos recebidos, vistos como vetores de $GF(2)^K$, tiverem posto $K$, o que em geral exige alguns símbolos além de $K$.
 
 \section{Proposta: HyBolt}
 \label{sec:proposta}
@@ -170,7 +170,7 @@ A Figura~\ref{fig:fluxo} apresenta o fluxo de Codificação e Distribuição pro
 
 \subsection{Integridade e Auditoria}
 
-Pela Equação~\eqref{eq:suporte}, o MAC esperado de qualquer bloco, inclusive de blocos de reparo gerados posteriormente, é obtido por $h_{\eta,j} = \bigoplus_{i \in X_\eta} h_{i,j}$. Dessa forma, o usuário continua armazenando apenas $n \cdot l$ MACs e não precisa registrar a composição de cada bloco.
+Pela Equação~\eqref{eq:rotulos}, o MAC esperado de qualquer bloco, inclusive de blocos de reparo gerados posteriormente, é obtido por $h_{\eta,j} = \bigoplus_{i \in x_\eta} h_{i,j}$. Dessa forma, o usuário continua armazenando apenas $n \cdot l$ MACs e, diferentemente do HySAIL, não precisa registrar o par $\langle i, x_i \rangle$ de cada bloco.
 
 A Auditoria segue o Algoritmo~2 do HySAIL \citep{amaral2019hysail}. Em cada rodada:
 \begin{enumerate}
@@ -189,12 +189,12 @@ Se os valores divergirem, os blocos de $Q$ são verificados individualmente com 
 
 Quando a Auditoria identifica um bloco corrompido, o HyBolt não reconstrói esse mesmo bloco. Em vez disso, gera um novo bloco de reparo para o \emph{chunk}, com um identificador $t$ ainda não utilizado, e o envia a outro provedor. O procedimento tem três passos:
 \begin{enumerate}
-	\item O usuário calcula o suporte $X_t$ do novo bloco, que depende apenas de $K$ e $t$.
-	\item Usando somente os metadados, o usuário encontra, por eliminação gaussiana em $GF(2)$, um conjunto $Q$ de blocos íntegros cujos suportes, combinados por XOR, resultam em $X_t$, dando preferência aos blocos que combinam poucos símbolos, como os próprios símbolos de origem.
+	\item O usuário calcula os rótulos $x_t$ do novo bloco, que dependem apenas de $K$ e $t$.
+	\item Usando somente os metadados, o usuário encontra, por eliminação gaussiana em $GF(2)$, um conjunto $Q$ de blocos íntegros cujos rótulos, combinados por XOR, resultam em $x_t$, dando preferência aos blocos que combinam poucos símbolos, como os próprios símbolos de origem.
 	\item O usuário transfere apenas os blocos de $Q$, confere cada um com seu \emph{hash} e obtém o novo bloco por $c_t = \bigoplus_{q \in Q} c_q$.
 \end{enumerate}
 
-Como exemplo ilustrativo, considere um \emph{chunk} com $K = 4$ símbolos de origem, armazenado nos blocos $c_0 = d_1$, $c_1 = d_2$, $c_2 = d_3$, $c_3 = d_4$, $c_4 = d_1 \oplus d_2 \oplus d_4$ e $c_5 = d_2 \oplus d_3$, e suponha que $c_1$ foi corrompido. Se o novo bloco, de identificador $t = 6$, tiver suporte $X_6 = \{d_2, d_4\}$, a eliminação gaussiana encontra $X_6 = X_5 \oplus X_2 \oplus X_3$, pois $(d_2 \oplus d_3) \oplus d_3 \oplus d_4 = d_2 \oplus d_4$. Assim, $c_6 = c_5 \oplus c_2 \oplus c_3$ é obtido sem usar o bloco corrompido $c_1$, embora $d_2$ faça parte do seu suporte, e sem decodificar o \emph{chunk}. Com o \emph{chunk} padrão de $K = 100$ símbolos, cada reparo transfere, em média, 49 blocos, cerca de 320~KB.
+Como exemplo ilustrativo, considere um \emph{chunk} com $K = 4$ símbolos de origem, armazenado nos blocos $c_0 = d_1$, $c_1 = d_2$, $c_2 = d_3$, $c_3 = d_4$, $c_4 = d_1 \oplus d_2 \oplus d_4$ e $c_5 = d_2 \oplus d_3$, e suponha que $c_1$ foi corrompido. Se o novo bloco, de identificador $t = 6$, tiver rótulos $x_6 = \{2, 4\}$, a eliminação gaussiana encontra $x_6 = x_5 \oplus x_2 \oplus x_3 = \{2, 3\} \oplus \{3\} \oplus \{4\}$, pois $(d_2 \oplus d_3) \oplus d_3 \oplus d_4 = d_2 \oplus d_4$. Assim, $c_6 = c_5 \oplus c_2 \oplus c_3$ é obtido sem usar o bloco corrompido $c_1$, embora $d_2$ componha $c_6$, e sem decodificar o \emph{chunk}. Com o \emph{chunk} padrão de $K = 100$ símbolos, cada reparo transfere, em média, 49 blocos, cerca de 320~KB.
 
 \section{Resultados Experimentais}
 \label{sec:resultados}
