@@ -11,10 +11,8 @@
 	% Codificação de um chunk
 	\node[caixa=serieD, right=of ch0, minimum width=22mm, yshift=-5mm, minimum height=14mm] (rq) {Raptor R10\\$K$ origem\\$+\ r = \lceil \varepsilon K \rceil$};
 	\draw[seta] (ch0.east) -- (rq.west |- ch0.east);
-	\node[caixa=serieE, right=of rq, minimum width=24mm, minimum height=14mm] (selo) {Cifragem\\SHAKE-256\\nome HMAC};
-	\node[caixa=serieB, right=of selo, minimum width=24mm, minimum height=14mm] (prova) {MACs $h_{i,j}$\\de $P_1, \ldots, P_l$\\+ SHA-256};
-	\draw[seta] (rq) -- node[rotulo, below] {$K{+}r$} (selo);
-	\draw[seta] (selo) -- (prova);
+	\node[caixa=serieB, right=of rq, minimum width=24mm, minimum height=14mm] (prova) {MACs $h_{i,j}$\\de $P_1, \ldots, P_l$\\+ SHA-256};
+	\draw[seta] (rq) -- node[rotulo, below] {$K{+}r$} (prova);
 
 	% Provedores
 	\node[servidor, right=12mm of prova, yshift=14mm] (s1) {$S_1$};
@@ -25,10 +23,9 @@
 	\draw[seta] (prova.east) -- (s3.west);
 
 	% Metadados do usuário
-	\node[caixa=serieC, below=12mm of selo, minimum width=70mm, align=left] (meta) {%
-		\textbf{Metadados do usuário:} chaves de cifragem e de nomeação, $P_1, \ldots, P_l$ e MACs $h_{i,j}$,\\
+	\node[caixa=serieC, anchor=north, minimum width=60mm, align=left] (meta) at ($(rq.south)!0.5!(prova.south) + (0,-12mm)$) {%
+		\textbf{Metadados do usuário:} $P_1, \ldots, P_l$ e MACs $h_{i,j}$,\\
 		além de ESI, provedor e SHA-256 de cada bloco};
 	\draw[seta, dashed] (rq.south) -- (rq.south |- meta.north);
-	\draw[seta, dashed] (selo.south) -- (meta.north -| selo.south);
 	\draw[seta, dashed] (prova.south) -- (prova.south |- meta.north);
 \end{tikzpicture}

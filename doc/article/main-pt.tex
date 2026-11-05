@@ -56,11 +56,11 @@
 \maketitle
 
 \begin{abstract-pt}
-O HySAIL é uma camada de armazenamento em nuvem que combina códigos de apagamento e um código de autenticação de mensagem (MAC) polinomial homomórfico para oferecer provas de recuperabilidade (PoR) de dados distribuídos entre múltiplos provedores. A proposta original utiliza Online Codes, que exigem muitos blocos excedentes para recuperar arquivos divididos em poucos blocos. Este trabalho apresenta o HyBolt, implementação do HySAIL que substitui os Online Codes pelo Raptor R10, padronizado na RFC~5053. Como o R10 opera exclusivamente sobre $GF(2)$, a substituição preserva o MAC homomórfico e a redistribuição local de blocos. Também é proposta a ocultação da estrutura do código frente aos provedores. Os experimentos, realizados na mesma máquina para os dois códigos, mostram custo computacional equivalente, \emph{overhead} de recepção de 5 a 36 vezes menor e, com a mesma redundância, tolerância à perda de 14\% dos blocos codificados de cada parte do arquivo com o R10, enquanto os Online Codes não toleram com segurança a perda de nenhum bloco.
+O HySAIL é uma camada de armazenamento em nuvem que combina códigos de apagamento e um código de autenticação de mensagem (MAC) polinomial homomórfico para oferecer provas de recuperabilidade (PoR) de dados distribuídos entre múltiplos provedores. A proposta original utiliza Online Codes, que exigem muitos blocos excedentes para recuperar arquivos divididos em poucos blocos. Este trabalho apresenta o HyBolt, implementação do HySAIL que substitui os Online Codes pelo Raptor R10, padronizado na RFC~5053. Como o R10 opera exclusivamente sobre $GF(2)$, a substituição preserva o MAC homomórfico e a redistribuição local de blocos. Os experimentos, realizados nas mesmas condições experimentais para os dois códigos, mostram custo computacional equivalente, \emph{overhead} de recepção de 5 a 36 vezes menor e, com a mesma redundância, tolerância à perda de 14\% dos blocos codificados de cada parte do arquivo com o R10, enquanto os Online Codes não toleram com segurança a perda de nenhum bloco.
 \end{abstract-pt}
 
 \begin{abstract-en}
-HySAIL is a cloud storage layer that combines erasure codes with a homomorphic polynomial message authentication code (MAC) to provide proofs of retrievability (PoR) for data spread across multiple providers. Its original design uses Online Codes, which require many extra blocks to recover files split into few blocks. This work presents HyBolt, a HySAIL implementation that replaces Online Codes with Raptor R10, standardized in RFC~5053. Since R10 operates solely over $GF(2)$, the replacement preserves the homomorphic MAC and the local redistribution of blocks. We also propose hiding the code structure from the providers. Experiments run on the same machine for both codes show equivalent computational cost, a reception overhead 5 to 36 times lower and, under the same redundancy, tolerance to the loss of 14\% of the encoded blocks of each file chunk with R10, whereas Online Codes cannot safely tolerate the loss of any block.
+HySAIL is a cloud storage layer that combines erasure codes with a homomorphic polynomial message authentication code (MAC) to provide proofs of retrievability (PoR) for data spread across multiple providers. Its original design uses Online Codes, which require many extra blocks to recover files split into few blocks. This work presents HyBolt, a HySAIL implementation that replaces Online Codes with Raptor R10, standardized in RFC~5053. Since R10 operates solely over $GF(2)$, the replacement preserves the homomorphic MAC and the local redistribution of blocks. Experiments run under the same experimental conditions for both codes show equivalent computational cost, a reception overhead 5 to 36 times lower and, under the same redundancy, tolerance to the loss of 14\% of the encoded blocks of each file chunk with R10, whereas Online Codes cannot safely tolerate the loss of any block.
 \end{abstract-en}
 
 \begin{pchaves}
@@ -92,8 +92,7 @@ O HySAIL \citep{amaral2019hysail} é um protocolo de PoR que codifica o arquivo 
 Este trabalho avalia a substituição dos Online Codes pelo Raptor R10, padronizado na RFC~5053 \citep{luby2007rfc5053}, que permite dividir o arquivo em partes independentes com poucos blocos excedentes. As principais contribuições são as seguintes:
 \begin{itemize}
 	\item A substituição dos Online Codes pelo R10 no HySAIL, mostrando que ela preserva o MAC homomórfico, a Auditoria e a redistribuição local de blocos.
-	\item A ocultação da estrutura do código frente aos provedores.
-	\item O HyBolt, implementação de código aberto, comparada experimentalmente com os Online Codes na mesma máquina.
+	\item O HyBolt, implementação de código aberto, comparada experimentalmente com os Online Codes sob as mesmas condições experimentais.
 \end{itemize}
 
 O restante do artigo apresenta os trabalhos relacionados (Seção~\ref{sec:relacionados}), a fundamentação (Seção~\ref{sec:fundamentacao}), a proposta (Seção~\ref{sec:proposta}), os resultados (Seção~\ref{sec:resultados}) e a conclusão (Seção~\ref{sec:conclusao}).
@@ -158,14 +157,14 @@ O suporte é determinado apenas por $K$ e $\eta$. No R10, a recuperação é pos
 \section{Proposta: HyBolt}
 \label{sec:proposta}
 
-A Figura~\ref{fig:fluxo} apresenta o fluxo de Codificação e Distribuição proposto. O arquivo é dividido em \emph{chunks}, isto é, partes independentes de $K = 100$ símbolos de origem de 6.500 bytes. Cada \emph{chunk} é codificado com o R10, que gera os $K$ símbolos de origem e $r = \lceil \varepsilon K \rceil$ símbolos de reparo, com redundância $\varepsilon = 0{,}25$ por padrão. Cada um desses símbolos codificados é armazenado como um bloco, que é cifrado e enviado a um dos provedores. O usuário, por sua vez, guarda apenas os MACs $h_{i,j}$ dos símbolos de origem, usados na Auditoria, e o \emph{hash} SHA-256 de cada bloco, usado para conferi-lo quando é transferido. O valor $K = 100$ equilibra a tolerância a perdas e o volume transferido em cada reparo.
+A Figura~\ref{fig:fluxo} apresenta o fluxo de Codificação e Distribuição proposto. O arquivo é dividido em \emph{chunks}, isto é, partes independentes de $K = 100$ símbolos de origem de 6.500 bytes. Cada \emph{chunk} é codificado com o R10, que gera os $K$ símbolos de origem e $r = \lceil \varepsilon K \rceil$ símbolos de reparo, com redundância $\varepsilon = 0{,}25$ por padrão. Cada um desses símbolos codificados é armazenado como um bloco, que é enviado a um dos provedores. O usuário, por sua vez, guarda apenas os MACs $h_{i,j}$ dos símbolos de origem, usados na Auditoria, e o \emph{hash} SHA-256 de cada bloco, usado para conferi-lo quando é transferido. O valor $K = 100$ equilibra a tolerância a perdas e o volume transferido em cada reparo.
 
 \begin{figure*}[t]
 	\centering
 	\begin{adjustbox}{max width=0.72\textwidth}
 		\input{figures/tikz/hybolt_fluxo}
 	\end{adjustbox}
-	\caption{Fluxo de Codificação e Distribuição do HyBolt. Cada \emph{chunk} é codificado com o R10, cada bloco é cifrado e enviado a um dos provedores, e o usuário mantém apenas os metadados, com os MACs dos símbolos de origem e o \emph{hash} de cada bloco.}
+	\caption{Fluxo de Codificação e Distribuição do HyBolt. Cada \emph{chunk} é codificado com o R10, cada bloco é enviado a um dos provedores, e o usuário mantém apenas os metadados, com os MACs dos símbolos de origem e o \emph{hash} de cada bloco.}
 	\label{fig:fluxo}
 \end{figure*}
 
@@ -192,14 +191,10 @@ Quando a Auditoria identifica um bloco corrompido, o HyBolt não reconstrói ess
 \begin{enumerate}
 	\item O usuário calcula o suporte $X_t$ do novo bloco, que depende apenas de $K$ e $t$.
 	\item Usando somente os metadados, o usuário encontra, por eliminação gaussiana em $GF(2)$, um conjunto $Q$ de blocos íntegros cujos suportes, combinados por XOR, resultam em $X_t$, dando preferência aos blocos que combinam poucos símbolos, como os próprios símbolos de origem.
-	\item O usuário transfere apenas os blocos de $Q$, confere e decifra cada um e obtém o novo bloco por $c_t = \bigoplus_{q \in Q} c_q$.
+	\item O usuário transfere apenas os blocos de $Q$, confere cada um com seu \emph{hash} e obtém o novo bloco por $c_t = \bigoplus_{q \in Q} c_q$.
 \end{enumerate}
 
 Como exemplo ilustrativo, considere um \emph{chunk} com $K = 4$ símbolos de origem, armazenado nos blocos $c_0 = d_1$, $c_1 = d_2$, $c_2 = d_3$, $c_3 = d_4$, $c_4 = d_1 \oplus d_2 \oplus d_4$ e $c_5 = d_2 \oplus d_3$, e suponha que $c_1$ foi corrompido. Se o novo bloco, de identificador $t = 6$, tiver suporte $X_6 = \{d_2, d_4\}$, a eliminação gaussiana encontra $X_6 = X_5 \oplus X_2 \oplus X_3$, pois $(d_2 \oplus d_3) \oplus d_3 \oplus d_4 = d_2 \oplus d_4$. Assim, $c_6 = c_5 \oplus c_2 \oplus c_3$ é obtido sem usar o bloco corrompido $c_1$, embora $d_2$ faça parte do seu suporte, e sem decodificar o \emph{chunk}. Com o \emph{chunk} padrão de $K = 100$ símbolos, cada reparo transfere, em média, 49 blocos, cerca de 320~KB.
-
-\subsection{Ocultação da Estrutura}
-
-Como a estrutura do R10 é pública, um adversário poderia corromper apenas os sete blocos que contêm um mesmo símbolo de origem e tornar o \emph{chunk} irrecuperável, embora ele possua $r = 25$ blocos de reparo. Para impedir esse ataque, cada bloco é cifrado com um fluxo de chave SHAKE-256 e armazenado sob um nome pseudoaleatório, seguindo \citet{juels2007pors} e \citet{bowers2009proofs}. Como a cifragem também é um XOR com um fluxo de chave $k_\eta$, o MAC esperado do bloco cifrado continua derivável, como $h_{\eta,j} \oplus (k_\eta \bmod P_j)$.
 
 \section{Resultados Experimentais}
 \label{sec:resultados}
@@ -225,21 +220,14 @@ A Figura~\ref{fig:perdas} mostra a fração de \emph{chunks} recuperados em fun�
 
 O custo dos dois códigos foi equivalente, com mediana de 2,8~ms para codificar e 3,5~ms para decodificar um \emph{chunk} com o R10, e de 2,6 e 3,2~ms com os Online Codes. Os Online Codes armazenaram 1,45 vez o tamanho do arquivo, contra 1,27 vez com o R10, e a decodificação precisou, em média, de 136,3 blocos por \emph{chunk}, contra 101,5, o que a tornou de 23\% a 75\% mais lenta.
 
-\subsection{Auditoria e Ocultação}
+\subsection{Auditoria}
 
-Com 5,1\% dos blocos de um provedor corrompidos, uma amostra de 50 blocos detectou a corrupção em 96\% das rodadas, acima do limite teórico $1 - (1 - \beta)^s \approx 93\%$ para uma fração corrompida $\beta$ e uma amostra de $s$ blocos. A Figura~\ref{fig:ataque} mostra o efeito da ocultação. Para um arquivo de 1~GiB, a fração de blocos que o adversário precisa corromper para que a perda do arquivo se torne possível passa de 0,0034\% para cerca de 4\%, e para que ela se torne mais provável que a recuperação, para 8,5\%.
-
-\begin{figure}[t]
-	\centering
-	\includegraphics[width=\columnwidth]{figures/targeted_attack.pdf}
-	\caption{Probabilidade de perda do arquivo em função da fração de blocos corrompidos, com ocultação (corrupção uniforme) e sem ocultação (linhas pontilhadas, ataque dirigido a um \emph{chunk}).}
-	\label{fig:ataque}
-\end{figure}
+Com 5,1\% dos blocos de um provedor corrompidos, uma amostra de 50 blocos detectou a corrupção em 96\% das rodadas, acima do limite teórico $1 - (1 - \beta)^s \approx 93\%$ para uma fração corrompida $\beta$ e uma amostra de $s$ blocos.
 
 \section{Conclusão}
 \label{sec:conclusao}
 
-O HyBolt mostra que a substituição dos Online Codes pelo Raptor R10 preserva o MAC homomórfico e a Redistribuição local do HySAIL com o mesmo custo computacional, reduz o \emph{overhead} de recepção de 5 a 36 vezes e eleva a tolerância a perdas de cada \emph{chunk} de nenhum bloco para 14\%. Quanto à prova de recuperabilidade, a Auditoria do HySAIL funciona sem alterações com os blocos do R10, e a ocultação da estrutura eleva em mais de três ordens de grandeza a corrupção necessária para destruir um arquivo grande.
+O HyBolt mostra que a substituição dos Online Codes pelo Raptor R10 preserva o MAC homomórfico e a Redistribuição local do HySAIL com o mesmo custo computacional, reduz o \emph{overhead} de recepção de 5 a 36 vezes e eleva a tolerância a perdas de cada \emph{chunk} de nenhum bloco para 14\%. Quanto à prova de recuperabilidade, a Auditoria do HySAIL funciona sem alterações com os blocos do R10, e a amostragem de 50 blocos por provedor detecta, com alta probabilidade, a corrupção de uma pequena fração deles.
 
 Como trabalhos futuros, destacam-se o uso de códigos MDS (\emph{Maximum Distance Separable}), nos quais quaisquer $K$ blocos bastam para recuperar um \emph{chunk}, desde que preservem o MAC homomórfico, e a proteção da Auditoria contra o cancelamento de erros, já que, no XOR simples, dois blocos alterados pelo mesmo erro se anulam. Destacam-se, ainda, a verificação pública por auditores delegados \citep{armknecht2021outsourcing} e a avaliação em provedores de nuvem reais.
 
