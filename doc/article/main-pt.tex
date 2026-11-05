@@ -56,11 +56,11 @@
 \maketitle
 
 \begin{abstract-pt}
-O HySAIL é uma camada de armazenamento em nuvem que combina códigos de apagamento e um código de autenticação de mensagem (MAC) polinomial homomórfico para oferecer provas de recuperabilidade (PoR) de dados distribuídos entre múltiplos provedores. A proposta original utiliza Online Codes, que exigem muitos blocos excedentes para recuperar arquivos divididos em blocos pequenos. Este trabalho apresenta o HyBolt, implementação do HySAIL que substitui os Online Codes pelo Raptor R10, padronizado na RFC~5053. Como o R10 opera exclusivamente sobre $GF(2)$, a substituição preserva o MAC homomórfico e a redistribuição local de blocos. Também é proposta a ocultação da estrutura do código frente aos provedores. Os experimentos, realizados na mesma máquina para os dois códigos, mostram custo computacional equivalente, \emph{overhead} de recepção de 5 a 36 vezes menor e, com a mesma redundância, tolerância à perda de 14\% dos blocos codificados de cada parte do arquivo com o R10, enquanto os Online Codes não toleram com segurança a perda de nenhum bloco.
+O HySAIL é uma camada de armazenamento em nuvem que combina códigos de apagamento e um código de autenticação de mensagem (MAC) polinomial homomórfico para oferecer provas de recuperabilidade (PoR) de dados distribuídos entre múltiplos provedores. A proposta original utiliza Online Codes, que exigem muitos blocos excedentes para recuperar arquivos divididos em poucos blocos. Este trabalho apresenta o HyBolt, implementação do HySAIL que substitui os Online Codes pelo Raptor R10, padronizado na RFC~5053. Como o R10 opera exclusivamente sobre $GF(2)$, a substituição preserva o MAC homomórfico e a redistribuição local de blocos. Também é proposta a ocultação da estrutura do código frente aos provedores. Os experimentos, realizados na mesma máquina para os dois códigos, mostram custo computacional equivalente, \emph{overhead} de recepção de 5 a 36 vezes menor e, com a mesma redundância, tolerância à perda de 14\% dos blocos codificados de cada parte do arquivo com o R10, enquanto os Online Codes não toleram com segurança a perda de nenhum bloco.
 \end{abstract-pt}
 
 \begin{abstract-en}
-HySAIL is a cloud storage layer that combines erasure codes with a homomorphic polynomial message authentication code (MAC) to provide proofs of retrievability (PoR) for data spread across multiple providers. Its original design uses Online Codes, which require many extra blocks to recover files split into small blocks. This work presents HyBolt, a HySAIL implementation that replaces Online Codes with Raptor R10, standardized in RFC~5053. Since R10 operates solely over $GF(2)$, the replacement preserves the homomorphic MAC and the local redistribution of blocks. We also propose hiding the code structure from the providers. Experiments run on the same machine for both codes show equivalent computational cost, a reception overhead 5 to 36 times lower and, under the same redundancy, tolerance to the loss of 14\% of the encoded blocks of each file chunk with R10, whereas Online Codes cannot safely tolerate the loss of any block.
+HySAIL is a cloud storage layer that combines erasure codes with a homomorphic polynomial message authentication code (MAC) to provide proofs of retrievability (PoR) for data spread across multiple providers. Its original design uses Online Codes, which require many extra blocks to recover files split into few blocks. This work presents HyBolt, a HySAIL implementation that replaces Online Codes with Raptor R10, standardized in RFC~5053. Since R10 operates solely over $GF(2)$, the replacement preserves the homomorphic MAC and the local redistribution of blocks. We also propose hiding the code structure from the providers. Experiments run on the same machine for both codes show equivalent computational cost, a reception overhead 5 to 36 times lower and, under the same redundancy, tolerance to the loss of 14\% of the encoded blocks of each file chunk with R10, whereas Online Codes cannot safely tolerate the loss of any block.
 \end{abstract-en}
 
 \begin{pchaves}
@@ -89,12 +89,14 @@ O armazenamento em nuvem oferece redução de custos e elasticidade, mas o usuá
 
 O HySAIL \citep{amaral2019hysail} é um protocolo de PoR que codifica o arquivo com Online Codes \citep{maymounkov2002online}, distribui os blocos codificados entre vários provedores e verifica sua integridade por meio de um MAC polinomial homomórfico em relação ao XOR. Os Online Codes, entretanto, precisam de muitos blocos excedentes quando o arquivo é dividido em poucos blocos, o que leva o HySAIL a codificar o arquivo inteiro de uma só vez.
 
-Este trabalho avalia a substituição dos Online Codes pelo Raptor R10, padronizado na RFC~5053 \citep{luby2007rfc5053}. As principais contribuições são as seguintes:
+Este trabalho avalia a substituição dos Online Codes pelo Raptor R10, padronizado na RFC~5053 \citep{luby2007rfc5053}, que permite dividir o arquivo em partes independentes com poucos blocos excedentes. As principais contribuições são as seguintes:
 \begin{itemize}
-	\item A demonstração de que o R10 preserva o MAC homomórfico e a redistribuição local do HySAIL.
+	\item A substituição dos Online Codes pelo R10 no HySAIL, mostrando que ela preserva o MAC homomórfico, a Auditoria e a redistribuição local de blocos.
 	\item A ocultação da estrutura do código frente aos provedores.
 	\item O HyBolt, implementação de código aberto, comparada experimentalmente com os Online Codes na mesma máquina.
 \end{itemize}
+
+O restante do artigo apresenta os trabalhos relacionados (Seção~\ref{sec:relacionados}), a fundamentação (Seção~\ref{sec:fundamentacao}), a proposta (Seção~\ref{sec:proposta}), os resultados (Seção~\ref{sec:resultados}) e a conclusão (Seção~\ref{sec:conclusao}).
 
 \section{Trabalhos Relacionados}
 \label{sec:relacionados}
