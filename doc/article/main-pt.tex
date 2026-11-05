@@ -110,7 +110,15 @@ No HySAIL, o arquivo é dividido em $n$ blocos de mensagem $m_i$, cada um interp
 \begin{equation}
 h_{i,j}(x) = m_i(x) \bmod P_j(x).
 \end{equation}
-Como a soma em $GF(2)$ coincide com o XOR, a redução módulo $P_j(x)$ é linear. Assim, o MAC de um bloco codificado $c = m_a \oplus m_b$ é simplesmente $h_{a,j} \oplus h_{b,j}$, e o usuário consegue verificar qualquer bloco codificado guardando apenas $n \cdot l$ MACs. A probabilidade de um provedor forjar uma resposta é da ordem de $B/2^\lambda$ para blocos de $B$ bits, pois a diferença entre dois blocos tem no máximo $B/\lambda$ fatores irredutíveis de grau $\lambda$, entre os cerca de $2^\lambda/\lambda$ possíveis valores de $P_j$.
+Como a soma em $GF(2)$ coincide com o XOR, a redução módulo $P_j(x)$ é linear, e o MAC é homomórfico em relação ao XOR \citep{amaral2019hysail}:
+\begin{equation}
+\begin{aligned}
+&\left[m_a(x) \bmod P_j(x)\right] \oplus \left[m_b(x) \bmod P_j(x)\right] \\
+&\quad = \left[m_a(x) \oplus m_b(x)\right] \bmod P_j(x).
+\end{aligned}
+\label{eq:homomorfismo}
+\end{equation}
+Assim, o MAC de um bloco codificado $c = m_a \oplus m_b$ é simplesmente $h_{a,j} \oplus h_{b,j}$, e o usuário consegue verificar qualquer bloco codificado guardando apenas $n \cdot l$ MACs. A probabilidade de um provedor forjar uma resposta é da ordem de $B/2^\lambda$ para blocos de $B$ bits, pois a diferença entre dois blocos tem no máximo $B/\lambda$ fatores irredutíveis de grau $\lambda$, entre os cerca de $2^\lambda/\lambda$ possíveis valores de $P_j$.
 
 \subsection{Códigos \emph{fountain} e o Raptor R10}
 
