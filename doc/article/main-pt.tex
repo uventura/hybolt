@@ -38,16 +38,16 @@
 \title[HySAIL-R: Raptor R10 no HySAIL]{HySAIL-R: substituição dos Online Codes pelo Raptor R10 na camada de armazenamento HySAIL}
 \engtitle{\textcolor{engtitle}{HySAIL-R: replacing Online Codes with Raptor R10 in the HySAIL storage layer}}
 
-% TODO: completar ORCID e e-mails dos autores.
+% TODO: completar os e-mails dos autores.
 \author[Silva et al. 2026]{
 
-\affil{\textbf{Ualiton V. Silva}
+\affil{\textbf{Ualiton V. Silva}~\orcid{0009-0003-0864-752X}
 \\Universidade de Brasília}
 
-\affil{\textbf{João J. C. Gondim}
+\affil{\textbf{Dino Macedo Amaral}~\orcid{0000-0002-8023-1057}
 \\Universidade de Brasília}
 
-\affil{\textbf{Dino Macedo Amaral}
+\affil{\textbf{João J. C. Gondim}~\orcid{0000-0002-5873-7502}
 \\Universidade de Brasília}
 
 }
@@ -266,12 +266,12 @@ Com 5,1\% dos blocos de um provedor corrompidos, uma amostra de 50 blocos conté
 
 O HySAIL-R mostra que a substituição dos Online Codes pelo Raptor R10 preserva o MAC homomórfico e a Redistribuição local do HySAIL com o mesmo custo computacional, reduz o \emph{overhead} de recepção de 5 a 36 vezes e, com a mesma redundância, permite que cada \emph{chunk} tolere a perda de 14\% de seus blocos, enquanto, com os Online Codes, a perda de um único bloco já pode torná-lo irrecuperável. Quanto à prova de recuperabilidade, a Auditoria do HySAIL funciona sem alterações com os blocos do R10 e detecta, com alta probabilidade, a corrupção de uma pequena fração deles, desde que os erros não se anulem no XOR.
 
-Como trabalhos futuros, destacam-se o uso de códigos MDS (\emph{Maximum Distance Separable}), nos quais quaisquer $K$ blocos bastam para recuperar um \emph{chunk}, desde que preservem o MAC homomórfico, e a proteção da Auditoria contra o cancelamento de erros, já que, no XOR simples, dois blocos alterados pelo mesmo erro se anulam, além da verificação pública por auditores delegados \citep{armknecht2021outsourcing} e da avaliação em provedores de nuvem reais.
+Como trabalhos futuros, destacam-se o uso de códigos MDS (\emph{Maximum Distance Separable}), nos quais quaisquer $K$ blocos bastam para recuperar um \emph{chunk}, desde que preservem o MAC homomórfico, e a proteção da Auditoria contra o cancelamento de erros, já que, no XOR simples, dois blocos alterados pelo mesmo erro se anulam, além da verificação pública por auditores delegados e da avaliação em provedores de nuvem reais.
 
 \begin{declarations}
 
 \begin{contributions}
-U. V. Silva implementou o HySAIL-R e redigiu o manuscrito, e J. J. C. Gondim e D. M. Amaral orientaram a pesquisa.
+U. V. Silva implementou o HySAIL-R e redigiu o manuscrito, e D. M. Amaral e J. J. C. Gondim orientaram a pesquisa.
 \end{contributions}
 
 \begin{interests}
