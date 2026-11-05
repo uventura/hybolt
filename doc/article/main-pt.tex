@@ -199,7 +199,7 @@ Como exemplo ilustrativo, considere um \emph{chunk} com $K = 4$ símbolos de ori
 \section{Resultados Experimentais}
 \label{sec:resultados}
 
-Os Online Codes foram implementados no mesmo fluxo do HyBolt, de modo que apenas o código varia nas comparações. Os experimentos foram executados em um Intel Core i7-11390H com 8~GB de memória, com três provedores simulados por diretórios locais, sem latência de rede, e com os parâmetros padrão ($\lambda = 127$, $K = 100$, $\varepsilon = 0{,}25$ e $l = 40$).
+Os Online Codes também foram implementados no HyBolt, compartilhando a divisão em \emph{chunks}, os MACs, a Auditoria e a Redistribuição, de modo que apenas o código \emph{fountain} utilizado na Codificação e na Decodificação varia nas comparações. Os experimentos foram executados em um Intel Core i7-11390H com 8~GB de memória, com três provedores simulados por diretórios locais, sem latência de rede, e com os parâmetros padrão ($\lambda = 127$, $K = 100$, $\varepsilon = 0{,}25$ e $l = 40$).
 
 \subsection{\emph{Overhead} de Recepção}
 
@@ -225,12 +225,12 @@ A Figura~\ref{fig:perdas} mostra a fração de \emph{chunks} recuperados em fun�
 
 \subsection{Desempenho}
 
-O custo dos dois códigos foi equivalente, com mediana de 2,8~ms para codificar e 3,5~ms para decodificar um \emph{chunk} com o R10, e de 2,6 e 3,2~ms com os Online Codes. A Figura~\ref{fig:tempos} mostra os tempos para arquivos de 50, 100 e 500~MB, considerando apenas o código e o fluxo completo, que inclui a leitura, a gravação e a distribuição dos blocos. Para 500~MB, o código levou 3,5 e 3,3~s na codificação e 2,7 e 3,2~s na decodificação, com o R10 e com os Online Codes, respectivamente. Os Online Codes armazenaram 1,45 vez o tamanho do arquivo, contra 1,27 vez com o R10, e a decodificação precisou, em média, de 136,3 blocos por \emph{chunk}, contra 101,5, o que tornou o fluxo completo de decodificação de 23\% a 75\% mais lento.
+O custo dos dois códigos foi equivalente, com mediana de 2,8~ms para codificar e 3,5~ms para decodificar um \emph{chunk} com o R10, e de 2,6 e 3,2~ms com os Online Codes. A Figura~\ref{fig:tempos} mostra os tempos para arquivos de 50, 100 e 500~MB em duas medições: apenas a etapa do código \emph{fountain} e o fluxo completo, que inclui também a leitura, a gravação e a distribuição dos blocos. Para 500~MB, a etapa do código levou 3,5 e 3,3~s na codificação e 2,7 e 3,2~s na decodificação, com o R10 e com os Online Codes, respectivamente. Os Online Codes armazenaram 1,45 vez o tamanho do arquivo, contra 1,27 vez com o R10, e a decodificação precisou, em média, de 136,3 blocos por \emph{chunk}, contra 101,5, o que tornou o fluxo completo de decodificação de 23\% a 75\% mais lento.
 
 \begin{figure}[t]
 	\centering
 	\includegraphics[width=\columnwidth]{figures/codec_times.pdf}
-	\caption{Tempos de codificação e decodificação com R10 e Online Codes, considerando apenas o código e o fluxo completo, sem o cálculo dos MACs.}
+	\caption{Tempos de codificação e decodificação da etapa do código \emph{fountain} (“código”) e do fluxo completo (“fluxo”), sem os MACs.}
 	\label{fig:tempos}
 \end{figure}
 
@@ -241,9 +241,9 @@ Com 5,1\% dos blocos de um provedor corrompidos, uma amostra de 50 blocos detect
 \section{Conclusão}
 \label{sec:conclusao}
 
-O HyBolt mostra que a substituição dos Online Codes pelo Raptor R10 preserva o MAC homomórfico e a Redistribuição local do HySAIL com o mesmo custo computacional, reduz o \emph{overhead} de recepção de 5 a 36 vezes e, com a mesma redundância, permite que cada \emph{chunk} tolere a perda de 14\% de seus blocos, enquanto, com os Online Codes, a perda de um único bloco já pode torná-lo irrecuperável. Quanto à prova de recuperabilidade, a Auditoria do HySAIL funciona sem alterações com os blocos do R10, e a amostragem de 50 blocos por provedor detecta, com alta probabilidade, a corrupção de uma pequena fração deles.
+O HyBolt mostra que a substituição dos Online Codes pelo Raptor R10 preserva o MAC homomórfico e a Redistribuição local do HySAIL com o mesmo custo computacional, reduz o \emph{overhead} de recepção de 5 a 36 vezes e, com a mesma redundância, permite que cada \emph{chunk} tolere a perda de 14\% de seus blocos, enquanto, com os Online Codes, a perda de um único bloco já pode torná-lo irrecuperável. Quanto à prova de recuperabilidade, a Auditoria do HySAIL funciona sem alterações com os blocos do R10 e detecta, com alta probabilidade, a corrupção de uma pequena fração deles.
 
-Como trabalhos futuros, destacam-se o uso de códigos MDS (\emph{Maximum Distance Separable}), nos quais quaisquer $K$ blocos bastam para recuperar um \emph{chunk}, desde que preservem o MAC homomórfico, e a proteção da Auditoria contra o cancelamento de erros, já que, no XOR simples, dois blocos alterados pelo mesmo erro se anulam. Destacam-se, ainda, a verificação pública por auditores delegados \citep{armknecht2021outsourcing} e a avaliação em provedores de nuvem reais.
+Como trabalhos futuros, destacam-se o uso de códigos MDS (\emph{Maximum Distance Separable}), nos quais quaisquer $K$ blocos bastam para recuperar um \emph{chunk}, desde que preservem o MAC homomórfico, e a proteção da Auditoria contra o cancelamento de erros, já que, no XOR simples, dois blocos alterados pelo mesmo erro se anulam, além da verificação pública por auditores delegados \citep{armknecht2021outsourcing} e da avaliação em provedores de nuvem reais.
 
 \begin{declarations}
 
