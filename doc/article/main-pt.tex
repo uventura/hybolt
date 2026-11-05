@@ -56,11 +56,11 @@
 \maketitle
 
 \begin{abstract-pt}
-O HySAIL é uma camada de armazenamento em nuvem que combina códigos de apagamento e um código de autenticação de mensagem (MAC) polinomial homomórfico para oferecer provas de recuperabilidade (PoR) de dados distribuídos entre múltiplos provedores. A proposta original utiliza Online Codes, que exigem muitos blocos excedentes para recuperar arquivos divididos em blocos pequenos. Este trabalho apresenta o HyBolt, implementação do HySAIL que substitui os Online Codes pelo Raptor R10, padronizado na RFC~5053. Como o R10 opera exclusivamente sobre $GF(2)$, a substituição preserva o MAC homomórfico e a redistribuição local de blocos. Também são propostas uma auditoria ponderada, que impede o cancelamento de erros, e a ocultação da estrutura do código. Os experimentos, realizados na mesma máquina para os dois códigos, mostram custo computacional equivalente, \emph{overhead} de recepção de 5 a 36 vezes menor e, com a mesma redundância, tolerância à perda de 14\% dos blocos codificados de cada parte do arquivo com o R10, enquanto os Online Codes não toleram com segurança a perda de nenhum bloco.
+O HySAIL é uma camada de armazenamento em nuvem que combina códigos de apagamento e um código de autenticação de mensagem (MAC) polinomial homomórfico para oferecer provas de recuperabilidade (PoR) de dados distribuídos entre múltiplos provedores. A proposta original utiliza Online Codes, que exigem muitos blocos excedentes para recuperar arquivos divididos em blocos pequenos. Este trabalho apresenta o HyBolt, implementação do HySAIL que substitui os Online Codes pelo Raptor R10, padronizado na RFC~5053. Como o R10 opera exclusivamente sobre $GF(2)$, a substituição preserva o MAC homomórfico e a redistribuição local de blocos. Também é proposta a ocultação da estrutura do código frente aos provedores. Os experimentos, realizados na mesma máquina para os dois códigos, mostram custo computacional equivalente, \emph{overhead} de recepção de 5 a 36 vezes menor e, com a mesma redundância, tolerância à perda de 14\% dos blocos codificados de cada parte do arquivo com o R10, enquanto os Online Codes não toleram com segurança a perda de nenhum bloco.
 \end{abstract-pt}
 
 \begin{abstract-en}
-HySAIL is a cloud storage layer that combines erasure codes with a homomorphic polynomial message authentication code (MAC) to provide proofs of retrievability (PoR) for data spread across multiple providers. Its original design uses Online Codes, which require many extra blocks to recover files split into small blocks. This work presents HyBolt, a HySAIL implementation that replaces Online Codes with Raptor R10, standardized in RFC~5053. Since R10 operates solely over $GF(2)$, the replacement preserves the homomorphic MAC and the local redistribution of blocks. We also propose a weighted audit that prevents error cancellation and hiding of the code structure. Experiments run on the same machine for both codes show equivalent computational cost, a reception overhead 5 to 36 times lower and, under the same redundancy, tolerance to the loss of 14\% of the encoded blocks of each file chunk with R10, whereas Online Codes cannot safely tolerate the loss of any block.
+HySAIL is a cloud storage layer that combines erasure codes with a homomorphic polynomial message authentication code (MAC) to provide proofs of retrievability (PoR) for data spread across multiple providers. Its original design uses Online Codes, which require many extra blocks to recover files split into small blocks. This work presents HyBolt, a HySAIL implementation that replaces Online Codes with Raptor R10, standardized in RFC~5053. Since R10 operates solely over $GF(2)$, the replacement preserves the homomorphic MAC and the local redistribution of blocks. We also propose hiding the code structure from the providers. Experiments run on the same machine for both codes show equivalent computational cost, a reception overhead 5 to 36 times lower and, under the same redundancy, tolerance to the loss of 14\% of the encoded blocks of each file chunk with R10, whereas Online Codes cannot safely tolerate the loss of any block.
 \end{abstract-en}
 
 \begin{pchaves}
@@ -92,7 +92,7 @@ O HySAIL \citep{amaral2019hysail} é um protocolo de PoR que codifica o arquivo 
 Este trabalho avalia a substituição dos Online Codes pelo Raptor R10, padronizado na RFC~5053 \citep{luby2007rfc5053}. As principais contribuições são as seguintes:
 \begin{itemize}
 	\item A demonstração de que o R10 preserva o MAC homomórfico e a redistribuição local do HySAIL.
-	\item Uma auditoria ponderada, imune ao cancelamento de erros, e a ocultação da estrutura do código frente aos provedores.
+	\item A ocultação da estrutura do código frente aos provedores.
 	\item O HyBolt, implementação de código aberto, comparada experimentalmente com os Online Codes na mesma máquina.
 \end{itemize}
 
@@ -171,12 +171,18 @@ A Figura~\ref{fig:fluxo} apresenta o fluxo de Codificação e Distribuição pro
 
 Pela Equação~\eqref{eq:suporte}, o MAC esperado de qualquer bloco, inclusive de blocos de reparo gerados posteriormente, é obtido por $h_{\eta,j} = \bigoplus_{i \in X_\eta} h_{i,j}$. Dessa forma, o usuário continua armazenando apenas $n \cdot l$ MACs e não precisa registrar a composição de cada bloco.
 
-Como no HySAIL, cada rodada de Auditoria utiliza um novo polinômio $P_j$ do conjunto gerado na Codificação, até que os $l$ polinômios se esgotem. O usuário envia ao provedor $P_j$, um conjunto $Q$ de blocos e expoentes distintos $k_\eta < 2^{32}$, sorteados a cada rodada, e o provedor responde
+A Auditoria segue o Algoritmo~2 do HySAIL \citep{amaral2019hysail}. Em cada rodada:
+\begin{enumerate}
+	\item O usuário escolhe aleatoriamente um polinômio primitivo $P_j$ entre os gerados na Codificação e ainda não utilizados.
+	\item O usuário escolhe aleatoriamente um subconjunto $Q$ dos blocos armazenados em um provedor $S_i$ e envia $Q$ e $P_j$ a esse provedor.
+	\item O provedor calcula o XOR dos blocos de $Q$, reduz o resultado módulo $P_j$ e devolve
 \begin{equation}
-A(x) = \textstyle\left(\bigoplus_{\eta \in Q} x^{k_\eta} c_\eta(x)\right) \bmod P_j(x),
+A(x) = \textstyle\left(\bigoplus_{\eta \in Q} c_\eta(x)\right) \bmod P_j(x).
 \label{eq:auditoria}
 \end{equation}
-que o usuário compara com $\left(\bigoplus_{\eta \in Q} x^{k_\eta} h_{\eta,j}(x)\right) \bmod P_j(x)$. A ponderação por $x^{k_\eta}$ substitui o XOR simples do HySAIL, no qual dois blocos alterados pelo mesmo erro se anulam. Como $x$ tem ordem $2^\lambda - 1$ módulo um polinômio primitivo, dois erros iguais só se anulariam se $k_a \equiv k_b \pmod{2^\lambda - 1}$, o que não ocorre para expoentes distintos menores que $2^{32}$. Se as respostas divergirem, os blocos de $Q$ são verificados individualmente com o mesmo $P_j$ para localizar os corrompidos, que são então redistribuídos.
+	\item Pela Equação~\eqref{eq:homomorfismo}, o usuário compara $A(x)$ com $\bigoplus_{\eta \in Q} h_{\eta,j}(x)$, calculado apenas a partir dos MACs.
+\end{enumerate}
+Se os valores divergirem, os blocos de $Q$ são verificados individualmente com o mesmo $P_j$ para localizar os corrompidos, que são então redistribuídos.
 
 \subsection{Redistribuição}
 
@@ -231,7 +237,7 @@ Com 5,1\% dos blocos de um provedor corrompidos, uma amostra de 50 blocos detect
 \section{Conclusão}
 \label{sec:conclusao}
 
-O HyBolt mostra que a substituição dos Online Codes pelo Raptor R10 preserva o MAC homomórfico e a Redistribuição local do HySAIL com o mesmo custo computacional, reduz o \emph{overhead} de recepção de 5 a 36 vezes e eleva a tolerância a perdas de cada \emph{chunk} de nenhum bloco para 14\%. Quanto à prova de recuperabilidade, a auditoria ponderada impede o cancelamento de erros, e a ocultação da estrutura eleva em mais de três ordens de grandeza a corrupção necessária para destruir um arquivo grande.
+O HyBolt mostra que a substituição dos Online Codes pelo Raptor R10 preserva o MAC homomórfico e a Redistribuição local do HySAIL com o mesmo custo computacional, reduz o \emph{overhead} de recepção de 5 a 36 vezes e eleva a tolerância a perdas de cada \emph{chunk} de nenhum bloco para 14\%. Quanto à prova de recuperabilidade, a Auditoria do HySAIL funciona sem alterações com os blocos do R10, e a ocultação da estrutura eleva em mais de três ordens de grandeza a corrupção necessária para destruir um arquivo grande.
 
 Como trabalhos futuros, destacam-se a verificação pública por auditores delegados \citep{armknecht2021outsourcing} e a avaliação em provedores de nuvem reais.
 
