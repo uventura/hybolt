@@ -59,11 +59,11 @@
 \maketitle
 
 \begin{abstract-pt}
-O HySAIL combina códigos de apagamento e um código de autenticação de mensagem (MAC) polinomial homomórfico para oferecer provas de recuperabilidade (PoR) de dados armazenados em múltiplos provedores de nuvem. Este trabalho apresenta o HySAIL-R, que substitui os Online Codes do HySAIL, ineficientes para arquivos divididos em poucos blocos, pelo Raptor R10 (RFC~5053), preservando o MAC homomórfico e a redistribuição local de blocos, pois o R10 opera exclusivamente sobre $GF(2)$. Nas mesmas condições experimentais, o R10 teve custo computacional equivalente, \emph{overhead} de recepção de 5 a 36 vezes menor e tolerou a perda de 14\% dos blocos de cada parte do arquivo, enquanto os Online Codes, com a mesma redundância, não toleram com segurança a perda de nenhum bloco.
+O HySAIL combina códigos de apagamento e um código de autenticação de mensagem (MAC) polinomial homomórfico para oferecer provas de recuperabilidade (PoR) em múltiplas nuvens. O HySAIL-R substitui os Online Codes do HySAIL pelo Raptor R10, preservando o MAC homomórfico e a redistribuição local, por operar apenas sobre $GF(2)$. O R10 teve custo equivalente, \emph{overhead} de recepção de 5 a 36 vezes menor e tolerou perder 14\% dos blocos de cada parte, enquanto os Online Codes, com a mesma redundância, não toleram com segurança perder nenhum bloco.
 \end{abstract-pt}
 
 \begin{abstract-en}
-HySAIL combines erasure codes with a homomorphic polynomial message authentication code (MAC) to provide proofs of retrievability (PoR) for data stored across multiple cloud providers. This work presents HySAIL-R, which replaces HySAIL's Online Codes, inefficient for files split into few blocks, with Raptor R10 (RFC~5053), preserving the homomorphic MAC and the local redistribution of blocks, since R10 operates solely over $GF(2)$. Under the same experimental conditions, R10 had equivalent computational cost, a reception overhead 5 to 36 times lower and tolerated the loss of 14\% of the blocks of each file chunk, whereas Online Codes, with the same redundancy, cannot safely tolerate the loss of any block.
+HySAIL combines erasure codes with a homomorphic polynomial message authentication code (MAC) to provide proofs of retrievability (PoR) across multiple cloud providers. We present HySAIL-R, which replaces HySAIL's Online Codes with Raptor R10, preserving the homomorphic MAC and local block redistribution, since R10 operates solely over $GF(2)$. R10 had equivalent cost, a reception overhead 5 to 36 times lower and tolerated losing 14\% of each chunk's blocks, whereas Online Codes, with the same redundancy, cannot safely tolerate the loss of any block.
 \end{abstract-en}
 
 \begin{pchaves}
@@ -141,7 +141,7 @@ Os Online Codes \citep{maymounkov2002online} e os Raptor Codes combinam uma pré
 		\midrule
 		Pré-codificação & aleatória ($q = 3$) & LDPC e Half (norma) \\
 		Sistemático & não & sim \\
-		Grau médio & 8,2 ($\varepsilon_o = 0{,}01$) & 4,6 \\
+		Grau médio & 5,0 ($\varepsilon_o = 0{,}10$) & 4,6 \\
 		Decodificação & \emph{peeling} & eliminação gaussiana \\
 		\emph{Overhead} esperado & $\approx 3\varepsilon_o K$ & poucos símbolos \\
 		Prob.\ de falha & decai com $q$ & decai a cada símbolo \\
@@ -160,7 +160,7 @@ Os rótulos $x_\eta$ são determinados apenas por $K$ e $\eta$. No R10, a recupe
 \section{Proposta: HySAIL-R}
 \label{sec:proposta}
 
-A Figura~\ref{fig:fluxo} apresenta o fluxo de Codificação e Distribuição proposto. O arquivo é dividido em \emph{chunks}, isto é, partes independentes de $K = 100$ símbolos de origem de 6.500 bytes. Cada \emph{chunk} é codificado com o R10, que gera os $K$ símbolos de origem e $r = \lceil \varepsilon K \rceil$ símbolos de reparo, com redundância $\varepsilon = 0{,}25$ por padrão. Cada um desses símbolos codificados é armazenado como um bloco, que é enviado a um dos provedores. O usuário, por sua vez, guarda apenas os MACs $h_{i,j}$ dos símbolos de origem, usados na Auditoria, e o \emph{hash} SHA-256 de cada bloco, usado para conferi-lo quando é transferido. O valor $K = 100$ equilibra a tolerância a perdas e o volume transferido em cada reparo.
+A Figura~\ref{fig:fluxo} apresenta o fluxo de Codificação e Distribuição proposto. O arquivo é dividido em \emph{chunks}, isto é, partes independentes de $K = 100$ símbolos de origem de 6.500 bytes. Cada \emph{chunk} é codificado com o R10, que gera os $K$ símbolos de origem e $r = \lceil \varepsilon K \rceil$ símbolos de reparo, com redundância $\varepsilon = 0{,}25$ por padrão. Cada um desses símbolos codificados é armazenado como um bloco, que é enviado a um dos provedores. O usuário, por sua vez, guarda apenas os polinômios $P_j$, os MACs $h_{i,j}$ dos símbolos de origem, usados na Auditoria, e o \emph{hash} SHA-256 de cada bloco, usado para conferi-lo quando é transferido. O valor $K = 100$ equilibra a tolerância a perdas e o volume transferido em cada reparo.
 
 \begin{figure*}[t]
 	\centering
@@ -232,7 +232,7 @@ A Tabela~\ref{tab:desempenho} separa a etapa do código \emph{fountain} do fluxo
 
 \begin{table}[t]
 	\centering
-	\caption{Comparação de desempenho entre R10 e Online Codes, com \emph{chunks} de $K = 100$ símbolos e $\varepsilon = 0{,}25$.}
+	\caption{Comparação de desempenho entre R10 e Online Codes, com \emph{chunks} de $K = 100$ símbolos, $\varepsilon = 0{,}25$ e sem os MACs.}
 	\label{tab:desempenho}
 	\footnotesize
 	\begin{tabular}{@{}llrr@{}}
@@ -259,12 +259,12 @@ A Tabela~\ref{tab:desempenho} separa a etapa do código \emph{fountain} do fluxo
 
 \subsection{Auditoria}
 
-Com 5,1\% dos blocos de um provedor corrompidos, uma amostra de 50 blocos detectou a corrupção em 96\% das rodadas, acima do limite teórico $1 - (1 - \beta)^s \approx 93\%$ para uma fração corrompida $\beta$ e uma amostra de $s$ blocos.
+Com 5,1\% dos blocos de um provedor corrompidos, uma amostra de 50 blocos contém ao menos um bloco corrompido com probabilidade de 94\%, acima do limite $1 - (1 - \beta)^s \approx 93\%$ para uma fração corrompida $\beta$ e uma amostra de $s$ blocos. Essa é a probabilidade de detecção quando os erros dos blocos amostrados não se anulam no XOR. Se todos os blocos forem alterados pelo mesmo erro, apenas amostras com um número ímpar de blocos corrompidos são detectadas, e a probabilidade cai para cerca de 50\%.
 
 \section{Conclusão}
 \label{sec:conclusao}
 
-O HySAIL-R mostra que a substituição dos Online Codes pelo Raptor R10 preserva o MAC homomórfico e a Redistribuição local do HySAIL com o mesmo custo computacional, reduz o \emph{overhead} de recepção de 5 a 36 vezes e, com a mesma redundância, permite que cada \emph{chunk} tolere a perda de 14\% de seus blocos, enquanto, com os Online Codes, a perda de um único bloco já pode torná-lo irrecuperável. Quanto à prova de recuperabilidade, a Auditoria do HySAIL funciona sem alterações com os blocos do R10 e detecta, com alta probabilidade, a corrupção de uma pequena fração deles.
+O HySAIL-R mostra que a substituição dos Online Codes pelo Raptor R10 preserva o MAC homomórfico e a Redistribuição local do HySAIL com o mesmo custo computacional, reduz o \emph{overhead} de recepção de 5 a 36 vezes e, com a mesma redundância, permite que cada \emph{chunk} tolere a perda de 14\% de seus blocos, enquanto, com os Online Codes, a perda de um único bloco já pode torná-lo irrecuperável. Quanto à prova de recuperabilidade, a Auditoria do HySAIL funciona sem alterações com os blocos do R10 e detecta, com alta probabilidade, a corrupção de uma pequena fração deles, desde que os erros não se anulem no XOR.
 
 Como trabalhos futuros, destacam-se o uso de códigos MDS (\emph{Maximum Distance Separable}), nos quais quaisquer $K$ blocos bastam para recuperar um \emph{chunk}, desde que preservem o MAC homomórfico, e a proteção da Auditoria contra o cancelamento de erros, já que, no XOR simples, dois blocos alterados pelo mesmo erro se anulam, além da verificação pública por auditores delegados \citep{armknecht2021outsourcing} e da avaliação em provedores de nuvem reais.
 
