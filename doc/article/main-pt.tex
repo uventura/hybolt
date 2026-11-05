@@ -110,7 +110,7 @@ No HySAIL, o arquivo é dividido em $n$ blocos de mensagem $m_i$, cada um interp
 \begin{equation}
 h_{i,j}(x) = m_i(x) \bmod P_j(x).
 \end{equation}
-Como a soma em $GF(2)$ coincide com o XOR, a redução módulo $P_j(x)$ é linear, e o MAC é homomórfico em relação ao XOR \citep{amaral2019hysail}:
+Como a soma em $GF(2)$ é equivalente ao XOR, a redução módulo $P_j(x)$ é linear, e o MAC é homomórfico em relação ao XOR \citep{amaral2019hysail}:
 \begin{equation}
 \begin{aligned}
 &\left[m_a(x) \bmod P_j(x)\right] \oplus \left[m_b(x) \bmod P_j(x)\right] \\
@@ -146,7 +146,7 @@ Os Online Codes \citep{maymounkov2002online} e os Raptor Codes combinam uma pré
 	\end{tabular}
 \end{table}
 
-O R10 é sistemático, ou seja, os $K$ primeiros símbolos codificados são os próprios símbolos de origem, e os seguintes são símbolos de reparo. Todas as suas operações ocorrem em $GF(2)$, de modo que cada símbolo codificado, identificado por um número $\eta$, é o XOR de um conjunto $X_\eta$ de símbolos de origem, aqui denominado suporte:
+No R10, a mensagem é dividida em $K$ símbolos de origem $d_1, \ldots, d_K$, blocos de mesmo tamanho que, no HyBolt, são as partes de um \emph{chunk} do arquivo. O código é sistemático, ou seja, os $K$ primeiros símbolos codificados, $c_0, \ldots, c_{K-1}$, são os próprios símbolos de origem, e os seguintes são símbolos de reparo. Todas as suas operações ocorrem em $GF(2)$, de modo que cada símbolo codificado $c_\eta$, identificado por um número $\eta$, é o XOR dos símbolos de origem cujos índices pertencem a um conjunto $X_\eta \subseteq \{1, \ldots, K\}$, aqui denominado suporte:
 \begin{equation}
 c_\eta = \textstyle\bigoplus_{i \in X_\eta} d_i .
 \label{eq:suporte}
