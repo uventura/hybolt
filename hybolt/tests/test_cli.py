@@ -522,3 +522,16 @@ def test_given_codec_option_when_encoding_then_forwards_codec(
 
     assert result.exit_code == 0, result.output
     assert captured["codec"] == expected
+
+
+def test_given_unbounded_audit_when_auditing_then_reports_secret_polynomial(
+    tmp_path, monkeypatch
+):
+    from hybolt.audit.audit import AuditReport
+
+    report = AuditReport(scheme="unbounded", servers=[], chunks=[])
+
+    result, _ = _invoke_audit(tmp_path, monkeypatch, report)
+
+    assert result.exit_code == 0, result.output
+    assert "Unbounded audit (secret polynomial, never revealed)" in result.output

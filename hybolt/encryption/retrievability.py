@@ -19,7 +19,10 @@ from hybolt.logger.progress import advance_progress, create_progress_task, get_p
 
 
 BOUNDED_SCHEME = "bounded"
+UNBOUNDED_SCHEME = "unbounded"
 COMPACT_SCHEME = "compact"
+# Schemes whose client keeps h_ij = m_i mod P_j for every source block.
+POLYNOMIAL_SCHEMES = (BOUNDED_SCHEME, UNBOUNDED_SCHEME)
 
 
 class RetrievabilityProof(ABC):
@@ -57,8 +60,8 @@ class RetrievabilityProof(ABC):
     def attach_server_tags(self, packets, chunk_index):
         """Set the tag each server stores next to a packet; none by default."""
 
-    def verify_download(self, server, block, data) -> bool:
-        """Check downloaded bytes against the server-side tag; nothing by default."""
+    def verify_download(self, server, block, data, expected_mac=None) -> bool:
+        """Check downloaded bytes after the transfer; nothing by default."""
         return True
 
 
@@ -68,6 +71,9 @@ class PolynomialRetrievabilityProof(RetrievabilityProof):
     scheme = BOUNDED_SCHEME
     requires_client_macs = True
     single_use_challenges = True
+
+    # None: the bounded set size, read when the set is generated.
+    polynomial_count = None
 
     def __init__(
         self, polynomials=None, max_threads=MAX_MAC_THREADS, challenge_index=None
@@ -149,24 +155,68 @@ class PolynomialRetrievabilityProof(RetrievabilityProof):
         return block_index, macs, time.perf_counter() - started_at
 
     def _polynomial_set_generation(self):
-        execution_logger.debug(
-            f"Generating {POLYNOMIAL_SET_SIZE} challenge polynomials"
-        )
+        count = self.polynomial_count or POLYNOMIAL_SET_SIZE
+        execution_logger.debug(f"Generating {count} challenge polynomials")
         polynomials = []
         progress = get_progress()
         task_id = create_progress_task(
             progress,
             "Generating challenge polynomials",
-            total=POLYNOMIAL_SET_SIZE,
+            total=count,
         )
 
-        while len(polynomials) < POLYNOMIAL_SET_SIZE:
+        while len(polynomials) < count:
             polynomial = ga.generate_challenge_polynomial()
             if polynomial.tolist() not in [p.tolist() for p in polynomials]:
                 polynomials.append(polynomial)
                 advance_progress(progress, task_id)
 
         return polynomials
+
+
+class UnboundedRetrievabilityProof(PolynomialRetrievabilityProof):
+    """Hy-SAIL's unbounded model: one secret polynomial P that never leaves the client.
+
+    The client keeps h_i = m_i mod P for every source block. Servers are never
+    sent P: before a download nothing is revealed, and the downloaded packet is
+    reduced modulo P by the client and compared with the MAC derived from its
+    support. Since a server cannot keep c mod P in place of c without knowing
+    P, the same polynomial serves any number of audits.
+    """
+
+    scheme = UNBOUNDED_SCHEME
+    single_use_challenges = False
+    polynomial_count = 1
+
+    def __init__(self, polynomials=None, max_threads=MAX_MAC_THREADS):
+        super().__init__(polynomials, max_threads, challenge_index=0)
+        if len(self._polynomials) != 1:
+            raise ValueError("The unbounded scheme uses exactly one polynomial")
+
+    @property
+    def modulus(self) -> int:
+        return ga._poly_coeffs_to_int(self._polynomials[0])
+
+    def verify(self, server, block, expected_mac):
+        # Revealing P would let the server answer from c mod P; check after download.
+        return True
+
+    def verify_download(self, server, block, data, expected_mac=None):
+        if expected_mac is None:
+            return True
+        started_at = time.perf_counter()
+        verified = self.matches(ga.bytes_to_poly_int(data), expected_mac(0))
+        self.polynomial_division_total_seconds += time.perf_counter() - started_at
+        self.polynomial_division_count += 1
+        if not verified:
+            execution_logger.error(f"Validation failed for block index: {block.index}")
+        return verified
+
+    def matches(self, value: int, expected_mac) -> bool:
+        """Whether value(x) mod P equals the MAC derived by the client."""
+        return ga.gf2_mod(value, self.modulus) == ga._poly_coeffs_to_int(
+            _as_coefficients(expected_mac)
+        )
 
 
 class DisabledRetrievabilityProof(RetrievabilityProof):
@@ -268,7 +318,7 @@ class CompactRetrievabilityProof(RetrievabilityProof):
         # Nothing is revealed before a download; the tag is checked afterwards.
         return True
 
-    def verify_download(self, server, block, data):
+    def verify_download(self, server, block, data, expected_mac=None):
         tag = server.download_tag(block.packet_file)
         verified = tag is not None and tag == self.keys.tag(
             self._chunk_index, block.index, data
@@ -290,10 +340,13 @@ class CompactRetrievabilityProof(RetrievabilityProof):
             masks ^= ga.gf2_clmul(
                 coefficient, self.keys.mask(chunk_index, packet_index)
             )
-        return ga.gf2_mod(
-            tau ^ self.keys.scale(ga.gf2_mod(mu, self.keys.modulus)) ^ masks,
-            self.keys.modulus,
-        ) == 0
+        return (
+            ga.gf2_mod(
+                tau ^ self.keys.scale(ga.gf2_mod(mu, self.keys.modulus)) ^ masks,
+                self.keys.modulus,
+            )
+            == 0
+        )
 
 
 def create_retrievability_proof(
@@ -308,6 +361,8 @@ def create_retrievability_proof(
         return DisabledRetrievabilityProof()
     if scheme == COMPACT_SCHEME:
         return CompactRetrievabilityProof(keys, chunk_index)
+    if scheme == UNBOUNDED_SCHEME:
+        return UnboundedRetrievabilityProof(polynomials, max_threads)
     if scheme != BOUNDED_SCHEME:
         raise ValueError(f"Unknown retrievability proof scheme: {scheme}")
 

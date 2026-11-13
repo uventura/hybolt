@@ -12,9 +12,12 @@ from hybolt.encryption.encoding_metadata import EncodingMetadata
 from hybolt.encryption.retrievability import (
     BOUNDED_SCHEME,
     COMPACT_SCHEME,
+    UNBOUNDED_SCHEME,
     ChallengeLedger,
     CompactRetrievabilityProof,
     SourceMacs,
+    UnboundedRetrievabilityProof,
+    xor_macs,
 )
 from hybolt.logger.logger import execution_logger
 from hybolt.server.server import Server
@@ -133,6 +136,36 @@ class BoundedAuditChallenge(AuditChallenge):
         return np.array_equal(expected, answer)
 
 
+class UnboundedAuditChallenge(AuditChallenge):
+    """Hy-SAIL's unbounded model: the secret polynomial never leaves the client.
+
+    The server answers the plain XOR of the sampled packets; the client reduces
+    it modulo P and compares it with the XOR of the packet MACs.
+    """
+
+    def __init__(self, metadata):
+        self._proof = UnboundedRetrievabilityProof(metadata.polynomials)
+        self._source_macs = {
+            chunk.chunk_index: SourceMacs(chunk, metadata.sealing_keys)
+            for chunk in metadata.chunks
+        }
+        # Size in bytes of the last answer, for the comparison with the bounded model.
+        self.last_answer_bytes = 0
+
+    def check(self, server, sample):
+        expected = xor_macs(
+            [
+                self._source_macs[chunk_index].packet_mac(packet.packet_index, 0)
+                for chunk_index, packet in sample
+            ]
+        )
+        answer = server.receive_xor_challenge(
+            [packet.packet_file for _, packet in sample]
+        )
+        self.last_answer_bytes = (answer.bit_length() + 7) // 8
+        return self._proof.matches(answer, expected)
+
+
 class CompactAuditChallenge(AuditChallenge):
     """Unbounded challenge: the secret polynomial never leaves the client."""
 
@@ -208,6 +241,8 @@ class Audit:
     def _create_challenge(self) -> AuditChallenge:
         if self._metadata.proof_scheme == COMPACT_SCHEME:
             return CompactAuditChallenge(self._metadata.compact_keys)
+        if self._metadata.proof_scheme == UNBOUNDED_SCHEME:
+            return UnboundedAuditChallenge(self._metadata)
         return BoundedAuditChallenge(self._metadata, self._metadata_file, self._random)
 
     def _audit_server(self, storage_location, packets, challenge):
@@ -288,6 +323,7 @@ class Audit:
         scheme = self._metadata.proof_scheme
         if self._metadata.chunks is None or scheme not in (
             BOUNDED_SCHEME,
+            UNBOUNDED_SCHEME,
             COMPACT_SCHEME,
         ):
             raise ValueError(

@@ -19,7 +19,11 @@ from hybolt.hybolt_encode import HyboltEncode
 from hybolt.constant import DEFAULT_REDUNDANCY, MAX_MAC_THREADS
 from hybolt.encryption.codecs import CODECS, DEFAULT_CODEC
 from hybolt.encryption.digest import Digest
-from hybolt.encryption.retrievability import BOUNDED_SCHEME, COMPACT_SCHEME
+from hybolt.encryption.retrievability import (
+    BOUNDED_SCHEME,
+    COMPACT_SCHEME,
+    UNBOUNDED_SCHEME,
+)
 from hybolt.logger.logger import execution_logger
 from hybolt.logger.progress import set_progress
 from hybolt.utils.debug import set_debugging
@@ -93,11 +97,12 @@ def main():
 )
 @click.option(
     "--proof-scheme",
-    type=click.Choice([COMPACT_SCHEME, BOUNDED_SCHEME]),
+    type=click.Choice([COMPACT_SCHEME, BOUNDED_SCHEME, UNBOUNDED_SCHEME]),
     default=COMPACT_SCHEME,
     show_default=True,
     help="compact: unbounded audits with server-side tags; "
-    "bounded: Hy-SAIL's single-use challenges with client-side MACs",
+    "bounded: Hy-SAIL's single-use challenges with client-side MACs; "
+    "unbounded: Hy-SAIL's single secret polynomial with client-side MACs",
 )
 @click.option(
     "--seal-packets/--no-seal-packets",
@@ -302,7 +307,9 @@ def audit_command(
     except ValueError as error:
         raise click.ClickException(str(error)) from error
 
-    if report.polynomial_index is None:
+    if report.scheme == UNBOUNDED_SCHEME:
+        click.echo("Unbounded audit (secret polynomial, never revealed)")
+    elif report.polynomial_index is None:
         click.echo(f"{report.scheme.capitalize()} audit (unbounded challenges)")
     else:
         click.echo(

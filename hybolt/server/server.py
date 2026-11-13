@@ -62,6 +62,21 @@ class Server:
 
         return ga.aggregate_remainders(remainders, polynomial, shifts)
 
+    def receive_xor_challenge(self, packet_files):
+        """Hy-SAIL's unbounded model: the XOR of the packets, as a polynomial.
+
+        No polynomial is involved, so the answer is about one packet long and
+        the client does the reduction with its secret P. Packets of different
+        lengths are XORed as polynomials, aligned at x^0.
+        """
+        answer = 0
+        for packet_file in packet_files:
+            block_path = self._find_check_block(None, packet_file)
+            if block_path is None:
+                raise ValueError(f"Check block not found: {packet_file}")
+            answer ^= ga.bytes_to_poly_int(self._read_block_data(block_path))
+        return answer
+
     def download_tag(self, packet_file):
         return getattr(
             self._read_payload(Path(self._storage_location) / packet_file), "tag", None

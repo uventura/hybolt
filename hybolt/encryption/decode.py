@@ -4,6 +4,7 @@ from pathlib import Path
 from hybolt.encryption.decoding_strategy import create_decoding_strategy
 from hybolt.encryption.encoding_metadata import EncodingMetadata
 from hybolt.encryption.retrievability import (
+    BOUNDED_SCHEME,
     COMPACT_SCHEME,
     ChallengeLedger,
     create_retrievability_proof,
@@ -81,7 +82,9 @@ class Decode:
                 chunk_index=getattr(metadata, "chunk_index", 0),
             )
         return create_retrievability_proof(
-            self._retrievability_proof, metadata.polynomials
+            self._retrievability_proof,
+            metadata.polynomials,
+            scheme=self._metadata.proof_scheme or BOUNDED_SCHEME,
         )
 
     def _reveal_one_challenge(self, proofs):

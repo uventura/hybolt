@@ -8,7 +8,9 @@ from hybolt.encryption.block import Block
 from hybolt.server.server import Server, StoredPacket
 
 
-def test_given_storage_location_when_initializing_server_then_creates_location(tmp_path):
+def test_given_storage_location_when_initializing_server_then_creates_location(
+    tmp_path,
+):
     storage_location = tmp_path / "storage"
 
     Server(str(storage_location))

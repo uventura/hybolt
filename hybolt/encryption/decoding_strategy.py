@@ -50,7 +50,7 @@ class DecodingStrategy(ABC):
         else:
             data = block.server.download_block(block.index)
 
-        if not self._proof.verify_download(block.server, block, data):
+        if not self._proof.verify_download(block.server, block, data, expected_mac):
             return None
 
         if not block.packet_sha256:
