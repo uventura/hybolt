@@ -1,11 +1,11 @@
-Este capítulo apresenta a avaliação experimental do HyBolt e a compara com a solução baseada em Online Codes do HySAIL \cite{amaral2013hysail,amaral2019hysail} e com outros esquemas de \acrshort{PoR}. Para que a comparação entre os códigos não dependa de medidas publicadas, obtidas em outro equipamento e com outra implementação, os Online Codes foram implementados no próprio HyBolt (Capítulo~5) e medidos na mesma máquina, com o mesmo fluxo de Codificação, Distribuição e Decodificação utilizado para o R10. São avaliados, nesta ordem, a recuperação dos dados e o \emph{overhead} de recepção do Raptor R10, comparado aos Online Codes e aos LT Codes, o custo do \acrshort{MAC} polinomial, o desempenho das fases de Codificação, Decodificação e Auditoria, a memória exigida do usuário, a eficácia da Auditoria e da ocultação da estrutura do código e, por fim, a comparação entre Online Codes e R10 e com os demais trabalhos de referência.
+Este capítulo apresenta a avaliação experimental do HyBolt e a compara com a solução baseada em Online Codes do HySAIL \cite{amaral2013hysail,amaral2019hysail} e com outros esquemas de \acrshort{PoR}. Para que a comparação entre os códigos não dependa de medidas publicadas, obtidas em outro equipamento e com outra implementação, os Online Codes foram implementados no próprio HyBolt (Capítulo~5) e medidos na mesma máquina, com o mesmo fluxo de Codificação, Distribuição e Decodificação utilizado para o R10. São avaliados, nesta ordem, a recuperação dos dados e o \emph{overhead} de recepção do Raptor R10, comparado aos Online Codes e aos LT Codes, o custo do \acrshort{MAC} polinomial, o desempenho das fases de Codificação, Decodificação e Auditoria, a memória exigida do usuário, a eficácia da Auditoria e, por fim, a comparação entre Online Codes e R10 e com os demais trabalhos de referência.
 
 \section{Ambiente Experimental}
 \label{sec:ambiente_experimental}
 
 Os experimentos foram executados em um computador com processador Intel Core i7-11390H (4 núcleos, 8 \emph{threads}, até 3,4 GHz) e 8 GB de memória, sob o subsistema Linux do Windows (WSL2), com Python~3.13, NumPy~2.2 e GCC~13 para a extensão em C. Os Online Codes foram executados pela implementação em Python do próprio HyBolt, como o R10. Os provedores foram simulados por três diretórios no sistema de arquivos Linux do próprio computador, de modo que os tempos medidos não incluem latência de rede.
 
-Salvo indicação em contrário, foram utilizados os parâmetros padrão do HyBolt: $\lambda = 127$, \emph{chunks} de até 650.000 bytes com $K = 100$ símbolos de origem, redundância $\varepsilon = 0{,}25$, $l = 40$ polinômios de desafio no esquema limitado e ocultação da estrutura habilitada. Com esses parâmetros, cada \emph{chunk} completo gera 125 pacotes de 6.500 bytes, dos quais 25 são pacotes de reparo. Os arquivos de entrada foram gerados com bytes pseudoaleatórios, e, em todas as execuções, o arquivo decodificado foi comparado byte a byte com o original.
+Salvo indicação em contrário, foram utilizados os parâmetros padrão do HyBolt: $\lambda = 127$, \emph{chunks} de até 650.000 bytes com $K = 100$ símbolos de origem, redundância $\varepsilon = 0{,}25$, $l = 40$ polinômios de desafio e pacotes armazenados sem cifragem. Com esses parâmetros, cada \emph{chunk} completo gera 125 pacotes de 6.500 bytes, dos quais 25 são pacotes de reparo. Os arquivos de entrada foram gerados com bytes pseudoaleatórios, e, em todas as execuções, o arquivo decodificado foi comparado byte a byte com o original.
 
 Todas as medidas e figuras deste capítulo são reproduzidas pelo comando \texttt{python scripts/thesis\_benchmarks.py all}, que grava os dados brutos em \texttt{logs/thesis/} e as figuras em \texttt{doc/thesis/img/resultados/}. O tempo de cada etapa da codificação é obtido envolvendo, durante a medição, os métodos correspondentes do HyBolt com um cronômetro, de modo que as etapas são medidas sem alterar o código da ferramenta. Medidas de arquivos de até 1~MiB correspondem à média de três execuções; as demais, a uma única execução.
 
@@ -60,7 +60,7 @@ Como mostra a Figura~\ref{fig:loss_tolerance}, a recuperação deixa de ser gara
 \section{Custo do MAC Polinomial}
 \label{sec:resultados_mac}
 
-A Figura~\ref{fig:mac_runtime} compara o tempo da divisão $m(x) \bmod P(x)$ por um polinômio de grau 127 nas duas representações do HyBolt com os valores reportados na Figura~5.5 da tese que propôs o HySAIL \cite{amaral2013hysail}. O esquema limitado representa o bloco como um vetor de coeficientes, convertido em inteiro antes da redução, e o esquema compacto utiliza diretamente o inteiro cujos bits são os coeficientes; em ambos os casos, a redução é realizada pela extensão em C.
+A Figura~\ref{fig:mac_runtime} compara o tempo da divisão $m(x) \bmod P(x)$ por um polinômio de grau 127 no HyBolt com os valores reportados na Figura~5.5 da tese que propôs o HySAIL \cite{amaral2013hysail}. O HyBolt representa o bloco como um vetor de coeficientes, convertido em inteiro antes da redução, realizada pela extensão em C.
 
 \begin{figure}[htbp]
 	\centering
@@ -69,37 +69,37 @@ A Figura~\ref{fig:mac_runtime} compara o tempo da divisão $m(x) \bmod P(x)$ por
 	\label{fig:mac_runtime}
 \end{figure}
 
-No HySAIL, o tempo cresce de forma quadrática com o tamanho do bloco, de 0,06~s para 1~KiB a 62~s para 40~KiB \cite{amaral2013hysail}. No HyBolt, o crescimento é linear: um bloco de 40~KiB é reduzido em 0,23~ms a partir do vetor de coeficientes e em 0,11~ms a partir do inteiro, mais de cinco ordens de grandeza menos que no HySAIL. Parte dessa diferença decorre do equipamento e da versão do Python, mas a mudança de comportamento assintótico decorre do algoritmo: a redução por tabela processa cada byte do bloco um número constante de vezes. Para o pacote de 6.500 bytes do HyBolt, um \acrshort{MAC} custa cerca de 20~$\mu$s, de modo que o \acrshort{MAC} deixa de ser um gargalo do protocolo.
+No HySAIL, o tempo cresce de forma quadrática com o tamanho do bloco, de 0,06~s para 1~KiB a 62~s para 40~KiB \cite{amaral2013hysail}. No HyBolt, o crescimento é linear: um bloco de 40~KiB é reduzido em 0,54~ms, cerca de cinco ordens de grandeza menos que no HySAIL. Parte dessa diferença decorre do equipamento e da versão do Python, mas a mudança de comportamento assintótico decorre do algoritmo: a redução por tabela processa cada byte do bloco um número constante de vezes. Para o pacote de 6.500 bytes do HyBolt, um \acrshort{MAC} custa cerca de 0,1~ms, de modo que o \acrshort{MAC} deixa de ser um gargalo do protocolo.
 
 \section{Codificação e Decodificação}
 \label{sec:resultados_codificacao}
 
-As Figuras~\ref{fig:encode_runtime} e~\ref{fig:decode_runtime} apresentam os tempos de codificação, incluindo a distribuição dos pacotes e a gravação dos metadados, e de decodificação para arquivos de 64~KiB a 64~MiB. O esquema limitado foi avaliado apenas até 1~MiB, pois seus metadados excedem o próprio arquivo (Seção~\ref{sec:resultados_memoria}).
+As Figuras~\ref{fig:encode_runtime} e~\ref{fig:decode_runtime} apresentam os tempos de codificação, incluindo a distribuição dos pacotes e a gravação dos metadados, e de decodificação para arquivos de 64~KiB a 64~MiB. A codificação com os \acrshort{MAC}s foi avaliada apenas até 1~MiB, pois seus metadados excedem o próprio arquivo (Seção~\ref{sec:resultados_memoria}).
 
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=0.85\textwidth]{resultados/encode_runtime.pdf}
-	\caption{Tempo de codificação e distribuição em função do tamanho do arquivo, para os esquemas compacto e limitado e sem prova de recuperabilidade.}
+	\caption{Tempo de codificação e distribuição em função do tamanho do arquivo, com e sem prova de recuperabilidade.}
 	\label{fig:encode_runtime}
 \end{figure}
 
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=0.85\textwidth]{resultados/decode_runtime.pdf}
-	\caption{Tempo de decodificação em função do tamanho do arquivo. Nos esquemas com prova, cada pacote transferido é verificado antes de ser entregue ao decodificador.}
+	\caption{Tempo de decodificação em função do tamanho do arquivo. Com a prova, cada pacote transferido é verificado antes de ser entregue ao decodificador.}
 	\label{fig:decode_runtime}
 \end{figure}
 
-Todos os esquemas escalam linearmente com o tamanho do arquivo, como esperado da divisão em \emph{chunks} independentes. Para 64~MiB, a codificação levou 2,2~s com o esquema compacto e 1,4~s sem prova de recuperabilidade, o que corresponde a 29 e 47~MiB/s, e a decodificação, 1,9 e 1,1~s. No esquema limitado, a codificação de 1~MiB levou 2,5~s, cerca de 60 vezes mais que no esquema compacto, e a decodificação, 0,13~s, contra 0,03~s; como o tempo do esquema limitado é dominado pela geração dos 40 polinômios primitivos, ele varia pouco entre 64~KiB e 1~MiB.
+Sem prova de recuperabilidade, os tempos escalam linearmente com o tamanho do arquivo, como esperado da divisão em \emph{chunks} independentes: para 64~MiB, a codificação levou 2,4~s, cerca de 27~MiB/s, e a decodificação, 1,8~s. Com os \acrshort{MAC}s, a codificação de 1~MiB levou 6,0~s, contra 0,03~s sem prova, e a decodificação, 0,57~s, contra 0,03~s; como esse tempo é dominado pela geração dos 40 polinômios primitivos, ele varia pouco entre 64~KiB e 1~MiB.
 
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=\textwidth]{resultados/encode_stages.pdf}
-	\caption{Decomposição do tempo de codificação de um arquivo de 1~MiB por etapa. A etapa ``outros'' reúne a leitura do arquivo, a geração das chaves e dos polinômios e o cálculo do \emph{hash} do arquivo.}
+	\caption{Decomposição do tempo de codificação de um arquivo de 1~MiB por etapa. A etapa ``outros'' reúne a leitura do arquivo, a geração dos polinômios e o cálculo do \emph{hash} do arquivo.}
 	\label{fig:encode_stages}
 \end{figure}
 
-A Figura~\ref{fig:encode_stages} mostra onde esse tempo é gasto. No esquema limitado, 47\% da codificação corresponde aos $n \cdot l$ \acrshort{MAC}s dos blocos de mensagem, e quase todo o restante, à geração dos polinômios de desafio. No esquema compacto, a gravação nos provedores responde por 30\%, a etiqueta por 19\% e a cifragem por 16\%, enquanto a codificação R10, implementada em Python, ocupa apenas 5\% do total. O custo do código de apagamento é, portanto, pequeno em relação às demais etapas, e otimizações futuras devem concentrar-se na gravação dos pacotes e na cifragem.
+A Figura~\ref{fig:encode_stages} mostra onde esse tempo é gasto. Com a prova, 47\% da codificação corresponde aos $n \cdot l$ \acrshort{MAC}s dos blocos de mensagem, e quase todo o restante, à geração dos polinômios de desafio. Sem a prova, a gravação nos provedores responde por 68\% e a gravação dos metadados por 14\%, enquanto a codificação R10, implementada em Python, ocupa 11\% do total. O custo do código de apagamento é, portanto, pequeno em relação às demais etapas, e otimizações futuras devem concentrar-se na geração dos polinômios, nos \acrshort{MAC}s e na gravação dos pacotes.
 
 \section{Auditoria}
 \label{sec:resultados_auditoria}
@@ -113,9 +113,9 @@ A Figura~\ref{fig:audit_runtime} apresenta o tempo de uma rodada de auditoria so
 	\label{fig:audit_runtime}
 \end{figure}
 
-No esquema compacto, a auditoria de todos os pacotes cresce linearmente com o arquivo, até 1,8~s para os 13.000 pacotes de 64~MiB, enquanto a auditoria amostral permanece entre 15 e 59~ms, independentemente do tamanho do arquivo. No esquema limitado, a rodada amostral de 1~MiB levou 0,11~s e a completa, 0,16~s; além da leitura e regravação dos metadados, que ocupam 1,6~MB, cada pacote desafiado exige a derivação de seu \acrshort{MAC} a partir de cerca de 50 \acrshort{MAC}s de blocos de mensagem e, para pacotes cifrados, uma divisão polinomial sobre o fluxo de chave.
+Para 1~MiB, a rodada amostral levou 0,40~s e a completa, 0,51~s. O tempo é dominado pela leitura e regravação dos metadados, que ocupam 1,6~MB, e pela derivação do \acrshort{MAC} de cada pacote desafiado a partir de cerca de 50 \acrshort{MAC}s de blocos de mensagem.
 
-O tempo de auditoria é útil apenas se a rodada detectar a corrupção. Para avaliar essa capacidade, um arquivo de 4~MiB foi codificado com o esquema compacto, e uma fração $\beta$ dos 294 pacotes de um provedor teve um byte alterado antes de cada rodada, com 100 repetições por configuração. A Figura~\ref{fig:audit_detection} compara a fração de rodadas que detectaram a corrupção com a probabilidade teórica de uma amostra sem reposição conter um pacote corrompido, $1 - \binom{N - c}{s} / \binom{N}{s}$, em que $N$ é o número de pacotes do provedor e $c$ o de pacotes corrompidos, que se aproxima de $1 - (1 - \beta)^s$ quando $s \ll N$.
+O tempo de auditoria é útil apenas se a rodada detectar a corrupção. Para avaliar essa capacidade, um arquivo de 4~MiB foi codificado com os \acrshort{MAC}s, e uma fração $\beta$ dos 294 pacotes de um provedor teve um byte alterado antes de cada rodada, com 100 repetições por configuração. Para que as 1.600 rodadas não esgotassem os $l = 40$ polinômios, os metadados foram restaurados antes de cada rodada. A Figura~\ref{fig:audit_detection} compara a fração de rodadas que detectaram a corrupção com a probabilidade teórica de uma amostra sem reposição conter um pacote corrompido, $1 - \binom{N - c}{s} / \binom{N}{s}$, em que $N$ é o número de pacotes do provedor e $c$ o de pacotes corrompidos, que se aproxima de $1 - (1 - \beta)^s$ quando $s \ll N$.
 
 \begin{figure}[htbp]
 	\centering
@@ -124,7 +124,7 @@ O tempo de auditoria é útil apenas se a rodada detectar a corrupção. Para av
 	\label{fig:audit_detection}
 \end{figure}
 
-Os valores medidos acompanham a curva teórica dentro da variação esperada para 100 repetições, o que indica que a resposta agregada é rejeitada sempre que a amostra contém um pacote corrompido. Além disso, nenhuma das auditorias realizadas sobre arquivos íntegros nos experimentos da Seção~\ref{sec:resultados_codificacao} acusou corrupção. Com 5,1\% de pacotes corrompidos, uma amostra de 50 pacotes detectou a corrupção em 96\% das rodadas; com 1,0\%, foram necessários 200 pacotes para atingir 98\%.
+Os valores medidos acompanham a curva teórica dentro da variação esperada para 100 repetições, o que indica que a resposta agregada é rejeitada sempre que a amostra contém um pacote corrompido. Além disso, nenhuma das auditorias realizadas sobre arquivos íntegros nos experimentos da Seção~\ref{sec:resultados_codificacao} acusou corrupção. Com 5,1\% de pacotes corrompidos, uma amostra de 50 pacotes detectou a corrupção em 95\% das rodadas; com 1,0\%, foram necessários 200 pacotes para atingir 98\%.
 
 \section{Memória do Usuário e Armazenamento}
 \label{sec:resultados_memoria}
@@ -134,29 +134,13 @@ A Figura~\ref{fig:metadata_size} apresenta o tamanho dos metadados mantidos pelo
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=0.85\textwidth]{resultados/metadata_size.pdf}
-	\caption{Metadados mantidos pelo usuário, em porcentagem do tamanho do arquivo. A linha pontilhada indica o valor que os $n \cdot l$ \acrshort{MAC}s do esquema limitado ocupariam empacotados em bits.}
+	\caption{Metadados mantidos pelo usuário, em porcentagem do tamanho do arquivo. A linha pontilhada indica o valor que os $n \cdot l$ \acrshort{MAC}s ocupariam empacotados em bits.}
 	\label{fig:metadata_size}
 \end{figure}
 
-No esquema limitado, os metadados ocupam 154\% de um arquivo de 1~MiB. Esse valor é elevado pelo segundo \emph{chunk}, mais curto, que também tem 100 blocos de mensagem; para arquivos grandes, a memória converge para $K l$ \acrshort{MAC}s por \emph{chunk} completo. Mesmo que os \acrshort{MAC}s fossem armazenados em bits, e não com um byte por coeficiente, ocupariam $K l \lambda$ bits por \emph{chunk}, cerca de 9,8\% do arquivo, valor que não diminui com o tamanho do arquivo e que independe da redundância. No esquema compacto, os metadados convergem para 2,7\% do arquivo e correspondem quase inteiramente à localização, ao nome e ao \emph{hash} SHA-256 de cada pacote; as chaves da prova ocupam 64 bytes. Essa informação de localização é necessária a qualquer esquema que distribua o arquivo entre provedores, e poderia ser reduzida derivando os nomes dos pacotes das chaves de nomeação, como já é feito na ocultação, e substituindo os \emph{hashes} individuais pela verificação das etiquetas.
+Com a prova, os metadados ocupam 154\% de um arquivo de 1~MiB. Esse valor é elevado pelo segundo \emph{chunk}, mais curto, que também tem 100 blocos de mensagem; para arquivos grandes, a memória converge para $K l$ \acrshort{MAC}s por \emph{chunk} completo. Mesmo que os \acrshort{MAC}s fossem armazenados em bits, e não com um byte por coeficiente, ocupariam $K l \lambda$ bits por \emph{chunk}, cerca de 9,8\% do arquivo, valor que não diminui com o tamanho do arquivo e que independe da redundância. Sem a prova, os metadados convergem para 2,7\% do arquivo e correspondem à localização, ao nome e ao \emph{hash} SHA-256 de cada pacote, informação necessária a qualquer esquema que distribua o arquivo entre provedores.
 
-O armazenamento nos provedores corresponde a 1,27 vez o tamanho do arquivo para $\varepsilon = 0{,}25$, próximo do fator nominal $125/100$, ao qual se somam a etiqueta de 16 bytes, a serialização de cada pacote e, em arquivos pequenos, o preenchimento do último símbolo.
-
-\section{Ocultação da Estrutura e Ataque Dirigido}
-\label{sec:resultados_ocultacao}
-
-Sem a ocultação, um adversário que conhece a estrutura do código pode escolher os pacotes que corrompe. Como os suportes do R10 dependem apenas de $K$ e dos \acrshort{ESI}s, ele pode corromper todos os pacotes que contêm um mesmo símbolo de origem, o que torna o \emph{chunk} irrecuperável; no \emph{chunk} padrão, o símbolo menos coberto aparece em apenas sete dos 125 pacotes, contra os $r + 1 = 26$ que um código MDS exigiria. A perda de $h$ pacotes escolhidos ao acaso, por outro lado, só se torna relevante perto de $r$: estimada por 20.000 ordens aleatórias, ela torna o \emph{chunk} irrecuperável com probabilidade de 0,8\%, 6,3\% e 43\% para $h = 18$, 21 e 24. Com a ocultação, o adversário não distingue os \emph{chunks} e, na melhor estratégia disponível, corrompe pacotes escolhidos uniformemente. A Figura~\ref{fig:targeted_attack} compara as duas situações, estimando por simulação, com 400 repetições por ponto, a probabilidade de perda do arquivo.
-
-\begin{figure}[htbp]
-	\centering
-	\includegraphics[width=0.85\textwidth]{resultados/targeted_attack.pdf}
-	\caption{Probabilidade de perda do arquivo em função da fração de pacotes corrompidos, com ocultação (corrupção uniforme) e sem ocultação (linhas pontilhadas: os sete pacotes que contêm um símbolo de origem de um único \emph{chunk}), para arquivos de 1~MiB, 64~MiB e 1~GiB.}
-	\label{fig:targeted_attack}
-\end{figure}
-
-Para um arquivo de 1~GiB, com 206.500 pacotes, a ocultação eleva a fração de pacotes que o adversário precisa corromper de 0,0034\% para cerca de 4\%, a partir da qual a perda do arquivo passa a ser possível, e para 8,5\%, a partir da qual ela se torna mais provável que a recuperação, um aumento de mais de três ordens de grandeza. Embora o R10 exija alguns pacotes além de $K$, os \emph{chunks} de 100 símbolos concentram a corrupção uniforme em torno de sua média, $\beta (K + r)$, e reduzem para 1.652 o número de \emph{chunks} em que uma combinação desfavorável pode ocorrer. A fração crítica diminui com o número de \emph{chunks} e é de cerca de 18\% para 1~MiB e de 11\% para 64~MiB.
-
-Essa fração de corrupção é, além disso, facilmente detectável. Com 4\% de pacotes corrompidos, uma auditoria de 50 pacotes detecta a corrupção em cada provedor com probabilidade de 87\%, e em pelo menos um dos três provedores com probabilidade superior a 99,8\%, o que permite iniciar a Redistribuição antes que algum \emph{chunk} se torne irrecuperável. A margem pode ser ampliada aumentando $\varepsilon$, aumentando ainda mais $K$ ou aumentando o tamanho da amostra de auditoria.
+O armazenamento nos provedores corresponde a 1,27 vez o tamanho do arquivo para $\varepsilon = 0{,}25$, próximo do fator nominal $125/100$, ao qual se somam a serialização de cada pacote e, em arquivos pequenos, o preenchimento do último símbolo.
 
 \section{Comparação entre Online Codes e Raptor R10}
 \label{sec:comparacao_hysail}
@@ -168,7 +152,7 @@ Como os Online Codes não são sistemáticos e exigem um número aleatório de b
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=\textwidth]{resultados/codec_comparison.pdf}
-	\caption{Tempos de codificação e decodificação do HyBolt com Raptor R10 e com Online Codes, medidos na mesma máquina, para arquivos de 50, 100 e 500~MB: tempo do código isolado, tempo total sem prova de recuperabilidade e sem ocultação e tempo total com o esquema compacto e a ocultação.}
+	\caption{Tempos de codificação e decodificação do HyBolt com Raptor R10 e com Online Codes, medidos na mesma máquina, para arquivos de 50, 100 e 500~MB: tempo do código isolado e tempo total sem prova de recuperabilidade.}
 	\label{fig:hysail_comparison}
 \end{figure}
 
@@ -187,15 +171,13 @@ Como os Online Codes não são sistemáticos e exigem um número aleatório de b
 		Online Codes & código isolado & 0,19 & 0,52 & 3,3 & 0,31 & 0,86 & 3,2 \\
 		R10 & sem prova & 1,5 & 3,1 & 24,0 & 0,8 & 3,0 & 9,8 \\
 		Online Codes & sem prova & 1,6 & 4,2 & 28,1 & 1,4 & 3,7 & 13,1 \\
-		R10 & compacto e ocultação & 2,8 & 6,9 & 43,3 & 2,9 & 4,7 & 52,4 \\
-		Online Codes & compacto e ocultação & 2,1 & 5,8 & 37,8 & 5,5 & 6,5 & 58,7 \\
 		\hline
 	\end{tabular}
 \end{table}
 
-A Figura~\ref{fig:hysail_comparison} e a Tabela~\ref{tab:comparacao_hysail} mostram que o custo dos dois códigos é equivalente. O tempo do código isolado, que reúne a construção do codificador e a geração dos pacotes na codificação e a entrega dos pacotes ao decodificador na decodificação, ficou entre 2,7 e 3,5~s para 500~MB com ambos. Como os tempos totais, medidos em uma única execução, são dominados pela gravação e leitura dos pacotes no sistema de arquivos e variam entre execuções --- em uma execução anterior, a codificação compacta de 500~MB com o R10 levou 15~s ---, o custo de cada código foi medido também em memória, codificando e decodificando 200 \emph{chunks} padrão: a mediana foi de 2,8~ms para codificar e 3,5~ms para decodificar um \emph{chunk} com o R10, e de 2,6~ms e 3,2~ms com os Online Codes. Os Online Codes geram cada bloco de verificação com cerca de cinco XORs da mensagem composta, enquanto cada pacote de reparo do R10 combina cerca de 48 símbolos de origem; em contrapartida, os 100 primeiros pacotes do R10 são os próprios símbolos de origem, ao passo que os Online Codes calculam os blocos auxiliares e geram 143 blocos, o que aproxima os dois custos.
+A Figura~\ref{fig:hysail_comparison} e a Tabela~\ref{tab:comparacao_hysail} mostram que o custo dos dois códigos é equivalente. O tempo do código isolado, que reúne a construção do codificador e a geração dos pacotes na codificação e a entrega dos pacotes ao decodificador na decodificação, ficou entre 2,7 e 3,5~s para 500~MB com ambos. Como os tempos totais, medidos em uma única execução, são dominados pela gravação e leitura dos pacotes no sistema de arquivos e variam entre execuções, o custo de cada código foi medido também em memória, codificando e decodificando 200 \emph{chunks} padrão: a mediana foi de 2,8~ms para codificar e 3,5~ms para decodificar um \emph{chunk} com o R10, e de 2,6~ms e 3,2~ms com os Online Codes. Os Online Codes geram cada bloco de verificação com cerca de cinco XORs da mensagem composta, enquanto cada pacote de reparo do R10 combina cerca de 48 símbolos de origem; em contrapartida, os 100 primeiros pacotes do R10 são os próprios símbolos de origem, ao passo que os Online Codes calculam os blocos auxiliares e geram 143 blocos, o que aproxima os dois custos.
 
-A diferença está na quantidade de pacotes. Para decodificar um \emph{chunk}, o R10 recebeu, em média, 101,5 pacotes, e no máximo 111, enquanto os Online Codes receberam, em média, 136,3 dos 143 pacotes armazenados. Na decodificação do arquivo, isso se traduz em mais pacotes transferidos, verificados e decifrados, o que explica a decodificação sem prova de 23\% a 75\% mais lenta com os Online Codes. Na codificação, o tempo total com os dois códigos foi próximo, e as diferenças, nos dois sentidos, são da ordem da variação entre execuções.
+A diferença está na quantidade de pacotes. Para decodificar um \emph{chunk}, o R10 recebeu, em média, 101,5 pacotes, e no máximo 111, enquanto os Online Codes receberam, em média, 136,3 dos 143 pacotes armazenados. Na decodificação do arquivo, isso se traduz em mais pacotes transferidos e verificados, o que explica a decodificação sem prova de 23\% a 75\% mais lenta com os Online Codes. Na codificação, o tempo total com os dois códigos foi próximo, e as diferenças, nos dois sentidos, são da ordem da variação entre execuções.
 
 \begin{figure}[htbp]
 	\centering
@@ -211,24 +193,24 @@ Quanto às demais propriedades, o HyBolt com R10 mantém a Distribuição entre 
 \section{Comparação com Outros Esquemas de PoR}
 \label{sec:comparacao_por}
 
-A Tabela~\ref{tab:comparacao_por} compara qualitativamente o HyBolt com os esquemas de \acrshort{PoR} de Juels e Kaliski \cite{juels2007pors} e de Shacham e Waters \cite{shacham2008compact}, a partir da comparação apresentada na tese do HySAIL \cite{amaral2013hysail}, com o próprio HySAIL e com os dois esquemas implementados neste trabalho. Esses trabalhos não reportam medidas de desempenho diretamente comparáveis às deste capítulo, de modo que a comparação se restringe às propriedades dos esquemas.
+A Tabela~\ref{tab:comparacao_por} compara qualitativamente o HyBolt com os esquemas de \acrshort{PoR} de Juels e Kaliski \cite{juels2007pors} e de Shacham e Waters \cite{shacham2008compact}, a partir da comparação apresentada na tese do HySAIL \cite{amaral2013hysail}, e com o próprio HySAIL. Esses trabalhos não reportam medidas de desempenho diretamente comparáveis às deste capítulo, de modo que a comparação se restringe às propriedades dos esquemas.
 
 \begin{table}[htbp]
 	\centering
 	\caption{Comparação qualitativa entre esquemas de \acrshort{PoR}. $n$ é o número de blocos de mensagem e $l$ o número de desafios do modelo limitado}
 	\label{tab:comparacao_por}
 	\footnotesize
-	\begin{tabular}{@{}p{3.3cm}p{2.1cm}p{2.1cm}p{2.0cm}p{2.0cm}p{2.1cm}@{}}
+	\begin{tabular}{@{}p{3.6cm}p{2.4cm}p{2.4cm}p{2.4cm}p{2.4cm}@{}}
 		\hline
-		\textbf{Propriedade} & \textbf{Juels--Kaliski} & \textbf{Shacham--Waters} & \textbf{HySAIL} & \textbf{HyBolt limitado} & \textbf{HyBolt compacto} \\
+		\textbf{Propriedade} & \textbf{Juels--Kaliski} & \textbf{Shacham--Waters} & \textbf{HySAIL} & \textbf{HyBolt} \\
 		\hline
-		Múltiplos provedores & não & não & sim & sim & sim \\
-		Redistribuição & não & não & local & local & local \\
-		Auditorias ilimitadas & não & sim & sim\textsuperscript{a} & não ($l$) & sim \\
-		Memória do usuário & chave & chave & $n \cdot l$ \acrshort{MAC}s & $n \cdot l$ \acrshort{MAC}s & chave e localização \\
-		Resposta & sentinelas & $\approx$ 1 bloco & $\lambda$ bits & $\lambda$ bits & $\approx$ 1 pacote \\
-		Ocultação da estrutura & sim & -- & não & sim & sim \\
-		\emph{Overhead} de recepção & -- & -- & 9,7\% a 65\%\textsuperscript{b} & 0,27\% a 14\%\textsuperscript{c} & 0,27\% a 14\%\textsuperscript{c} \\
+		Múltiplos provedores & não & não & sim & sim \\
+		Redistribuição & não & não & local & local \\
+		Auditorias ilimitadas & não & sim & sim\textsuperscript{a} & não ($l$) \\
+		Memória do usuário & chave & chave & $n \cdot l$ \acrshort{MAC}s & $n \cdot l$ \acrshort{MAC}s \\
+		Resposta & sentinelas & $\approx$ 1 bloco & $\lambda$ bits & $\lambda$ bits \\
+		Ocultação da estrutura & sim & -- & não & não \\
+		\emph{Overhead} de recepção & -- & -- & 9,7\% a 65\%\textsuperscript{b} & 0,27\% a 14\%\textsuperscript{c} \\
 		\hline
 	\end{tabular}
 
@@ -238,8 +220,8 @@ A Tabela~\ref{tab:comparacao_por} compara qualitativamente o HyBolt com os esque
 	\textsuperscript{c} Raptor R10, para $K$ entre 1.000 e 10 (Tabela~\ref{tab:overhead}).
 \end{table}
 
-O esquema compacto do HyBolt combina as propriedades dos dois grupos: assim como o esquema de Shacham e Waters, admite auditorias ilimitadas com uma chave de tamanho constante e uma resposta do tamanho de um pacote, e, assim como o HySAIL, distribui o arquivo entre provedores e redistribui os pacotes corrompidos. Como em Juels e Kaliski, a estrutura do código é ocultada por cifragem, o que impede o ataque dirigido a um \emph{chunk}. Em relação ao esquema de Shacham e Waters, a diferença principal é a instanciação do \acrshort{MAC} linear com a redução polinomial em $GF(2)[x]$ do HySAIL, cuja garantia de extração ainda deve ser formalizada (Seção~\ref{sec:esquema_compacto}). Nenhum dos esquemas implementados oferece verificação pública, limitação já apontada para o HySAIL \cite{amaral2019hysail} e tratada pelas variantes com auditoria delegada \cite{armknecht2021outsourcing,shen2024public}.
+O HyBolt mantém as propriedades do HySAIL, a distribuição entre provedores e a Redistribuição local, e reduz o \emph{overhead} de recepção. Em relação aos esquemas de Juels e Kaliski e de Shacham e Waters, mantém as limitações do modelo limitado: o número de auditorias é fixado na codificação, a memória do usuário cresce com o arquivo e a estrutura do código fica exposta aos provedores. Nenhum dos esquemas oferece verificação pública, limitação já apontada para o HySAIL \cite{amaral2019hysail} e tratada pelas variantes com auditoria delegada \cite{armknecht2021outsourcing,shen2024public}.
 
 \section{Síntese}
 
-Os experimentos confirmam que a substituição dos Online Codes pelo Raptor R10 preserva as propriedades estruturais do HySAIL: o usuário mantém apenas os $n \cdot l$ \acrshort{MAC}s dos blocos de mensagem, o \acrshort{MAC} de qualquer pacote, inclusive dos gerados na Redistribuição, é derivado por XOR, e a Redistribuição volta a ser local, transferindo cerca de 320~KB por pacote reparado. Medidos na mesma máquina e no mesmo fluxo, os dois códigos têm custo computacional equivalente, de cerca de 3~ms por \emph{chunk}, mas o \emph{overhead} de recepção do R10 é de 5 a 36 vezes menor que o dos Online Codes: com \emph{chunks} de 100 símbolos e $\varepsilon = 0{,}25$, os Online Codes armazenam 1,45 vez o arquivo, contra 1,27, e não toleram com segurança a perda de nenhum pacote, enquanto o R10 tolera 14\%. O custo do código de apagamento é pequeno no protocolo, mesmo implementado em Python, enquanto a aritmética em $GF(2)[x]$ implementada em C reduziu a codificação de 1~MiB para cerca de 0,05~s no esquema compacto. A concessão do R10 é não ser MDS, o que torna inadequados os \emph{chunks} pequenos: com $K = 10$, nem $\varepsilon = 0{,}5$ protege um arquivo grande contra 0,4\% de corrupção uniforme. Com \emph{chunks} de $K = 100$ símbolos, $\varepsilon = 0{,}25$ basta para tolerar 14\% de perdas por \emph{chunk}, e um arquivo de 1~GiB só se torna mais provavelmente perdido que recuperado com 8,5\% dos pacotes corrompidos. O esquema compacto continua resolvendo as limitações do modelo limitado, com metadados de cerca de 3\% do arquivo, auditorias ilimitadas em tempo constante quando amostradas e detecção de corrupção coerente com a análise teórica, e a ocultação da estrutura eleva em mais de três ordens de grandeza a corrupção necessária para destruir um arquivo grande. Os principais pontos de melhoria identificados são a provisão para a saída de provedores, que, com três provedores, exige $\varepsilon \ge 0{,}6$, e o desempenho da gravação dos pacotes e da cifragem, que dominam o tempo de codificação.
+Os experimentos confirmam que a substituição dos Online Codes pelo Raptor R10 preserva as propriedades estruturais do HySAIL: o usuário mantém apenas os $n \cdot l$ \acrshort{MAC}s dos blocos de mensagem, o \acrshort{MAC} de qualquer pacote, inclusive dos gerados na Redistribuição, é derivado por XOR, e a Redistribuição transfere cerca de 320~KB por pacote reparado. Medidos na mesma máquina e no mesmo fluxo, os dois códigos têm custo computacional equivalente, de cerca de 3~ms por \emph{chunk}, mas o \emph{overhead} de recepção do R10 é de 5 a 36 vezes menor: com \emph{chunks} de 100 símbolos e $\varepsilon = 0{,}25$, os Online Codes armazenam 1,45 vez o arquivo, contra 1,27, e não toleram com segurança a perda de nenhum pacote, enquanto o R10 tolera 14\%. A concessão do R10 é não ser MDS, o que torna inadequados os \emph{chunks} pequenos. A Auditoria detecta a corrupção conforme a análise teórica. Permanecem as limitações do modelo limitado do HySAIL: metadados maiores que o arquivo, 40 auditorias por codificação, estrutura do código exposta aos provedores e cancelamento de erros na resposta agregada.

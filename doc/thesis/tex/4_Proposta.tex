@@ -15,7 +15,7 @@ HySAIL é dividido em diferentes fases para o seu processo funcionamento, são e
 \item \textit{Fase de Decodificação:} os blocos são recuperados e decodificados para reconstruir os dados originais.
 \end{itemize}
 
-O presente trabalho realiza uma substituição no processo de Codificação, passando a utilizar o Raptor R10 \cite{luby2007rfc5053} em vez dos Online Codes originalmente empregados no HySAIL. Como os dois códigos produzem blocos de verificação que são o XOR de blocos de mensagem, a substituição preserva o \acrshort{MAC} homomórfico e a Redistribuição local do HySAIL. A substituição, contudo, não é transparente para todas as fases: o dimensionamento da redundância foi concebido para os parâmetros dos Online Codes, e o modelo limitado e a exposição da estrutura do código aos provedores mantêm limitações do HySAIL original. As seções a seguir justificam a escolha do R10, identificam os problemas que permanecem na substituição direta, descrevem as adaptações que mantêm o modelo limitado do HySAIL e, por fim, propõem um esquema compacto e ilimitado, inspirado em Shacham e Waters \cite{shacham2008compact}, e a ocultação da estrutura do código, que resolvem as limitações que o modelo limitado não supera.
+O presente trabalho realiza uma substituição no processo de Codificação, passando a utilizar o Raptor R10 \cite{luby2007rfc5053} em vez dos Online Codes originalmente empregados no HySAIL. Como os dois códigos produzem blocos de verificação que são o XOR de blocos de mensagem, a substituição preserva o \acrshort{MAC} homomórfico e a Redistribuição local do HySAIL. O restante do protocolo é mantido: o usuário guarda os \acrshort{MAC}s polinomiais dos blocos de mensagem e o \emph{hash} SHA-256 de cada pacote, e a Auditoria segue o HySAIL. As seções a seguir justificam a escolha do R10, identificam as limitações que permanecem e descrevem as adaptações necessárias.
 
 \section{Escolha do Raptor R10}
 \label{sec:escolha_r10}
@@ -60,23 +60,23 @@ Na proposta deste trabalho, cada bloco de tamanho limitado do arquivo (\emph{chu
 	\begin{adjustbox}{max width=\textwidth}
 		\input{img/tikz/hybolt_fluxo}
 	\end{adjustbox}
-	\caption{Fluxo de Codificação e Distribuição proposto: cada \emph{chunk} é codificado com o R10, cada pacote é cifrado e recebe o material de prova, e os pacotes são distribuídos entre os provedores, enquanto o usuário mantém apenas os metadados.}
+	\caption{Fluxo de Codificação e Distribuição proposto: cada \emph{chunk} é codificado com o R10, e os pacotes são distribuídos entre os provedores, enquanto o usuário mantém apenas os metadados, com os \acrshort{MAC}s dos símbolos de origem e o \emph{hash} de cada pacote.}
 	\label{fig:hybolt_fluxo}
 \end{figure}
 
 \section{Problemas da Substituição Direta}
 \label{sec:problemas_substituicao}
 
-Substituir os Online Codes pelo R10 mantendo o restante do HySAIL inalterado preserva o \acrshort{MAC} homomórfico e a Redistribuição local, mas deixa o protocolo exposto em quatro aspectos, analisados a seguir e quantificados experimentalmente nos Capítulos~5 e~6.
+Substituir os Online Codes pelo R10 mantendo o restante do HySAIL inalterado preserva o \acrshort{MAC} homomórfico e a Redistribuição local, mas mantém quatro limitações do HySAIL, quantificadas nos Capítulos~5 e~6.
 
 \begin{enumerate}
 	\item \textit{Memória do usuário no modelo limitado:} o usuário armazena $n \cdot l$ \acrshort{MAC}s de $\lambda$ bits, como no HySAIL, o que corresponde a uma fração $l \lambda / B$ do arquivo para blocos de mensagem de $B$ bits. Com $l = 40$, $\lambda = 127$ e blocos de 6.500 bytes, o usuário armazena cerca de 10\% do volume terceirizado, o que contraria o objetivo de uma \acrshort{PoR}, que é manter junto ao usuário apenas uma quantidade pequena de informação \cite{juels2007pors}.
 	\item \textit{Número limitado de auditorias:} como cada desafio $P_j$ é revelado ao provedor, ele só pode ser usado uma vez (Seção~\ref{sec:auditoria_limitada}). Um arquivo admite, portanto, $l$ auditorias, incluindo os desafios realizados durante a decodificação, após as quais precisa ser recodificado.
-	\item \textit{Ataque dirigido a um único \emph{chunk}:} a redundância é calculada por \emph{chunk}, e a estrutura do código fica exposta aos provedores, pois o nome dos arquivos e os próprios símbolos de origem, emitidos de forma sistemática, são armazenados em claro. Um adversário pode, assim, corromper alguns pacotes de um mesmo \emph{chunk} e tornar o arquivo irrecuperável; como o R10 não é MDS, o menor desses conjuntos pode ter menos que $r + 1$ pacotes, e, com os parâmetros padrão, bastam os sete pacotes que contêm um mesmo símbolo de origem, contra os $r + 1 = 26$ que um código MDS exigiria. Essa corrupção atinge apenas uma fração mínima dos $T$ pacotes do arquivo, e uma auditoria que amostra $s$ pacotes a detecta com probabilidade desprezível para arquivos grandes. As \acrshort{PoR}s clássicas evitam esse ataque aplicando o código sobre todo o arquivo ou ocultando, por cifragem e permutação, quais símbolos pertencem a uma mesma palavra-código \cite{juels2007pors,bowers2009proofs}.
+	\item \textit{Ataque dirigido a um único \emph{chunk}:} a redundância é calculada por \emph{chunk}, e a estrutura do código fica exposta aos provedores, pois o nome dos arquivos e os próprios símbolos de origem, emitidos de forma sistemática, são armazenados em claro. Um adversário pode, assim, corromper alguns pacotes de um mesmo \emph{chunk} e tornar o arquivo irrecuperável; como o R10 não é MDS, o menor desses conjuntos pode ter menos que $r + 1$ pacotes, e, com os parâmetros padrão, bastam os sete pacotes que contêm um mesmo símbolo de origem, contra os $r + 1 = 26$ que um código MDS exigiria. Essa corrupção atinge apenas uma fração mínima dos $T$ pacotes do arquivo, e uma auditoria que amostra $s$ pacotes a detecta com probabilidade desprezível para arquivos grandes. As \acrshort{PoR}s clássicas evitam esse ataque ocultando, por cifragem e permutação, quais símbolos pertencem a uma mesma palavra-código \cite{juels2007pors,bowers2009proofs}.
 	\item \textit{Cancelamento de erros na resposta agregada:} a resposta da Auditoria original, o XOR dos pacotes desafiados, permite que dois pacotes corrompidos com o mesmo padrão de erro se anulem, como detalhado na Seção~\ref{sec:auditoria_limitada}.
 \end{enumerate}
 
-Além desses aspectos, herdados do HySAIL, a substituição introduz uma diferença no dimensionamento da redundância e do tamanho dos \emph{chunks}: os $r$ símbolos de reparo de um \emph{chunk} não toleram, em geral, a perda de quaisquer $r$ pacotes (Seção~\ref{sec:redundancia}). As Seções~\ref{sec:impacto_mac} a~\ref{sec:redistribuicao} descrevem como o R10 mantém o modelo limitado do HySAIL e resolvem o item 4. Os itens 1 e 2 decorrem do próprio modelo limitado e são resolvidos pelo esquema compacto da Seção~\ref{sec:esquema_compacto}, e o item 3, pela ocultação da estrutura do código da Seção~\ref{sec:ocultacao}.
+Além desses aspectos, herdados do HySAIL, a substituição introduz uma diferença no dimensionamento da redundância e do tamanho dos \emph{chunks}: os $r$ símbolos de reparo de um \emph{chunk} não toleram, em geral, a perda de quaisquer $r$ pacotes (Seção~\ref{sec:redundancia}). Para manter um modelo simples, as quatro limitações não são tratadas nesta proposta e ficam como trabalhos futuros; as seções seguintes descrevem como o R10 mantém o modelo limitado do HySAIL.
 
 \section{MAC Homomórfico com o Raptor R10}
 \label{sec:impacto_mac}
@@ -88,7 +88,7 @@ A propriedade da Equação~\eqref{eq:hysail_homomorfismo} permite ao usuário do
 	\label{eq:mac_derivado}
 \end{equation}
 
-A memória do usuário é de $n \cdot l$ \acrshort{MAC}s, independentemente do número de pacotes de reparo, e a codificação exige $n \cdot l$ divisões polinomiais, uma por bloco de mensagem e desafio, como no HySAIL original. Se os pacotes forem cifrados antes da distribuição (Seção~\ref{sec:ocultacao}), o provedor armazena $c_\eta \oplus k_\eta$, em que $k_\eta$ é o fluxo de chave da posição do pacote. Pela mesma linearidade, o \acrshort{MAC} esperado passa a ser $h_{\eta,j}(x) \oplus \left(k_\eta(x) \bmod P_j(x)\right)$, em que o segundo termo é calculado pelo usuário, que conhece a chave, no momento da verificação, ao custo de uma divisão polinomial por pacote verificado. Em ambos os casos, a propriedade homomórfica continua válida entre pacotes, o que preserva os desafios agregados sobre conjuntos de pacotes na fase de Auditoria.
+A memória do usuário é de $n \cdot l$ \acrshort{MAC}s, independentemente do número de pacotes de reparo, e a codificação exige $n \cdot l$ divisões polinomiais, uma por bloco de mensagem e desafio, como no HySAIL original. A propriedade homomórfica também vale entre pacotes, o que preserva os desafios agregados sobre conjuntos de pacotes na fase de Auditoria.
 
 \section{Escolha dos Polinômios de Desafio}
 
@@ -103,16 +103,14 @@ Por fim, um único conjunto de $l$ polinômios é gerado para todo o arquivo e c
 
 No modelo limitado, cada polinômio de desafio pode ser utilizado em uma única rodada de auditoria. Uma vez que $P_j$ é revelado, um provedor desonesto pode armazenar apenas os restos $c_\eta(x) \bmod P_j(x)$ e descartar os pacotes, respondendo corretamente a desafios futuros com o mesmo polinômio sem possuir os dados. A proposta registra, nos metadados mantidos pelo usuário, os índices dos polinômios já revelados, e o registro é persistido antes de o polinômio ser enviado ao provedor, de modo que nem uma interrupção do processo leve à sua reutilização. Assim, um arquivo codificado com $l$ polinômios admite $l$ rodadas de auditoria, após as quais deve ser recodificado. O mesmo princípio aplica-se ao desafio realizado antes de cada transferência durante a decodificação, que consome um único polinômio por sessão.
 
-Em cada rodada, o usuário sorteia um polinômio ainda não revelado e, para cada provedor $S_i$, uma amostra aleatória de $s$ pacotes por ele armazenados, solicitando uma resposta agregada. A Auditoria do HySAIL original utiliza o XOR simples dos pacotes, $\left(\bigoplus_\eta c_\eta(x)\right) \bmod P_j(x)$. Essa forma de agregação, entretanto, permite que corrupções se cancelem: se dois pacotes de uma mesma amostra forem alterados pelo mesmo padrão de erro $e(x)$, isto é, $c'_a = c_a \oplus e$ e $c'_b = c_b \oplus e$, então $c'_a \oplus c'_b = c_a \oplus c_b$ e a resposta agregada coincide com a esperada para qualquer $P_j$. Um adversário capaz de corromper pacotes aos pares pode, portanto, ocultar as alterações sem conhecer os desafios.
-
-Para eliminar esse cancelamento, a proposta pondera cada pacote por uma potência secreta de $x$. O usuário sorteia expoentes distintos $k_\eta < 2^{32}$ e o provedor responde
+Em cada rodada, o usuário sorteia um polinômio ainda não revelado e, para cada provedor $S_i$, uma amostra aleatória $Q$ de $s$ pacotes por ele armazenados. Como no Algoritmo~2 do HySAIL \cite{amaral2019hysail}, o provedor responde com o XOR dos pacotes da amostra reduzido módulo $P_j(x)$,
 
 \begin{equation}
-	A(x) = \left(\sum_{\eta} x^{k_\eta} \, c_\eta(x)\right) \bmod P_j(x),
-	\label{eq:desafio_ponderado}
+	A(x) = \left(\bigoplus_{\eta \in Q} c_\eta(x)\right) \bmod P_j(x),
+	\label{eq:desafio_xor}
 \end{equation}
 
-\noindent que o usuário compara com $\left(\sum_\eta x^{k_\eta} h_{\eta,j}(x)\right) \bmod P_j(x)$, calculado a partir dos \acrshort{MAC}s derivados pela Equação~\eqref{eq:mac_derivado}, pois a redução módulo $P_j(x)$ é compatível com a multiplicação. No exemplo anterior, as contribuições do erro deixam de se anular, já que $\left(x^{k_a} + x^{k_b}\right) e(x) \equiv 0 \pmod{P_j(x)}$ exigiria, sendo $P_j$ irredutível e $e(x) \not\equiv 0$, que $x^{k_a - k_b} \equiv 1 \pmod{P_j(x)}$. Como $x$ tem ordem $2^\lambda - 1$ para $P_j$ primitivo, isso só ocorreria se $k_a \equiv k_b \pmod{2^\lambda - 1}$, o que é impossível para expoentes distintos menores que $2^{32}$. O caso $e(x) \equiv 0 \pmod{P_j(x)}$ corresponde à falsificação de um \acrshort{MAC} isolado, cuja probabilidade já é limitada por $2^{-\lambda}$.
+\noindent que o usuário compara com $\bigoplus_{\eta \in Q} h_{\eta,j}(x)$, calculado a partir dos \acrshort{MAC}s derivados pela Equação~\eqref{eq:mac_derivado}. Essa agregação permite que corrupções se cancelem: se dois pacotes de uma mesma amostra forem alterados pelo mesmo padrão de erro $e(x)$, então $c'_a \oplus c'_b = c_a \oplus c_b$ e a resposta coincide com a esperada para qualquer $P_j$. Essa é a quarta limitação da Seção~\ref{sec:problemas_substituicao}.
 
 Quando a resposta agregada de um provedor diverge da esperada, os pacotes da amostra são verificados individualmente com o mesmo polinômio, já revelado naquela rodada, para localizar os pacotes corrompidos. O número de pacotes corrompidos encontrados em $S_i$ define $\tau_{provider}$, e o provedor é considerado aprovado se $\tau_{provider} \le \tau_{maximum}$, em que $\tau_{maximum}$ é um parâmetro da auditoria. Adicionalmente, cada \emph{chunk} é avaliado quanto à recuperabilidade, o que corresponde ao limite global $\tau_{global}$ do HySAIL. Como o R10 não é MDS, essa avaliação não compara o número de pacotes corrompidos com $r$, mas verifica se os suportes dos pacotes restantes ainda têm posto $K$, o que decide exatamente se o \emph{chunk} pode ser decodificado. Se uma fração $\beta$ dos pacotes de um provedor estiver corrompida, uma amostra de $s$ pacotes detecta ao menos uma corrupção com probabilidade de, no mínimo, $1 - (1 - \beta)^s$, o que orienta a escolha de $s$ em função do custo aceitável por rodada.
 
@@ -164,14 +162,14 @@ O parâmetro $\varepsilon$ também determina quantos provedores podem deixar o s
 
 Nos Online Codes, um bloco de verificação corrompido pode ser reconstruído pelo XOR de outros blocos de verificação, sem transferir o arquivo, graças à codificação local \cite{maymounkov2003rateless,amaral2019hysail}. O R10 preserva essa propriedade: como todo pacote é o XOR dos blocos de mensagem de seu suporte, qualquer pacote cujo suporte pertença ao espaço gerado pelos suportes dos pacotes íntegros pode ser escrito como o XOR de alguns desses pacotes, exatamente como na Figura~3 de \cite{amaral2019hysail}.
 
-Em vez de reproduzir o pacote corrompido, a proposta explora a propriedade \emph{fountain} do R10, que permite gerar um número ilimitado de símbolos de reparo distintos a partir do mesmo bloco de origem \cite{luby2007rfc5053}. Cada pacote perdido é substituído por um novo símbolo de reparo, cujo \acrshort{ESI} $t$ nunca foi utilizado no \emph{chunk}, controlado por um contador mantido nos metadados. O usuário calcula, sem transferir dados, o suporte $X_t$ e o expressa como a diferença simétrica dos suportes de um subconjunto $Q$ dos pacotes íntegros, por eliminação gaussiana em $GF(2)$ que privilegia pacotes de grau baixo, como os símbolos de origem sistemáticos. Apenas os pacotes de $Q$ são transferidos, conferidos com o \emph{hash} SHA-256 armazenado e decifrados, e o novo pacote é obtido por
+Em vez de reproduzir o pacote corrompido, a proposta explora a propriedade \emph{fountain} do R10, que permite gerar um número ilimitado de símbolos de reparo distintos a partir do mesmo bloco de origem \cite{luby2007rfc5053}. Cada pacote perdido é substituído por um novo símbolo de reparo, cujo \acrshort{ESI} $t$ nunca foi utilizado no \emph{chunk}, controlado por um contador mantido nos metadados. O usuário calcula, sem transferir dados, o suporte $X_t$ e o expressa como a diferença simétrica dos suportes de um subconjunto $Q$ dos pacotes íntegros, por eliminação gaussiana em $GF(2)$ que privilegia pacotes de grau baixo, como os símbolos de origem sistemáticos. Apenas os pacotes de $Q$ são transferidos e conferidos com o \emph{hash} SHA-256 armazenado, e o novo pacote é obtido por
 
 \begin{equation}
 	c_t = \bigoplus_{q \in Q} c_q.
 	\label{eq:redistribuicao_xor}
 \end{equation}
 
-\noindent Se algum pacote de $Q$ não conferir com seu \emph{hash}, ele é excluído e a combinação é recalculada com os demais. O \emph{chunk} nunca é decodificado, e o número de pacotes transferidos é no máximo $K$. No esquema limitado, o novo pacote não exige novos \acrshort{MAC}s, pois o \acrshort{MAC} esperado é derivado pela Equação~\eqref{eq:mac_derivado}; no esquema compacto, recebe sua etiqueta. O pacote é então armazenado no provedor que menos pacotes do \emph{chunk} possui, excluído aquele em que a perda foi detectada. O uso de \acrshort{ESI}s inéditos evita que o mesmo conteúdo seja entregue novamente a um provedor que possa ter retido a cópia anterior, e permite, na mesma operação, gerar símbolos de reparo adicionais que ampliam a margem de um \emph{chunk} que perdeu pacotes, por exemplo, quando um provedor deixa o sistema. A Figura~\ref{fig:redistribuicao} ilustra o procedimento.
+\noindent Se algum pacote de $Q$ não conferir com seu \emph{hash}, ele é excluído e a combinação é recalculada com os demais. O \emph{chunk} nunca é decodificado, e o número de pacotes transferidos é no máximo $K$. O novo pacote não exige novos \acrshort{MAC}s, pois o \acrshort{MAC} esperado é derivado pela Equação~\eqref{eq:mac_derivado}. O pacote é então armazenado no provedor que menos pacotes do \emph{chunk} possui, excluído aquele em que a perda foi detectada. O uso de \acrshort{ESI}s inéditos evita que o mesmo conteúdo seja entregue novamente a um provedor que possa ter retido a cópia anterior, e permite, na mesma operação, gerar símbolos de reparo adicionais que ampliam a margem de um \emph{chunk} que perdeu pacotes, por exemplo, quando um provedor deixa o sistema. A Figura~\ref{fig:redistribuicao} ilustra o procedimento.
 
 \begin{figure}[htbp]
 	\centering
@@ -184,52 +182,3 @@ Em vez de reproduzir o pacote corrompido, a proposta explora a propriedade \emph
 
 A divisão do arquivo em \emph{chunks} de, por padrão, no máximo 650.000 bytes limita o volume transferido em cada Redistribuição a uma parte de um único \emph{chunk}, independentemente do tamanho do arquivo: com $K = 100$, cada pacote reparado exige, em média, a transferência de cerca de 49 pacotes, aproximadamente 320~KB.
 
-\section{Esquema Compacto e Ilimitado}
-\label{sec:esquema_compacto}
-
-O R10 preserva o modelo limitado do HySAIL, mas também as duas limitações inerentes a ele: a memória do usuário cresce com o arquivo, e o número de auditorias é fixado na codificação. Ambas decorrem de o polinômio de desafio ser revelado ao provedor. Shacham e Waters \cite{shacham2008compact} propuseram uma \acrshort{PoR} em que o provedor armazena, junto a cada bloco, uma etiqueta autenticada que combina um \acrshort{MAC} linear com uma função pseudoaleatória, e responde a desafios com combinações lineares dos blocos e das etiquetas, de modo que o usuário verifica as respostas sem revelar sua chave e mantém apenas essa chave. Este trabalho propõe instanciar essa construção com o \acrshort{MAC} polinomial do HySAIL.
-
-O usuário gera um único polinômio primitivo secreto $P(x)$ de grau $\lambda$, uma chave $K$ para uma função pseudoaleatória $f_K$, implementada com HMAC-SHA-256 truncado a $\lambda$ bits, e um identificador aleatório $id_F$ do arquivo. Para o pacote $c_\eta$ do \emph{chunk} $i$, a etiqueta armazenada pelo provedor é
-
-\begin{equation}
-	\sigma_\eta = \left(c_\eta(x) \bmod P(x)\right) + f_K(id_F, i, \eta),
-	\label{eq:etiqueta_compacta}
-\end{equation}
-
-\noindent em que a soma é realizada em $GF(2)$. A máscara pseudoaleatória torna a etiqueta indistinguível de um valor aleatório para quem não conhece $K$, de modo que as etiquetas não revelam informação sobre $P(x)$, e o vínculo com $(id_F, i, \eta)$ impede que etiquetas sejam trocadas entre posições ou entre arquivos.
-
-Em uma auditoria, o usuário escolhe um conjunto $Q$ de pacotes do provedor e coeficientes aleatórios $\nu_\eta$, polinômios de grau menor que $\lambda$. O provedor, sem conhecer $P(x)$, calcula em $GF(2)[x]$, sem redução modular,
-
-\begin{equation}
-	\mu(x) = \sum_{\eta \in Q} \nu_\eta(x) \, c_\eta(x), \qquad \tau(x) = \sum_{\eta \in Q} \nu_\eta(x) \, \sigma_\eta(x),
-	\label{eq:resposta_compacta}
-\end{equation}
-
-\noindent e o usuário aceita a resposta se
-
-\begin{equation}
-	\left(\mu(x) + \tau(x) + \sum_{\eta \in Q} \nu_\eta(x) \, f_K(id_F, i_\eta, \eta)\right) \bmod P(x) = 0.
-	\label{eq:verificacao_compacta}
-\end{equation}
-
-A correção decorre da linearidade da redução módulo $P(x)$: como $\sigma_\eta \equiv c_\eta + f_K(id_F, i_\eta, \eta) \pmod{P(x)}$, tem-se $\tau \equiv \mu + \sum_\eta \nu_\eta f_K(id_F, i_\eta, \eta)$, e a soma em $GF(2)$ de um termo consigo mesmo é nula. A Figura~\ref{fig:auditoria_compacta} apresenta a troca de mensagens de uma rodada.
-
-\begin{figure}[htbp]
-	\centering
-	\begin{adjustbox}{max width=\textwidth}
-		\input{img/tikz/auditoria_compacta}
-	\end{adjustbox}
-	\caption{Rodada de auditoria no esquema compacto. O provedor combina pacotes e etiquetas sem conhecer $P(x)$, e o usuário verifica a resposta com sua chave. Elaborada pelo autor com base em \cite{shacham2008compact}.}
-	\label{fig:auditoria_compacta}
-\end{figure}
-
-Como $P(x)$ nunca é transmitido, um mesmo polinômio pode ser utilizado em um número ilimitado de auditorias, e a memória do usuário reduz-se a $P(x)$, $K$ e $id_F$, que ocupam 64 bytes, independentemente do tamanho do arquivo. Para que um provedor responda $(\mu', \tau') \neq (\mu, \tau)$ e ainda seja aceito, a diferença $\delta(x) = (\mu' - \mu) + (\tau' - \tau)$ deve ser divisível por $P(x)$. Um polinômio não nulo de grau $d$ possui no máximo $d / \lambda$ fatores irredutíveis distintos de grau $\lambda$, entre os aproximadamente $2^\lambda / \lambda$ polinômios irredutíveis desse grau, de modo que, para $P(x)$ uniforme e desconhecido pelo provedor, a probabilidade de aceitação de uma resposta incorreta fixada é limitada por cerca de $d / 2^\lambda$, desprezível para $\lambda = 127$. Os coeficientes aleatórios $\nu_\eta$ também eliminam o cancelamento de erros idênticos: dois pacotes alterados pelo mesmo erro $e(x)$ só se anulam se $P(x)$ dividir $(\nu_a + \nu_b)\, e(x)$, o que ocorre com a mesma probabilidade desprezível. A garantia de extração, isto é, de que respostas aceitas com probabilidade não desprezível permitem reconstruir os pacotes por álgebra linear sobre respostas a desafios distintos, segue o argumento de Shacham e Waters para o esquema de chave privada \cite{shacham2008compact} e deve ser formalizada para a instanciação aqui proposta.
-
-O custo da construção desloca-se do usuário para o provedor e para a rede. O provedor armazena uma etiqueta de $\lambda$ bits por pacote, cerca de 0,2\% de um pacote de 6.500 bytes, e a resposta passa a ter aproximadamente o tamanho de um pacote, em vez de $\lambda$ bits, mas permanece independente do tamanho do arquivo e do número de pacotes desafiados. Na codificação, é calculada uma única divisão polinomial por pacote, em vez de $l$. A decodificação também se beneficia: cada pacote transferido é verificado contra sua etiqueta, sem consumir desafios.
-
-\section{Ocultação da Estrutura do Código}
-\label{sec:ocultacao}
-
-Para impedir o ataque dirigido a um único \emph{chunk}, a proposta oculta dos provedores quais pacotes pertencem a uma mesma palavra-código, seguindo a abordagem de Juels e Kaliski \cite{juels2007pors} e de Bowers, Juels e Oprea \cite{bowers2009proofs}. Antes da distribuição, cada pacote é cifrado com um fluxo de chave obtido da função SHAKE-256, parametrizada pela chave do usuário e pela posição $(id_F, i, \eta)$, e armazenado sob um nome pseudoaleatório derivado por HMAC-SHA-256. A cifragem oculta os símbolos de origem, que de outro modo seriam armazenados em claro por ser o código sistemático, e oferece, adicionalmente, confidencialidade aos dados; como os pacotes não carregam cabeçalho, o conteúdo armazenado não revela o \acrshort{ESI}. As etiquetas e os \emph{hashes} são calculados sobre os pacotes cifrados, que são o que os provedores armazenam, de modo que a Auditoria opera sem acesso ao conteúdo original. A cifragem é um XOR com o fluxo de chave e, portanto, também é linear em $GF(2)$, o que permite ao esquema limitado derivar o \acrshort{MAC} dos pacotes cifrados (Seção~\ref{sec:impacto_mac}).
-
-Sem conhecer a estrutura, um adversário que corrompe uma fração $\beta$ dos pacotes atinge cada \emph{chunk} de forma aproximadamente uniforme. Um \emph{chunk} só se torna irrecuperável quando os pacotes corrompidos reduzem o posto dos suportes restantes abaixo de $K$, o que exige $\beta$ comparável à densidade de corrupção tolerada, e essa fração é detectada por uma auditoria de $s$ pacotes com probabilidade $1 - (1 - \beta)^s$. A ocultação não é completa: os provedores ainda observam o tamanho dos pacotes, que difere apenas no último \emph{chunk}, e a ordem em que os pacotes são recebidos. Esses canais podem ser eliminados pelo preenchimento do último \emph{chunk} e pelo embaralhamento global dos pacotes de todos os \emph{chunks} antes do envio, o que exige manter o arquivo codificado em memória ou em armazenamento temporário durante a distribuição.
