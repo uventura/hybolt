@@ -119,19 +119,6 @@
 \newblock {\latintext \btxurlfont{https://www.rfc-editor.org/rfc/rfc5053}},
   Acesso em: 25 out. 2026.
 
-\bibitem {luby2011rfc6330}
-\btxnamefont {\btxlastnamefont {Luby}, Michael}, \btxnamefont {Amin
-  \btxlastnamefont {Shokrollahi}}, \btxnamefont {Mark \btxlastnamefont
-  {Watson}}, \btxnamefont {Thomas \btxlastnamefont {Stockhammer}}\btxandcomma
-  {} \btxandlong {}\ \btxnamefont {Lorenz \btxlastnamefont
-  {Minder}}\btxauthorcolon\ \btxtitlefont {\btxifchangecase {Raptorq forward
-  error correction scheme for object delivery}{RaptorQ Forward Error Correction
-  Scheme for Object Delivery}}.
-\newblock \Btxtechreplong {}\ RFC 6330, Internet Engineering Task Force (IETF),
-  2011.
-\newblock {\latintext \btxurlfont{https://www.rfc-editor.org/rfc/rfc6330}},
-  Acesso em: 24 out. 2026.
-
 \bibitem {luby2002lt}
 \btxnamefont {\btxlastnamefont {Luby}, Michael}\btxauthorcolon\ \btxtitlefont
   {\btxifchangecase {Lt codes}{LT codes}}.
@@ -165,18 +152,6 @@
 \newblock \btxjournalfont {IEEE Transactions on Information Theory},
   52(6):2551--2567, 2006.
 
-\bibitem {WOS:000381844400033}
-\btxnamefont {\btxlastnamefont {Ko}, Dongyub}, \btxnamefont {Kijong
-  \btxlastnamefont {Koo}}\btxandcomma {} \btxandlong {}\ \btxnamefont
-  {Do\btxfnamespacelong Young \btxlastnamefont {Kim}}\btxauthorcolon\
-  \btxjtitlefont {\btxifchangecase {Reducing the decoding complexity of raptorq
-  codes for delay sensitive applications using a simplified and scaled-down
-  matrix}{Reducing the decoding complexity of RaptorQ codes for delay sensitive
-  applications using a simplified and scaled-down matrix}}.
-\newblock \btxjournalfont {AEU-INTERNATIONAL JOURNAL OF ELECTRONICS AND
-  COMMUNICATIONS}, 70(9):1356--1360, 2016\ifbtxprintISSN {,
-  \mbox{\btxISSN~\btxISSNfont {1434-8411}}}.
-
 \expandafter\btxselectlanguage\expandafter {\btxfallbacklanguage}
 \bibitem {armknecht2021outsourcing}
 \btxnamefont {\btxlastnamefont {Armknecht}, Frederik}, \btxnamefont
@@ -209,17 +184,6 @@
   Replication}}.
 \newblock \btxjournalfont {IEEE Transactions on Dependable and Secure
   Computing}, 21(4), 2024.
-
-\bibitem {shacham2008compact}
-\btxnamefont {\btxlastnamefont {Shacham}, Hovav} \btxandlong {}\ \btxnamefont
-  {Brent \btxlastnamefont {Waters}}\btxauthorcolon\ \btxtitlefont
-  {\btxifchangecase {Compact proofs of retrievability}{Compact Proofs of
-  Retrievability}}.
-\newblock \Btxinlong {}\ \btxnamefont {\btxlastnamefont {Pieprzyk}, Josef}\
-  (\btxeditorlong {}): \btxtitlefont {Advances in Cryptology -- ASIACRYPT
-  2008}, \btxvolumelong {}\ \btxvolumefont {5350} \btxofserieslong {}\
-  \btxtitlefont {Lecture Notes in Computer Science}, \btxpageslong {}\ 90--107,
-  Berlin, Heidelberg, 2008. \btxpublisherfont {Springer}.
 
 \bibitem {juels2007pors}
 \btxnamefont {\btxlastnamefont {Juels}, Ari} \btxandlong {}\ \btxnamefont
@@ -260,5 +224,16 @@
   codes in Go}}, 2016.
 \newblock {\latintext \btxurlfont{https://github.com/google/gofountain}},
   Acesso em: 25 out. 2026.
+
+\bibitem {shacham2008compact}
+\btxnamefont {\btxlastnamefont {Shacham}, Hovav} \btxandlong {}\ \btxnamefont
+  {Brent \btxlastnamefont {Waters}}\btxauthorcolon\ \btxtitlefont
+  {\btxifchangecase {Compact proofs of retrievability}{Compact Proofs of
+  Retrievability}}.
+\newblock \Btxinlong {}\ \btxnamefont {\btxlastnamefont {Pieprzyk}, Josef}\
+  (\btxeditorlong {}): \btxtitlefont {Advances in Cryptology -- ASIACRYPT
+  2008}, \btxvolumelong {}\ \btxvolumefont {5350} \btxofserieslong {}\
+  \btxtitlefont {Lecture Notes in Computer Science}, \btxpageslong {}\ 90--107,
+  Berlin, Heidelberg, 2008. \btxpublisherfont {Springer}.
 
 \end{thebibliography}

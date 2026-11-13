@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.6.14)  25 OCT 2026 12:56
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.11.4)  13 NOV 2026 20:20
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -983,7 +983,7 @@ Package babel Info: Importing basic data for portuguese
 (babel)             from babel-pt.ini. Reported on input line 11.
 )
 Package babel Info: Hyphen rules for 'portuguese' set to \l@english
-(babel)             (\language0). Reported on input line 404.
+(babel)             (\language0). Reported on input line 364.
  (/usr/share/texlive/texmf-dist/tex/generic/babel/locale/en/babel-english.tex
 Package babel Info: Importing basic data for english
 (babel)             from babel-en.ini. Reported on input line 11.
@@ -1109,7 +1109,7 @@ LaTeX Font Warning: Font shape `T1/cmr/m/n' in size <20> not available
 LaTeX Font Warning: Font shape `T1/ua1/b/n' in size <20> not available
 (Font)              size <20.74> substituted on input line 30.
 
-<img/positivo_cor.pdf, id=240, 119.44624pt x 60.225pt>
+<img/positivo_cor.pdf, id=224, 119.44624pt x 60.225pt>
 File: img/positivo_cor.pdf Graphic file (type pdf)
 <use img/positivo_cor.pdf>
 Package pdftex.def Info: img/positivo_cor.pdf  used on input line 30.
@@ -1189,11 +1189,11 @@ LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 1
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 ) [7
 
-] [8{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathsy.enc}])
+])
 \tf@lof=\write9
 \openout9 = `monografia.lof'.
 
- [9] (./monografia.lot)
+ [8{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathsy.enc}] (./monografia.lot)
 \tf@lot=\write10
 \openout10 = `monografia.lot'.
 
@@ -1201,10 +1201,10 @@ File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 \@gls@deffile=\write11
 \openout11 = `monografia.glsdefs'.
 
-)
-(./monografia.acr [10
+) (./monografia.acr
+[9
 
-]) [11
+]) [10
 
 
 ]
@@ -1223,70 +1223,52 @@ Chapter 2.
 
 ]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <14.4> on input line 19.
+(Font)              <14.4> on input line 17.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 19.
+(Font)              <10> on input line 17.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 19.
+(Font)              <7> on input line 17.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 19.
+(hyperref)                removing `math shift' on input line 17.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 19.
+(hyperref)                removing `math shift' on input line 17.
 
 [7] (./img/tikz/hysail_protocolo.tex
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <10.95> on input line 3.
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <5> on input line 18.
-) [8] (./img/tikz/mac_homomorfico.tex)
-[9{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathex.enc}] [10]
-(./img/tikz/lt_grafo.tex) [11] [12] (./img/tikz/online_codes.tex) [13]
+) [8{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathex.enc}] (./img/tikz/mac_homomo
+rfico.tex) [9] [10]
+(./img/tikz/lt_grafo.tex) [11] (./img/tikz/online_codes.tex) [12] [13]
 (./img/tikz/raptor_r10.tex) [14]
-<img/resultados/degree_distributions.pdf, id=653, 392.3847pt x 248.57825pt>
+<img/resultados/degree_distributions.pdf, id=619, 392.3847pt x 248.69572pt>
 File: img/resultados/degree_distributions.pdf Graphic file (type pdf)
 <use img/resultados/degree_distributions.pdf>
 Package pdftex.def Info: img/resultados/degree_distributions.pdf  used on input
- line 227.
-(pdftex.def)             Requested size: 364.19667pt x 230.72401pt.
- [15] [16 <./img/resultados/degree_distributions.pdf>]) [17]
+ line 225.
+(pdftex.def)             Requested size: 364.19667pt x 230.83304pt.
+ [15 <./img/resultados/degree_distributions.pdf>]) [16]
 Chapter 3.
-(./tex/3_Metodologia_de_Pesquisa.tex [18
+(./tex/3_Metodologia_de_Pesquisa.tex [17
 
-]) [19]
+]) [18]
 Chapter 4.
 (./tex/4_Proposta.tex
-<img/Hysail-Architecture.png, id=743, 1087.06125pt x 364.86313pt>
+<img/Hysail-Architecture.png, id=697, 1087.06125pt x 364.86313pt>
 File: img/Hysail-Architecture.png Graphic file (type png)
 <use img/Hysail-Architecture.png>
 Package pdftex.def Info: img/Hysail-Architecture.png  used on input line 4.
 (pdftex.def)             Requested size: 364.19667pt x 122.24242pt.
- [20
+ [19
 
- <./img/Hysail-Architecture.png>]
-Underfull \hbox (badness 10000) in paragraph at lines 37--37
-[]\T1/lmr/m/n/10 combinação em
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 39--39
-[]\T1/lmr/m/n/10 decodificação do
- []
-
-[21] (./img/tikz/hybolt_fluxo.tex) [22] [23] [24] [25] [26] [27] [28]
-(./img/tikz/redistribuicao.tex) [29]
-Overfull \hbox (6.02797pt too wide) in paragraph at lines 216--217
-[]\T1/lmr/m/n/12 A cor-reção decorre da lin-eari-dade da re-dução mó-dulo $\OML
-/lmm/m/it/12 P\OT1/lmr/m/n/12 (\OML/lmm/m/it/12 x\OT1/lmr/m/n/12 )$\T1/lmr/m/n/
-12 : como $\OML/lmm/m/it/12 ^^[[] \OMS/lmsy/m/n/12 ^^Q \OML/lmm/m/it/12 c[] \OT
-1/lmr/m/n/12 + \OML/lmm/m/it/12 f[]\OT1/lmr/m/n/12 (\OML/lmm/m/it/12 id[]; i[];
- ^^Q\OT1/lmr/m/n/12 )
- []
-
-(./img/tikz/auditoria_compacta.tex) [30]) [31] [32]
+ <./img/Hysail-Architecture.png>] [20]
+(./img/tikz/hybolt_fluxo.tex) [21] [22] [23] [24] [25] [26]
+(./img/tikz/redistribuicao.tex)) [27]
 Chapter 5.
 (./tex/5_Implementacao.tex
 Overfull \hbox (36.5482pt too wide) in paragraph at lines 7--8
@@ -1294,33 +1276,21 @@ Overfull \hbox (36.5482pt too wide) in paragraph at lines 7--8
 cado por seu su-porte (Equação []),
  []
 
-[33
+[28
 
-] [34] [35] (./img/tikz/estrutura_codigo.tex
+] [29] [30] (./img/tikz/estrutura_codigo.tex
 Overfull \hbox (3.74843pt too wide) in paragraph at lines 11--11
  [][]\T1/lmtt/m/n/8 PolynomialRetrievabilityProof 
  []
 
-)
-Overfull \hbox (83.56027pt too wide) in paragraph at lines 61--62
-\T1/lmr/m/n/12 fi-cações antes e de-pois de cada trans-fer-ên-cia. É es-pe-cial
--izada por \T1/lmtt/m/n/12 PolynomialRetrievabilityProof\T1/lmr/m/n/12 ,
+) [31]
+Overfull \hbox (22.49838pt too wide) in paragraph at lines 62--63
+\T1/lmr/m/n/12 cal-iza-ção dos pa-cotes cor-rompi-dos e a avali-ação dos lim-it
+es $\OML/lmm/m/it/12 ^^\$\T1/lmr/m/n/12 , e a classe \T1/lmtt/m/n/12 ChallengeL
+edger
  []
 
 
-Overfull \hbox (19.54042pt too wide) in paragraph at lines 61--62
-\T1/lmtt/m/n/12 SourceMacs\T1/lmr/m/n/12 , que deriva o [][]MAC[] de qual-quer 
-pa-cote, por \T1/lmtt/m/n/12 CompactRetrievabilityProof\T1/lmr/m/n/12 ,
- []
-
-
-Overfull \hbox (103.96591pt too wide) in paragraph at lines 61--62
-\T1/lmr/m/n/12 que re-al-iza o es-quema com-pacto a par-tir das chaves \T1/lmtt
-/m/n/12 CompactKeys\T1/lmr/m/n/12 , e por \T1/lmtt/m/n/12 DisabledRetrievabilit
-yProof\T1/lmr/m/n/12 ,
- []
-
-[36]
 Overfull \hbox (31.29683pt too wide) in paragraph at lines 63--64
 \T1/lmtt/m/n/12 Raptor10DecodingStrategy\T1/lmr/m/n/12 , uti-lizada na pro-post
 a, por \T1/lmtt/m/n/12 OnlineCodesDecodingStrategy\T1/lmr/m/n/12 ,
@@ -1339,142 +1309,100 @@ aptor \T1/lmr/m/n/12 im-ple-menta a RFC 5053, com as classes \T1/lmtt/m/n/12 En
 coder
  []
 
-[37]
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[38] [39]) [40] [41]
+[32] [33]) [34]
 Chapter 6.
-(./tex/6_Resultados.tex [42
+(./tex/6_Resultados.tex [35
 
 ]
-<img/resultados/reception_overhead.pdf, id=1008, 401.65402pt x 240.33162pt>
+<img/resultados/reception_overhead.pdf, id=905, 398.77167pt x 240.33162pt>
 File: img/resultados/reception_overhead.pdf Graphic file (type pdf)
 <use img/resultados/reception_overhead.pdf>
 Package pdftex.def Info: img/resultados/reception_overhead.pdf  used on input l
 ine 19.
-(pdftex.def)             Requested size: 455.24411pt x 272.41501pt.
- [43]
-<img/resultados/loss_tolerance.pdf, id=1019, 393.32573pt x 243.33058pt>
+(pdftex.def)             Requested size: 455.24411pt x 274.3806pt.
+ [36] [37 <./img/resultados/reception_overhead.pdf>]
+<img/resultados/loss_tolerance.pdf, id=966, 393.32573pt x 243.33058pt>
 File: img/resultados/loss_tolerance.pdf Graphic file (type pdf)
 <use img/resultados/loss_tolerance.pdf>
 Package pdftex.def Info: img/resultados/loss_tolerance.pdf  used on input line 
-56.
+53.
 (pdftex.def)             Requested size: 386.96027pt x 239.398pt.
- [44 <./img/resultados/reception_overhead.pdf>] [45 <./img/resultados/loss_tole
-rance.pdf>]
-<img/resultados/mac_runtime.pdf, id=1127, 392.667pt x 243.61288pt>
+ [38 <./img/resultados/loss_tolerance.pdf>]
+<img/resultados/mac_runtime.pdf, id=1021, 392.667pt x 244.77217pt>
 File: img/resultados/mac_runtime.pdf Graphic file (type pdf)
 <use img/resultados/mac_runtime.pdf>
-Package pdftex.def Info: img/resultados/mac_runtime.pdf  used on input line 70.
+Package pdftex.def Info: img/resultados/mac_runtime.pdf  used on input line 67.
 
-(pdftex.def)             Requested size: 386.96027pt x 240.07718pt.
- [46 <./img/resultados/mac_runtime.pdf>]
-<img/resultados/encode_runtime.pdf, id=1195, 392.52586pt x 243.33058pt>
+(pdftex.def)             Requested size: 386.96027pt x 241.21965pt.
+ [39 <./img/resultados/mac_runtime.pdf>]
+<img/resultados/encode_runtime.pdf, id=1091, 392.52586pt x 243.33058pt>
 File: img/resultados/encode_runtime.pdf Graphic file (type pdf)
 <use img/resultados/encode_runtime.pdf>
 Package pdftex.def Info: img/resultados/encode_runtime.pdf  used on input line 
-84.
+81.
 (pdftex.def)             Requested size: 386.96027pt x 239.89552pt.
-<img/resultados/decode_runtime.pdf, id=1196, 392.52586pt x 243.33058pt>
+<img/resultados/decode_runtime.pdf, id=1092, 392.52586pt x 243.33058pt>
 File: img/resultados/decode_runtime.pdf Graphic file (type pdf)
 <use img/resultados/decode_runtime.pdf>
 Package pdftex.def Info: img/resultados/decode_runtime.pdf  used on input line 
-91.
+88.
 (pdftex.def)             Requested size: 386.96027pt x 239.89552pt.
-<img/resultados/encode_stages.pdf, id=1197, 428.5636pt x 181.50548pt>
+<img/resultados/encode_stages.pdf, id=1094, 413.70656pt x 181.50548pt>
 File: img/resultados/encode_stages.pdf Graphic file (type pdf)
 <use img/resultados/encode_stages.pdf>
-Package pdftex.def Info: img/resultados/encode_stages.pdf  used on input line 1
-00.
-(pdftex.def)             Requested size: 455.24411pt x 192.80478pt.
- [47 <./img/resultados/encode_runtime.pdf>] [48 <./img/resultados/decode_runtim
-e.pdf> <./img/resultados/encode_stages.pdf>]
-<img/resultados/audit_runtime.pdf, id=1334, 392.3847pt x 243.33058pt>
+Package pdftex.def Info: img/resultados/encode_stages.pdf  used on input line 9
+7.
+(pdftex.def)             Requested size: 455.24411pt x 199.73695pt.
+<img/resultados/audit_runtime.pdf, id=1099, 369.03183pt x 243.33058pt>
 File: img/resultados/audit_runtime.pdf Graphic file (type pdf)
 <use img/resultados/audit_runtime.pdf>
 Package pdftex.def Info: img/resultados/audit_runtime.pdf  used on input line 1
-14.
-(pdftex.def)             Requested size: 386.96027pt x 239.96979pt.
- [49 <./img/resultados/audit_runtime.pdf>]
-<img/resultados/audit_detection.pdf, id=1383, 387.711pt x 244.89894pt>
+11.
+(pdftex.def)             Requested size: 386.96027pt x 255.17049pt.
+ [40 <./img/resultados/encode_runtime.pdf>] [41 <./img/resultados/decode_runtim
+e.pdf> <./img/resultados/encode_stages.pdf>]
+<img/resultados/audit_detection.pdf, id=1230, 387.711pt x 244.89894pt>
 File: img/resultados/audit_detection.pdf Graphic file (type pdf)
 <use img/resultados/audit_detection.pdf>
 Package pdftex.def Info: img/resultados/audit_detection.pdf  used on input line
- 125.
+ 122.
 (pdftex.def)             Requested size: 386.96027pt x 244.43869pt.
-<img/resultados/metadata_size.pdf, id=1386, 386.72293pt x 243.33058pt>
+ [42 <./img/resultados/audit_runtime.pdf>]
+<img/resultados/metadata_size.pdf, id=1272, 386.72293pt x 243.33058pt>
 File: img/resultados/metadata_size.pdf Graphic file (type pdf)
 <use img/resultados/metadata_size.pdf>
 Package pdftex.def Info: img/resultados/metadata_size.pdf  used on input line 1
-39.
+36.
 (pdftex.def)             Requested size: 386.96027pt x 243.4785pt.
- [50 <./img/resultados/audit_detection.pdf>] [51 <./img/resultados/metadata_siz
-e.pdf>]
-<img/resultados/targeted_attack.pdf, id=1497, 387.56984pt x 293.07591pt>
-File: img/resultados/targeted_attack.pdf Graphic file (type pdf)
-<use img/resultados/targeted_attack.pdf>
-Package pdftex.def Info: img/resultados/targeted_attack.pdf  used on input line
- 155.
-(pdftex.def)             Requested size: 386.96027pt x 292.61905pt.
- [52 <./img/resultados/targeted_attack.pdf>]
-<img/resultados/codec_comparison.pdf, id=1546, 399.02313pt x 264.75162pt>
+ [43 <./img/resultados/audit_detection.pdf>]
+<img/resultados/codec_comparison.pdf, id=1328, 399.02313pt x 252.81639pt>
 File: img/resultados/codec_comparison.pdf Graphic file (type pdf)
 <use img/resultados/codec_comparison.pdf>
 Package pdftex.def Info: img/resultados/codec_comparison.pdf  used on input lin
-e 173.
-(pdftex.def)             Requested size: 455.24411pt x 302.07043pt.
-
-Overfull \hbox (27.50343pt too wide) in paragraph at lines 184--197
- [][] 
- []
-
-[53] [54 <./img/resultados/codec_comparison.pdf>]
-<img/resultados/codec_loss.pdf, id=1610, 401.82307pt x 283.36777pt>
+e 154.
+(pdftex.def)             Requested size: 455.24411pt x 288.45282pt.
+ [44 <./img/resultados/metadata_size.pdf>] [45 <./img/resultados/codec_comparis
+on.pdf>]
+<img/resultados/codec_loss.pdf, id=1436, 401.82307pt x 283.36777pt>
 File: img/resultados/codec_loss.pdf Graphic file (type pdf)
 <use img/resultados/codec_loss.pdf>
-Package pdftex.def Info: img/resultados/codec_loss.pdf  used on input line 205.
+Package pdftex.def Info: img/resultados/codec_loss.pdf  used on input line 184.
 
 (pdftex.def)             Requested size: 386.96027pt x 272.8904pt.
 
-Overfull \hbox (15.95473pt too wide) in paragraph at lines 210--211
+Overfull \hbox (15.95473pt too wide) in paragraph at lines 189--190
 []\T1/lmr/m/n/12 A con-se-quên-cia mais rel-e-vante, porém, é a tol-erân-cia a 
-per-das, ap-re-sen-tada na Figura []6.12[],
+per-das, ap-re-sen-tada na Figura []6.11[],
  []
 
-[55 <./img/resultados/codec_loss.pdf>]
-Underfull \hbox (badness 10000) in paragraph at lines 226--226
-[]\T1/lmr/bx/n/10 Juels--
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 226--226
+[46 <./img/resultados/codec_loss.pdf>]
+Underfull \hbox (badness 10000) in paragraph at lines 205--205
 []\T1/lmr/bx/n/10 Shacham--
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 226--226
-[]\T1/lmr/bx/n/10 HyBolt
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 226--227
-[]\T1/lmr/bx/n/10 HyBolt
- []
-
-
-Underfull \hbox (badness 1231) in paragraph at lines 233--233
-[]\T1/lmr/m/n/10 Ocultação da es-tru-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 234--234
-[]\T1/lmr/m/n/10 0,27% a
- []
-
-[56]) [57] [58]
+[47]) [48]
 Chapter 7.
-(./tex/7_Conclusao.tex) [59
+(./tex/7_Conclusao.tex) [49
 
 ] (./monografia.bbl (./monografia.brf)
 \tf@brf=\write12
@@ -1492,10 +1420,10 @@ babelbib: Using the BibTeX style's default font for `ISBN'.
 babelbib: Using the BibTeX style's default font for `ISSN'.
 babelbib: Using the BibTeX style's default font for `url'.
 babelbib: Using the BibTeX style's default font for `numeral'.
-[60
+[50
 
 
-] [61]) [62] (./monografia.aux)
+]) [51] (./monografia.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -1512,20 +1440,20 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
 Package rerunfilecheck Info: File `monografia.out' has not changed.
-(rerunfilecheck)             Checksum: D28276FA65EB3A3EC37EC5BE67F7F2AC;9955.
+(rerunfilecheck)             Checksum: 5794C49293889333861D6343B28ED3B5;9106.
 
 Package rerunfilecheck Warning: File `monografia.brf' has changed.
 (rerunfilecheck)                Rerun to get bibliographical references right.
 
 Package rerunfilecheck Info: Checksums for `monografia.brf':
-(rerunfilecheck)             Before: 9CAA7A11CF950CF280192A9AF519727E;4735
-(rerunfilecheck)             After:  3C146A242552FAA1D4582AE1E65D4E6E;5037.
+(rerunfilecheck)             Before: 1174DCFF5C15E3E8B03CEDDC101EB357;4094
+(rerunfilecheck)             After:  B24A5C99CDAAF1BEB39B0E5C5EC785CB;4334.
  ) 
 Here is how much of TeX's memory you used:
- 33576 strings out of 476182
- 652659 string characters out of 5795595
- 1949975 words of memory out of 5000000
- 54642 multiletter control sequences out of 15000+600000
+ 33448 strings out of 476182
+ 650207 string characters out of 5795595
+ 1945975 words of memory out of 5000000
+ 54540 multiletter control sequences out of 15000+600000
  679194 words of font info for 96 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  109i,14n,107p,2346b,1448s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1539,15 +1467,15 @@ mf/fonts/type1/public/lm/lmr10.pfb></usr/share/texmf/fonts/type1/public/lm/lmr1
 2.pfb></usr/share/texmf/fonts/type1/public/lm/lmr7.pfb></usr/share/texmf/fonts/
 type1/public/lm/lmr8.pfb></usr/share/texmf/fonts/type1/public/lm/lmri10.pfb></u
 sr/share/texmf/fonts/type1/public/lm/lmri12.pfb></usr/share/texmf/fonts/type1/p
-ublic/lm/lmsy10.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy7.pfb></usr/sha
-re/texmf/fonts/type1/public/lm/lmsy8.pfb></usr/share/texmf/fonts/type1/public/l
-m/lmtt10.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt12.pfb></usr/share/tex
-mf/fonts/type1/public/lm/lmtt8.pfb></usr/share/texmf/fonts/type1/public/cm-supe
-r/sfrm1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm2074.pfb>
-Output written on monografia.pdf (73 pages, 857951 bytes).
+ublic/lm/lmsy10.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy8.pfb></usr/sha
+re/texmf/fonts/type1/public/lm/lmtt10.pfb></usr/share/texmf/fonts/type1/public/
+lm/lmtt12.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt8.pfb></usr/share/tex
+mf/fonts/type1/public/cm-super/sfrm1000.pfb></usr/share/texmf/fonts/type1/publi
+c/cm-super/sfrm2074.pfb>
+Output written on monografia.pdf (61 pages, 799912 bytes).
 PDF statistics:
- 1976 PDF objects out of 2073 (max. 8388607)
- 1303 compressed objects within 14 object streams
- 235 named destinations out of 1000 (max. 500000)
- 552 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1761 PDF objects out of 2073 (max. 8388607)
+ 1163 compressed objects within 12 object streams
+ 212 named destinations out of 1000 (max. 500000)
+ 515 words of extra memory for PDF output out of 10000 (max. 10000000)
 

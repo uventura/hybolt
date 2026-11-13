@@ -15,7 +15,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
-from thesis_benchmarks import COLORS, LINESTYLES, configure_style, save_figure  # noqa: E402
+from thesis_benchmarks import CATEGORICAL_COLORS as COLORS, LINESTYLES, configure_style, save_figure  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 COLUMN_WIDTH = 3.4

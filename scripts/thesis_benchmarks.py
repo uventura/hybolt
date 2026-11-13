@@ -10,6 +10,10 @@ or a subset, e.g. ``python scripts/thesis_benchmarks.py overhead loss``.
 ``--quick`` shrinks every workload to check the script end to end, and
 ``replot`` redraws the pipeline, detection, overhead and codec figures from the
 saved data without measuring again.
+
+The figures follow the architecture of the article: the bounded scheme of
+Hy-SAIL (polynomial MACs of the source blocks and a SHA-256 hash per packet),
+without server tags or packet encryption.
 """
 
 import argparse
@@ -46,11 +50,8 @@ from hybolt.encryption import encode as encode_module
 from hybolt.encryption import online_codes, raptor
 from hybolt.encryption.retrievability import (
     BOUNDED_SCHEME,
-    COMPACT_SCHEME,
-    CompactRetrievabilityProof,
     PolynomialRetrievabilityProof,
 )
-from hybolt.encryption.sealing import SealingKeys
 from hybolt.hybolt_decode import HyboltDecode
 from hybolt.hybolt_encode import HyboltEncode
 from hybolt.logger.logger import execution_logger
@@ -59,28 +60,25 @@ from hybolt.server.packet_saver import PacketSaver
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-try:
-    # RaptorQ is no longer a HyBolt dependency; when installed, it is measured
-    # as the reference the R10 trade-off is compared with.
-    import raptorq
-except ImportError:
-    raptorq = None
-
 KIB = 1024
 MIB = 1024 * KIB
 MB = 1000 * 1000
 
-# Categorical slots of the reference palette, in fixed order; markers and line
-# styles repeat the identity for grayscale print.
-COLORS = ("#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#6250d6")
+# Categorical palette of the article figures (scripts/article_figures.py).
+CATEGORICAL_COLORS = ("#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#6250d6")
+# Monochrome blue palette of the thesis figures. Series slots alternate dark and
+# light tones so that neighbouring series stay apart; markers and line styles
+# repeat the identity for grayscale print.
+COLORS = ("#0b2d63", "#3f7fcb", "#8ab8e8", "#1f5aa8", "#6aa3e0", "#13417f")
+# Sequential blues, dark to light, for stacked bars.
+SEQUENTIAL_BLUES = ("#0b2d63", "#1f5aa8", "#3f7fcb", "#6aa3e0", "#9cc4ee", "#cfe2f7")
 MARKERS = ("o", "s", "^", "D", "v", "P")
 LINESTYLES = ("-", "--", "-.", ":", (0, (5, 1)), (0, (3, 1, 1, 1)))
 TEXT_SECONDARY = "#52514e"
 GRID = "#d9d8d4"
 # Heading of this file's figures, also the legend label of HyBolt's own runs.
 SCHEME_LABELS = {
-    COMPACT_SCHEME: "compacto",
-    BOUNDED_SCHEME: "limitado",
+    BOUNDED_SCHEME: "com MACs",
     "none": "sem prova",
 }
 
@@ -184,9 +182,7 @@ class StageTimer:
 
 ENCODE_STAGES = (
     (encode_module.Encode, "_encode", "R10"),
-    (SealingKeys, "seal", "cifragem"),
-    (PolynomialRetrievabilityProof, "tag_source_blocks", "MAC/etiqueta"),
-    (CompactRetrievabilityProof, "attach_server_tags", "MAC/etiqueta"),
+    (PolynomialRetrievabilityProof, "tag_source_blocks", "MACs"),
     (PacketSaver, "save", "distribuição"),
     (HyboltEncode, "_save_packet_metadata", "metadados"),
 )
@@ -244,7 +240,7 @@ def encode_file(
     deployment,
     input_file,
     scheme,
-    seal=True,
+    seal=False,
     redundancy=DEFAULT_REDUNDANCY,
     codec=raptor.CODEC,
     stages=ENCODE_STAGES,
@@ -259,7 +255,7 @@ def encode_file(
         str(metadata_dir),
         retrievability_proof=scheme != "none",
         redundancy=redundancy,
-        proof_scheme=scheme if scheme != "none" else COMPACT_SCHEME,
+        proof_scheme=BOUNDED_SCHEME,
         seal_packets=seal,
         codec=codec,
     )
@@ -319,7 +315,6 @@ def save_figure(figure, figure_dir, name):
 
 def experiment_pipeline(args):
     sizes = {
-        COMPACT_SCHEME: [64 * KIB, 256 * KIB, MIB, 4 * MIB, 16 * MIB, 64 * MIB],
         "none": [64 * KIB, 256 * KIB, MIB, 4 * MIB, 16 * MIB, 64 * MIB],
         BOUNDED_SCHEME: [64 * KIB, 256 * KIB, MIB],
     }
@@ -335,7 +330,7 @@ def experiment_pipeline(args):
             input_file = inputs_dir / f"random_{size}.bin"
             if not input_file.exists():
                 write_input(input_file, size)
-            repeats = 1 if size >= 4 * MIB or scheme == BOUNDED_SCHEME else args.repeats
+            repeats = 1 if size >= 4 * MIB else args.repeats
             for repeat in range(repeats):
                 print(f"  pipeline {scheme} {size_label(size)} run {repeat + 1}")
                 encoded = encode_file(deployment, input_file, scheme)
@@ -382,7 +377,7 @@ def _aggregate(results, scheme, key):
 
 
 def plot_pipeline(results, figure_dir):
-    schemes = [COMPACT_SCHEME, BOUNDED_SCHEME, "none"]
+    schemes = [BOUNDED_SCHEME, "none"]
     all_sizes = [record["file_size"] for record in results]
     for key, name, ylabel in (
         ("encode_seconds", "encode_runtime", "tempo de codificação (s)"),
@@ -409,10 +404,8 @@ def plot_pipeline(results, figure_dir):
     figure, axis = plt.subplots()
     for slot, (scheme, key, label) in enumerate(
         (
-            (COMPACT_SCHEME, "audit_all_seconds", "compacto, todos os pacotes"),
-            (BOUNDED_SCHEME, "audit_all_seconds", "limitado, todos os pacotes"),
-            (COMPACT_SCHEME, "audit_sample50_seconds", "compacto, s = 50"),
-            (BOUNDED_SCHEME, "audit_sample50_seconds", "limitado, s = 50"),
+            (BOUNDED_SCHEME, "audit_all_seconds", "todos os pacotes"),
+            (BOUNDED_SCHEME, "audit_sample50_seconds", "s = 50"),
         )
     ):
         sizes, values = _aggregate(results, scheme, key)
@@ -432,7 +425,7 @@ def plot_pipeline(results, figure_dir):
     save_figure(figure, figure_dir, "audit_runtime")
 
     figure, axis = plt.subplots()
-    for slot, scheme in enumerate(schemes[:2]):
+    for slot, scheme in enumerate(schemes):
         sizes, values = _aggregate(results, scheme, "metadata_bytes")
         if sizes:
             axis.plot(
@@ -448,10 +441,10 @@ def plot_pipeline(results, figure_dir):
         * POLYNOMIAL_SET_SIZE
         * POLYNOMIAL_LAMBDA
         / (8 * DEFAULT_CHUNK_SIZE),
-        color=COLORS[3],
+        color=COLORS[2],
         linestyle=":",
         linewidth=1.5,
-        label=r"limitado, MACs em bits ($K l \lambda$ por chunk)",
+        label=r"MACs em bits ($K l \lambda$ por chunk)",
     )
     axis.set_xscale("log", base=2)
     axis.set_yscale("log")
@@ -461,26 +454,17 @@ def plot_pipeline(results, figure_dir):
     axis.legend()
     save_figure(figure, figure_dir, "metadata_size")
 
-    compact = [
+    records = [
         record
         for record in results
-        if record["scheme"] in (COMPACT_SCHEME, BOUNDED_SCHEME)
-        and record["file_size"] == MIB
-        and record["repeat"] == 0
+        if record["file_size"] == MIB and record["repeat"] == 0
     ]
-    if compact:
-        plot_stages(compact, figure_dir)
+    if records:
+        plot_stages(records, figure_dir)
 
 
 def plot_stages(records, figure_dir):
-    stages = [
-        "R10",
-        "cifragem",
-        "MAC/etiqueta",
-        "distribuição",
-        "metadados",
-        "outros",
-    ]
+    stages = ["R10", "MACs", "distribuição", "metadados", "outros"]
     figure, axis = plt.subplots(figsize=(6.0, 2.2))
     labels = [SCHEME_LABELS[record["scheme"]] for record in records]
     for row, record in enumerate(records):
@@ -495,7 +479,7 @@ def plot_stages(records, figure_dir):
                 share,
                 left=left,
                 height=0.55,
-                color=COLORS[slot],
+                color=SEQUENTIAL_BLUES[slot],
                 edgecolor="white",
                 linewidth=2,
                 label=stage if row == 0 else None,
@@ -507,7 +491,7 @@ def plot_stages(records, figure_dir):
                     f"{share:.0f}%",
                     ha="center",
                     va="center",
-                    color="white",
+                    color="white" if slot < 3 else SEQUENTIAL_BLUES[0],
                     fontsize=8,
                 )
             left += share
@@ -515,7 +499,7 @@ def plot_stages(records, figure_dir):
     axis.set_xlim(0, 100)
     axis.set_xlabel("fração do tempo de codificação de 1 MiB (%)")
     axis.grid(axis="y", visible=False)
-    axis.legend(ncol=6, loc="lower center", bbox_to_anchor=(0.5, 1.0), fontsize=7)
+    axis.legend(ncol=5, loc="lower center", bbox_to_anchor=(0.5, 1.0), fontsize=7)
     save_figure(figure, figure_dir, "encode_stages")
 
 
@@ -566,14 +550,8 @@ def experiment_mac(args):
     axis.plot(
         [record["block_kib"] for record in results],
         [record["coefficient_seconds"] for record in results],
-        label="HyBolt, esquema limitado (tabela de bytes)",
+        label="HyBolt (tabela de bytes, extensão em C)",
         **series_style(0),
-    )
-    axis.plot(
-        [record["block_kib"] for record in results],
-        [record["integer_seconds"] for record in results],
-        label="HyBolt, esquema compacto (inteiros)",
-        **series_style(2),
     )
     axis.set_xscale("log", base=2)
     axis.set_yscale("log")
@@ -585,7 +563,7 @@ def experiment_mac(args):
 
 
 # ---------------------------------------------------------------------------
-# Overhead: symbols needed for recovery, R10 against RaptorQ, Online and LT codes
+# Overhead: symbols needed for recovery, R10 against Online and LT codes
 # ---------------------------------------------------------------------------
 
 
@@ -684,20 +662,11 @@ def symbols_needed_r10(k, rng, pool_factor=3):
     return received_until_decoded(raptor, k, rng.permutation(pool_factor * k))
 
 
-def symbols_needed_raptorq(packets, transfer_length, symbol_size, rng):
-    decoder = raptorq.Decoder.with_defaults(transfer_length, symbol_size)
-    for received, index in enumerate(rng.permutation(len(packets)), start=1):
-        if decoder.decode(packets[index]) is not None:
-            return received
-    return None
-
-
 def experiment_overhead(args):
     ks = [10, default_chunk_code()[0], 1000]
     trials = dict(zip(ks, (2000, 1000, 200)))
     if args.quick:
         trials = {k: 20 for k in ks}
-    symbol_size = 16
     rng = np.random.default_rng(2)
     results = {}
     for k in ks:
@@ -706,15 +675,6 @@ def experiment_overhead(args):
         for _ in range(trials[k]):
             needed["r10"].append(symbols_needed_r10(k, rng))
         r10_seconds = time.perf_counter() - started
-        if raptorq is not None:
-            data = rng.integers(0, 256, k * symbol_size, dtype=np.uint8).tobytes()
-            packets = raptorq.Encoder.with_defaults(
-                data, symbol_size
-            ).get_encoded_packets(k)
-            needed["raptorq"] = [
-                symbols_needed_raptorq(packets, len(data), symbol_size, rng)
-                for _ in range(trials[k])
-            ]
         for _ in range(trials[k]):
             needed["online"].append(symbols_needed_online(k, rng))
             needed["lt"].append(symbols_needed_lt(k, rng))
@@ -738,7 +698,6 @@ def plot_overhead(results, figure_dir):
     figure, axes = plt.subplots(1, len(ks), figsize=(6.2, 2.8), sharey=True)
     codes = (
         ("r10", "Raptor R10"),
-        ("raptorq", "RaptorQ"),
         ("online", "Online Codes"),
         ("lt", "LT (sóliton robusto)"),
     )
@@ -768,7 +727,7 @@ def plot_overhead(results, figure_dir):
         axis.set_title(f"K = {k}")
         axis.set_xlabel("símbolos recebidos / K")
     axes[0].set_ylabel("decodificações bem-sucedidas (%)")
-    axes[1].legend(ncol=4, loc="upper center", bbox_to_anchor=(0.5, -0.25))
+    axes[1].legend(ncol=3, loc="upper center", bbox_to_anchor=(0.5, -0.25))
     save_figure(figure, figure_dir, "reception_overhead")
 
 
@@ -841,7 +800,7 @@ def experiment_loss(args):
 
 
 # ---------------------------------------------------------------------------
-# Detection: audits against random corruption, and chunk-targeted attacks
+# Detection: audits against random corruption
 # ---------------------------------------------------------------------------
 
 
@@ -871,7 +830,10 @@ def experiment_detection(args):
     input_file = Path(args.work_dir) / "inputs" / f"detection_{size}.bin"
     input_file.parent.mkdir(parents=True, exist_ok=True)
     write_input(input_file, size, seed=4)
-    encoded = encode_file(deployment, input_file, COMPACT_SCHEME)
+    encoded = encode_file(deployment, input_file, BOUNDED_SCHEME)
+    # Each bounded round reveals one polynomial; restoring the metadata before
+    # every round reuses the l polynomials across the repeated measurements.
+    metadata = encoded["metadata_file"].read_bytes()
     paths = deployment.packet_paths(0)
     server = deployment.servers[0]["storage_location"]
     rng = random.Random(5)
@@ -885,6 +847,7 @@ def experiment_detection(args):
             detected = 0
             for _ in range(trials):
                 originals = corrupt_packets(rng.sample(paths, corrupted_count))
+                encoded["metadata_file"].write_bytes(metadata)
                 try:
                     _, report = audit_file(
                         deployment, encoded["metadata_file"], sample_size
@@ -903,10 +866,8 @@ def experiment_detection(args):
             )
             print(f"  detection beta={fraction} s={sample_size}: {detected}/{trials}")
 
-    attack = targeted_attack_model(args)
-    save_json(args.data_dir, "detection", {"empirical": empirical, "attack": attack})
+    save_json(args.data_dir, "detection", {"empirical": empirical})
     plot_detection(empirical, fractions, sample_sizes, args.figure_dir)
-    plot_attack(attack, args.figure_dir)
 
 
 def detection_probability(packets, corrupted, sample_size):
@@ -949,99 +910,6 @@ def plot_detection(empirical, fractions, sample_sizes, figure_dir):
     save_figure(figure, figure_dir, "audit_detection")
 
 
-def smallest_known_attack(k, repair):
-    """Packets of one chunk whose loss is certain to destroy it.
-
-    Losing every packet whose support holds some source symbol i leaves i out
-    of every remaining support, so the rank drops below K; the smallest such
-    set is an attack an adversary who knows the code structure can mount.
-    """
-    total = k + repair
-    supports = [raptor.symbol_support(k, esi) for esi in range(total)]
-    return min(sum(support >> i & 1 for support in supports) for i in range(k))
-
-
-def targeted_attack_model(args):
-    """P(file lost) when a fraction of packets is corrupted uniformly at random.
-
-    With sealing the adversary cannot tell chunks apart, so its corruption is
-    spread uniformly; without it, the packets holding one source symbol suffice.
-    """
-
-    k, repair = default_chunk_code()
-    per_chunk = k + repair
-    trials_per_chunk = 200 if args.quick else 20000
-    failure_by_hits = np.asarray(
-        failure_by_losses(k, per_chunk, np.random.default_rng(7), trials_per_chunk)
-    )
-    smallest_attack = smallest_known_attack(k, repair)
-    chunk_size = DEFAULT_CHUNK_SIZE
-    files = {"1 MiB": MIB, "64 MiB": 64 * MIB, "1 GiB": 1024 * MIB}
-    fractions = np.concatenate(
-        [np.geomspace(1e-5, 0.08, 40), np.linspace(0.085, 0.3, 30)]
-    )
-    trials = 50 if args.quick else 400
-    rng = np.random.default_rng(6)
-    results = {}
-    for label, size in files.items():
-        chunks = math.ceil(size / chunk_size)
-        total = chunks * per_chunk
-        losses = []
-        for fraction in fractions:
-            corrupted = int(round(fraction * total))
-            if corrupted == 0:
-                losses.append(0.0)
-                continue
-            lost = 0
-            for _ in range(trials):
-                hits = rng.multivariate_hypergeometric([per_chunk] * chunks, corrupted)
-                lost += bool((rng.random(chunks) < failure_by_hits[hits]).any())
-            losses.append(lost / trials)
-        results[label] = {
-            "chunks": chunks,
-            "packets": total,
-            "fractions": fractions.tolist(),
-            "random_loss": losses,
-            "targeted_packets": smallest_attack,
-            "targeted_fraction": smallest_attack / total,
-        }
-    results["chunk_failure_by_hits"] = failure_by_hits.tolist()
-    return results
-
-
-def plot_attack(attack, figure_dir):
-    figure, axis = plt.subplots()
-    files = {label: data for label, data in attack.items() if isinstance(data, dict)}
-    for slot, (label, data) in enumerate(files.items()):
-        axis.plot(
-            100 * np.asarray(data["fractions"]),
-            100 * np.asarray(data["random_loss"]),
-            color=COLORS[slot],
-            linestyle=LINESTYLES[slot],
-            label=f"{label}, com ocultação",
-        )
-        axis.axvline(
-            100 * data["targeted_fraction"],
-            color=COLORS[slot],
-            linestyle=":",
-            linewidth=1.4,
-            label=f"{label}, sem ocultação ({data['targeted_packets']} pacotes)",
-        )
-    axis.set_xscale("log")
-    axis.set_xlabel("pacotes corrompidos pelo adversário (% do arquivo)")
-    axis.set_ylabel("probabilidade de perda do arquivo (%)")
-    handles, labels = axis.get_legend_handles_labels()
-    order = [0, 2, 4, 1, 3, 5]
-    axis.legend(
-        [handles[index] for index in order],
-        [labels[index] for index in order],
-        ncol=2,
-        loc="upper center",
-        bbox_to_anchor=(0.5, -0.18),
-    )
-    save_figure(figure, figure_dir, "targeted_attack")
-
-
 # ---------------------------------------------------------------------------
 # Codecs: HyBolt with Online Codes, as in Hy-SAIL, against Raptor R10
 # ---------------------------------------------------------------------------
@@ -1050,7 +918,6 @@ CODECS = ((raptor.CODEC, "Raptor R10"), (online_codes.CODEC, "Online Codes"))
 CODEC_CONFIGS = (
     ("codec", "só o código"),
     ("none", "sem prova"),
-    (COMPACT_SCHEME, "compacto + ocultação"),
 )
 # The codec's own work, under one name for both codes.
 CODEC_STAGES = (
@@ -1082,7 +949,7 @@ def experiment_codecs(args):
         if not input_file.exists():
             write_input(input_file, size_mb * MB, seed=size_mb)
         for codec, _ in CODECS:
-            for scheme, seal in ((COMPACT_SCHEME, True), ("none", False)):
+            for scheme, seal in (("none", False),):
                 print(f"  codecs {size_mb} MB codec={codec} scheme={scheme}")
                 encoded = encode_file(
                     deployment,
@@ -1281,50 +1148,8 @@ def _codec_value(timings, size_mb, codec, config, key):
 
 
 # ---------------------------------------------------------------------------
-# Degrees: degree distributions of the three fountain codes
+# Degrees: degree distributions of the fountain codes
 # ---------------------------------------------------------------------------
-
-# RFC 6330, Section 5.3.5.2: degree d is drawn when f[d - 1] <= v < f[d] for a
-# uniform v in [0, 2^20).
-RAPTORQ_DEGREE_TABLE = (
-    0,
-    5243,
-    529531,
-    704294,
-    791675,
-    844104,
-    879057,
-    904023,
-    922747,
-    937311,
-    948962,
-    958494,
-    966438,
-    973160,
-    978921,
-    983914,
-    988283,
-    992138,
-    995565,
-    998631,
-    1001391,
-    1003887,
-    1006157,
-    1008229,
-    1010129,
-    1011876,
-    1013490,
-    1014983,
-    1016370,
-    1017662,
-    1048576,
-)
-
-
-def raptorq_degree_distribution():
-    table = np.asarray(RAPTORQ_DEGREE_TABLE, dtype=float)
-    return np.diff(table) / table[-1]
-
 
 def r10_degree_distribution():
     """RFC 5053, Section 5.4.4.2, Table 1."""
@@ -1346,7 +1171,6 @@ def experiment_degrees(args):
             online_codes.degree_distribution(0.01)
         ),
         "Raptor R10 (RFC 5053)": r10_degree_distribution(),
-        "RaptorQ (RFC 6330)": raptorq_degree_distribution(),
     }
     summary = {}
     figure, axis = plt.subplots()
@@ -1389,7 +1213,6 @@ def replot_saved(args):
         [1, 2, 5, 10, 20, 50, 100, 200],
         args.figure_dir,
     )
-    plot_attack(detection["attack"], args.figure_dir)
     plot_codecs(json.loads((data_dir / "codecs.json").read_text()), args.figure_dir)
     plot_overhead(json.loads((data_dir / "overhead.json").read_text()), args.figure_dir)
 
