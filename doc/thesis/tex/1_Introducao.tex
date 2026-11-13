@@ -37,13 +37,13 @@ Portanto, embora o cenário tecnológico tenha evoluído, permanece necessária 
 
 \section{Objetivos}
 
-Na proposta original, o HySAIL depende de Online Codes para gerar os blocos distribuídos entre os servidores. O presente trabalho tem como objetivo avaliar a substituição dos Online Codes pelos Raptor Codes padronizados na RFC~5053 (R10) \cite{luby2007rfc5053} no processo de codificação e decodificação de blocos do HySAIL. O R10 foi escolhido em vez de seu sucessor, o RaptorQ \cite{luby2011rfc6330}, porque opera inteiramente em $GF(2)$: cada símbolo codificado continua sendo o XOR de blocos de mensagem, como nos Online Codes, o que preserva o \acrshort{MAC} homomórfico e a Redistribuição local do HySAIL.
+Na proposta original, o HySAIL depende de Online Codes para gerar os blocos distribuídos entre os servidores. O presente trabalho tem como objetivo avaliar a substituição dos Online Codes pelos Raptor Codes padronizados na RFC~5053 (R10) \cite{luby2007rfc5053} no processo de codificação e decodificação de blocos do HySAIL. O R10 opera inteiramente em $GF(2)$: cada símbolo codificado continua sendo o XOR de blocos de mensagem, como nos Online Codes, o que preserva o \acrshort{MAC} homomórfico e a Redistribuição local do HySAIL.
 
 Após a implementação e a avaliação dessas mudanças, serão realizadas comparações com soluções adotadas anteriormente, a fim de identificar os ganhos proporcionados pelo novo modelo.
 
 \section{Contribuições Esperadas}
 
-Ao final deste trabalho, espera-se que o modelo proposto para codificação e decodificação de blocos utilizando o Raptor R10 apresente melhorias em termos de eficiência, segurança e robustez em comparação com as soluções baseadas em Online Codes, que exista prova matemática que admita seu uso e que as concessões em relação ao RaptorQ sejam quantificadas.
+Ao final deste trabalho, espera-se que o modelo proposto para codificação e decodificação de blocos utilizando o Raptor R10 apresente melhorias em termos de eficiência, segurança e robustez em comparação com as soluções baseadas em Online Codes e que exista prova matemática que admita seu uso.
 
 Além disso, espera-se que as contribuições deste estudo forneçam subsídios para a adoção de técnicas avançadas de codificação em cenários de Big Data e ambientes distribuídos.
 

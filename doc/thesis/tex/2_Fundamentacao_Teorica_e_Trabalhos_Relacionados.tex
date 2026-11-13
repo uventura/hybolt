@@ -1,4 +1,4 @@
-Este capítulo apresenta os fundamentos necessários à compreensão da proposta e os trabalhos relacionados. Inicialmente, são definidos os corpos finitos e a divisão polinomial em $GF(2)$, que fundamentam as operações de codificação de blocos. Em seguida, descreve-se o HySAIL e são apresentados os códigos \emph{fountain} relevantes ao trabalho: os LT Codes, que servem de base aos demais, os Online Codes, empregados na proposta original do HySAIL, o Raptor R10, cuja adoção é avaliada neste trabalho, e os RaptorQ Codes, seu sucessor, cuja pré-codificação em $GF(256)$ explica a escolha do R10. Por fim, são analisados os trabalhos relacionados no campo de \acrshort{PoR}.
+Este capítulo apresenta os fundamentos necessários à compreensão da proposta e os trabalhos relacionados. Inicialmente, são definidos os corpos finitos e a divisão polinomial em $GF(2)$, que fundamentam as operações de codificação de blocos. Em seguida, descreve-se o HySAIL e são apresentados os códigos \emph{fountain} relevantes ao trabalho: os LT Codes, que servem de base aos demais, os Online Codes, empregados na proposta original do HySAIL e o Raptor R10, cuja adoção é avaliada neste trabalho. Por fim, são analisados os trabalhos relacionados no campo de \acrshort{PoR}.
 
 \section{Conceitos Fundamentais}
 
@@ -6,8 +6,6 @@ Este capítulo apresenta os fundamentos necessários à compreensão da proposta
 Um corpo finito, ou corpo de Galois, é uma estrutura algébrica composta por um conjunto finito de elementos sobre o qual as operações de adição e multiplicação são fechadas, associativas, comutativas e distributivas, e em que todo elemento possui inverso aditivo e todo elemento não nulo possui inverso multiplicativo. No contexto do HySAIL, são utilizados o corpo $GF(2)$ e suas extensões $GF(2^n)$, que permitem representar e manipular dados binários por meio de operações algébricas bem definidas.
 
 O corpo $GF(2)$ possui apenas os elementos 0 e 1. Nele, a adição corresponde à operação XOR e a multiplicação, à operação AND. Assim, $1 + 1 = 0$ e $1 + 0 = 1$. As extensões $GF(2^n)$ possuem $2^n$ elementos, representados por polinômios de grau menor que $n$ com coeficientes em $GF(2)$, de modo que cada elemento corresponde a um vetor de $n$ bits. A adição em $GF(2^n)$ continua sendo o XOR dos vetores, enquanto a multiplicação corresponde ao produto dos polinômios reduzido módulo um polinômio irredutível de grau $n$, que define o corpo.
-
-Um caso particular relevante para este trabalho é $GF(2^8)$, também denotado $GF(256)$, cujos elementos correspondem a um byte. O padrão dos RaptorQ Codes define esse corpo pelo polinômio irredutível $x^8 + x^4 + x^3 + x^2 + 1$ \cite{luby2011rfc6330}. Nele, por exemplo, o produto de $x$ por $x^7$ é $x^8$, que, reduzido módulo esse polinômio, resulta em $x^4 + x^3 + x^2 + 1$. Diferentemente da adição, a multiplicação por uma constante de $GF(256)$ mistura os bits de cada byte, o que impede o uso do \acrshort{MAC} do HySAIL com os RaptorQ Codes e motiva a adoção do Raptor R10, que opera apenas em $GF(2)$, como discutido no Capítulo~4.
 
 \subsubsection{Exemplo de representação polinomial}%
 Neste trabalho, adota-se a convenção em que a primeira posição de um vetor binário corresponde ao coeficiente do termo constante e cada posição seguinte, ao coeficiente da potência imediatamente superior de $x$. Segundo essa convenção, o vetor $1011$ possui coeficientes $1$, $0$, $1$ e $1$ associados, respectivamente, a $x^0$, $x^1$, $x^2$ e $x^3$, e é representado pelo polinômio
@@ -220,12 +218,12 @@ Essa é exatamente a estrutura dos blocos de verificação do HySAIL, que o usu�
 
 Na decodificação, o receptor reúne os símbolos recebidos e resolve, por eliminação gaussiana em $GF(2)$, o sistema formado pelas restrições de pré-codificação e pelas linhas LT dos símbolos recebidos; a norma descreve um decodificador por inativação que explora a esparsidade das restrições \cite{luby2007rfc5053}. Pela Equação~\eqref{eq:r10_suporte}, um conjunto de símbolos recebidos permite a recuperação se, e somente se, seus suportes, vistos como vetores de $GF(2)^K$, tiverem posto $K$. Como a pré-codificação opera apenas em $GF(2)$, o R10 não se aproxima de um código MDS (\emph{Maximum Distance Separable}): receber exatamente $K$ símbolos é, em geral, insuficiente, e a probabilidade de falha decresce aproximadamente por um fator constante a cada símbolo adicional recebido, comportamento quantificado no Capítulo~6.
 
-A Figura~\ref{fig:degree_distributions} compara as distribuições de grau dos códigos discutidos. A distribuição sóliton robusta dos LT Codes precisa admitir graus até $K$ para cobrir todos os símbolos de origem, e a dos Online Codes, com $\varepsilon = 0{,}01$, chega a 2.115, com grau médio de 10,3 e 8,2, respectivamente. Como a pré-codificação dos Raptor Codes assume a cobertura dos símbolos que a etapa LT deixa de alcançar, a distribuição do R10 admite apenas os graus 1, 2, 3, 4, 10, 11 e 40, com grau médio de 4,6, e a do RaptorQ é truncada no grau 30, com grau médio de 4,8 \cite{luby2007rfc5053,luby2011rfc6330}.
+A Figura~\ref{fig:degree_distributions} compara as distribuições de grau dos códigos discutidos. A distribuição sóliton robusta dos LT Codes precisa admitir graus até $K$ para cobrir todos os símbolos de origem, e a dos Online Codes, com $\varepsilon = 0{,}01$, chega a 2.115, com grau médio de 10,3 e 8,2, respectivamente. Como a pré-codificação dos Raptor Codes assume a cobertura dos símbolos que a etapa LT deixa de alcançar, a distribuição do R10 admite apenas os graus 1, 2, 3, 4, 10, 11 e 40, com grau médio de 4,6 \cite{luby2007rfc5053}.
 
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=0.8\textwidth]{resultados/degree_distributions.pdf}
-	\caption{Distribuições de grau dos LT Codes (sóliton robusta, com $c = 0{,}1$ e $\delta = 0{,}5$), dos Online Codes, do Raptor R10 (Tabela~1 da RFC~5053) e do RaptorQ (Seção 5.3.5.2 da RFC~6330). Gerada por \texttt{scripts/thesis\_benchmarks.py}.}
+	\caption{Distribuições de grau dos LT Codes (sóliton robusta, com $c = 0{,}1$ e $\delta = 0{,}5$), dos Online Codes e do Raptor R10 (Tabela~1 da RFC~5053). Gerada por \texttt{scripts/thesis\_benchmarks.py}.}
 	\label{fig:degree_distributions}
 \end{figure}
 
@@ -253,12 +251,6 @@ c_3 = C_2 \oplus C_4 = 0111.
 Seus suportes são $X_1 = \{1\}$, $X_2 = \{2, 3\}$ e $X_3 = \{2\} \triangle \{1, 2, 3\} = \{1, 3\}$, em que $\triangle$ denota a diferença simétrica, que corresponde ao XOR dos vetores de $GF(2)^3$. Como os três vetores $100$, $011$ e $101$ têm posto 3, a recuperação é possível. A partir de $c_1$, o receptor recupera $d_1$; de $c_3 = d_1 \oplus d_3$, obtém $d_3 = c_3 \oplus d_1 = 1101$; e, de $c_2 = d_2 \oplus d_3$, obtém $d_2 = c_2 \oplus d_3 = 0110$.
 
 Esse exemplo ilustra o papel da pré-codificação e a representação por suportes: cada símbolo recebido, inclusive os que combinam símbolos de reparo da pré-codificação, é o XOR de símbolos de origem, e a recuperação reduz-se a um sistema linear em $GF(2)$.
-
-\subsection{RaptorQ Codes}
-\label{sec:raptorq}
-Os \textbf{RaptorQ Codes}, padronizados na RFC~6330 \cite{luby2011rfc6330,WOS:000381844400033}, são o sucessor do R10. A estrutura em duas etapas é mantida, mas a pré-codificação acrescenta, às restrições LDPC, restrições HDPC (\emph{High-Density Parity-Check}) cujos coeficientes pertencem a $GF(256)$, de modo que cada byte de um símbolo é multiplicado por um elemento do corpo antes de ser somado. Essas restrições aproximam o RaptorQ de um código MDS: a probabilidade de falha é inferior a 1\% ao receber $K$ símbolos e inferior a $10^{-6}$ ao receber $K + 2$ símbolos \cite{luby2011rfc6330}, contra a necessidade de símbolos adicionais do R10 descrita acima.
-
-Como os símbolos intermediários resultam da solução de um sistema com coeficientes em $GF(256)$, cada um deles é uma combinação linear dos símbolos de origem sobre $GF(256)$, e o mesmo ocorre com os símbolos de reparo. Um símbolo de reparo do RaptorQ não é, portanto, o XOR de símbolos de origem, e a multiplicação por constantes de $GF(256)$ não comuta com a redução módulo $P_j(x)$ do \acrshort{MAC} do HySAIL. Essa incompatibilidade, que obriga o usuário a armazenar um \acrshort{MAC} por pacote e impede a Redistribuição local, motivou a escolha do R10 neste trabalho, como discutido na Seção~\ref{sec:escolha_r10}.
 
 \section{Trabalhos Relacionados}
 

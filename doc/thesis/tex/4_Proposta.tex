@@ -15,31 +15,30 @@ HySAIL é dividido em diferentes fases para o seu processo funcionamento, são e
 \item \textit{Fase de Decodificação:} os blocos são recuperados e decodificados para reconstruir os dados originais.
 \end{itemize}
 
-O presente trabalho realiza uma substituição no processo de Codificação, passando a utilizar o Raptor R10 \cite{luby2007rfc5053} em vez dos Online Codes originalmente empregados no HySAIL. Como os dois códigos produzem blocos de verificação que são o XOR de blocos de mensagem, a substituição preserva o \acrshort{MAC} homomórfico e a Redistribuição local do HySAIL, o que não ocorreria com o RaptorQ. A substituição, contudo, não é transparente para todas as fases: o dimensionamento da redundância foi concebido para os parâmetros dos Online Codes, e o modelo limitado e a exposição da estrutura do código aos provedores mantêm limitações do HySAIL original. As seções a seguir justificam a escolha do R10, identificam os problemas que permanecem na substituição direta, descrevem as adaptações que mantêm o modelo limitado do HySAIL e, por fim, propõem um esquema compacto e ilimitado, inspirado em Shacham e Waters \cite{shacham2008compact}, e a ocultação da estrutura do código, que resolvem as limitações que o modelo limitado não supera.
+O presente trabalho realiza uma substituição no processo de Codificação, passando a utilizar o Raptor R10 \cite{luby2007rfc5053} em vez dos Online Codes originalmente empregados no HySAIL. Como os dois códigos produzem blocos de verificação que são o XOR de blocos de mensagem, a substituição preserva o \acrshort{MAC} homomórfico e a Redistribuição local do HySAIL. A substituição, contudo, não é transparente para todas as fases: o dimensionamento da redundância foi concebido para os parâmetros dos Online Codes, e o modelo limitado e a exposição da estrutura do código aos provedores mantêm limitações do HySAIL original. As seções a seguir justificam a escolha do R10, identificam os problemas que permanecem na substituição direta, descrevem as adaptações que mantêm o modelo limitado do HySAIL e, por fim, propõem um esquema compacto e ilimitado, inspirado em Shacham e Waters \cite{shacham2008compact}, e a ocultação da estrutura do código, que resolvem as limitações que o modelo limitado não supera.
 
 \section{Escolha do Raptor R10}
 \label{sec:escolha_r10}
 
-Entre os códigos \emph{fountain} sucessores dos LT Codes, os Raptor Codes \cite{shokrollahi2006raptor} são os mais próximos dos Online Codes: ambos combinam uma pré-codificação com uma codificação LT de grau médio constante. Das duas variantes padronizadas, o RaptorQ \cite{luby2011rfc6330} tem \emph{overhead} de recepção praticamente nulo, mas suas restrições HDPC em $GF(256)$ fazem de cada símbolo de reparo uma combinação linear dos blocos de mensagem sobre $GF(256)$ (Seção~\ref{sec:raptorq}). A multiplicação de cada byte por uma constante de $GF(256)$ não comuta com a redução módulo $P_j(x)$, de modo que, com o RaptorQ, não existe combinação dos valores $h_{i,j}$ que forneça o \acrshort{MAC} de um símbolo de reparo: o usuário precisaria armazenar um \acrshort{MAC} por pacote, e a Redistribuição exigiria decodificar o bloco de origem.
-
-O R10, por sua vez, opera apenas em $GF(2)$, e todo símbolo codificado é o XOR dos blocos de mensagem de seu suporte $X_\eta$ (Equação~\eqref{eq:r10_suporte}). A Tabela~\ref{tab:escolha_codigo} resume as consequências dessa diferença para as fases do HySAIL. A concessão do R10 é o \emph{overhead} de recepção: por não ser um código próximo de MDS, ele exige alguns símbolos além de $K$ para uma recuperação confiável, o que é tratado na Seção~\ref{sec:redundancia}.
+Entre os códigos \emph{fountain} sucessores dos LT Codes, os Raptor Codes \cite{shokrollahi2006raptor} são os mais próximos dos Online Codes: ambos combinam uma pré-codificação com uma codificação LT de grau médio constante. O R10 opera apenas em $GF(2)$, e todo símbolo codificado é o XOR dos blocos de mensagem de seu suporte $X_\eta$ (Equação~\eqref{eq:r10_suporte}), como os blocos de verificação dos Online Codes. A Tabela~\ref{tab:escolha_codigo} resume as diferenças entre os dois códigos para as fases do HySAIL. A concessão do R10 é não ser um código MDS: ele exige alguns símbolos além de $K$ para uma recuperação confiável, o que é tratado na Seção~\ref{sec:redundancia}.
 
 \begin{table}[htbp]
 	\centering
-	\caption{Consequências da escolha do código para as fases do HySAIL}
+	\caption{Diferenças entre Online Codes e Raptor R10 para as fases do HySAIL}
 	\label{tab:escolha_codigo}
 	\footnotesize
-	\begin{tabular}{@{}p{4.2cm}p{3.2cm}p{3.2cm}p{3.2cm}@{}}
+	\begin{tabular}{@{}lll@{}}
 		\hline
-		\textbf{Aspecto} & \textbf{Online Codes} & \textbf{RaptorQ} & \textbf{Raptor R10} \\
+		\textbf{Aspecto} & \textbf{Online Codes} & \textbf{Raptor R10} \\
 		\hline
-		Corpo das operações & $GF(2)$ & $GF(2)$ e $GF(256)$ & $GF(2)$ \\
-		Bloco de verificação & XOR de blocos & combinação em $GF(256)$ & XOR de blocos \\
-		\acrshort{MAC} do usuário & $n \cdot l$ & $t \cdot l$ & $n \cdot l$ \\
-		Redistribuição & XOR de blocos & decodificação do bloco & XOR de blocos \\
-		Composição $\langle i, x_i \rangle$ & armazenada & -- & derivada de $(K, \eta)$ \\
-		\emph{Overhead} de recepção & elevado para $K$ pequeno & praticamente nulo & alguns símbolos \\
-		Padronização & -- & RFC~6330 & RFC~5053 \\
+		Pré-codificação & aleatória ($q = 3$) & LDPC e Half (norma) \\
+		Sistemático & não & sim \\
+		Decodificação & \emph{peeling} & eliminação gaussiana \\
+		\acrshort{MAC} do usuário & $n \cdot l$ & $n \cdot l$ \\
+		Redistribuição & XOR de blocos & XOR de blocos \\
+		Composição $\langle i, x_i \rangle$ & armazenada & derivada de $(K, \eta)$ \\
+		\emph{Overhead} de recepção & elevado para $K$ pequeno & alguns símbolos \\
+		Padronização & -- & RFC~5053 \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -149,7 +148,7 @@ O tamanho do \emph{chunk}, por outro lado, é uma escolha de projeto que o \acrs
 	\end{tabular}
 \end{table}
 
-Com $K = 100$, a perda tolerada por \emph{chunk} já se aproxima do limite MDS de $r/(K + r) = 20\%$ para $\varepsilon = 0{,}25$, e a corrupção crítica de um arquivo de 1~GiB é cinco vezes maior que a obtida com o RaptorQ e \emph{chunks} de $K = 11$ símbolos, de 1,6\%, enquanto cada reparo transfere apenas 325~KB. Valores maiores de $K$ aumentam pouco a tolerância e multiplicam o custo da Redistribuição. A proposta adota, por isso, \emph{chunks} de $K = 100$ símbolos de 6.500 bytes (650.000 bytes) e $\varepsilon = 0{,}25$ como valores padrão. Para arquivos ou \emph{chunks} menores que 650.000 bytes, o símbolo é reduzido de modo a manter 100 símbolos de origem.
+Com $K = 100$, a perda tolerada por \emph{chunk} já se aproxima do limite MDS de $r/(K + r) = 20\%$ para $\varepsilon = 0{,}25$, enquanto cada reparo transfere apenas 325~KB. Valores maiores de $K$ aumentam pouco a tolerância e multiplicam o custo da Redistribuição. A proposta adota, por isso, \emph{chunks} de $K = 100$ símbolos de 6.500 bytes (650.000 bytes) e $\varepsilon = 0{,}25$ como valores padrão. Para arquivos ou \emph{chunks} menores que 650.000 bytes, o símbolo é reduzido de modo a manter 100 símbolos de origem.
 
 O parâmetro $\varepsilon$ também determina quantos provedores podem deixar o sistema sem perda de dados. Como os $K + r$ pacotes de cada \emph{chunk} são distribuídos de forma equilibrada entre os $N$ provedores, cada provedor armazena cerca de $(K + r)/N$ deles, e a saída de $f$ provedores só pode ser tolerada se $f (K + r)/N \le r$, isto é, se
 
