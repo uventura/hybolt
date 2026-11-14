@@ -1,12 +1,37 @@
-A metodologia adotada neste trabalho está organizada em três etapas, que permitem analisar o impacto da substituição dos Online Codes pelo Raptor R10 no HySAIL quanto à integridade e à disponibilidade dos dados e à eficiência dos processos de codificação e decodificação. Na primeira etapa, realizou-se uma revisão da literatura que fundamenta a proposta. Na segunda, avalia-se se as provas de integridade e disponibilidade do HySAIL permanecem válidas após a substituição. Na terceira, compara-se experimentalmente o desempenho do R10 com o dos Online Codes.
+Este capítulo descreve a metodologia adotada para avaliar a substituição dos Online Codes pelo Raptor R10 no HySAIL. A avaliação combina uma análise das propriedades do protocolo que dependem do código com uma comparação experimental entre os dois códigos e entre os modelos de auditoria.
 
-\section{Revisão da Literatura}
-A revisão da literatura abrangeu os Online Codes, os Raptor Codes, em particular o R10, e as soluções que empregam códigos de apagamento para garantir a integridade e a disponibilidade de dados armazenados. Seu objetivo foi compreender o estado da arte e identificar as lacunas que justificam a substituição proposta.
+\section{Abordagem}
 
-A busca foi conduzida de forma sistemática nas bases Scopus, Web of Science, Google Scholar e IEEE Xplore, com as palavras-chave ``Online Codes'', ``Raptor Codes'', ``proof of retrievability'', ``erasure codes'', ``'' e ``digital storage'', além de seus sinônimos e variações em português e inglês. Para assegurar a atualidade dos resultados, foram considerados artigos publicados nos últimos oito anos. A análise dos trabalhos selecionados permitiu identificar as lacunas e oportunidades que fundamentam a proposta apresentada neste trabalho.
+A abordagem consiste em alterar um único componente do HySAIL por vez e manter os demais fixos. O protocolo, com suas fases de Codificação, Distribuição, Auditoria, Redistribuição e Decodificação, é implementado uma única vez, e o código \emph{fountain} é um componente intercambiável dessa implementação. Assim, os Online Codes e o R10 são executados no mesmo fluxo, com os mesmos \acrshort{MAC}s, a mesma Auditoria e a mesma Redistribuição.
 
-\section{Provas de Integridade e Disponibilidade}
-O HySAIL fundamenta-se em provas de integridade e disponibilidade, que garantem que os dados armazenados permanecem corretos e acessíveis mesmo diante de falhas ou de ataques maliciosos. Como essas provas foram formuladas considerando o uso de Online Codes, é necessário verificar se continuam válidas quando o Raptor R10 é adotado. Essa verificação compreenderá uma análise teórica das propriedades do R10 relacionadas à integridade e à disponibilidade, complementada por experimentos que simulem falhas e ataques, a fim de confirmar que as garantias originais são preservadas.
+Essa escolha evita comparar o R10 com os tempos publicados do HySAIL, obtidos em outro equipamento e com outra implementação. Qualquer diferença medida pode, portanto, ser atribuída ao componente alterado.
 
-\section{Avaliação do Raptor R10}
-Além da preservação das garantias de segurança, é necessário avaliar o impacto da substituição sobre a eficiência de codificação e decodificação e sobre a robustez frente a perdas de símbolos. Para isso, serão realizados experimentos que meçam, para o R10 e os Online Codes, o \emph{overhead} de recepção, o tempo de codificação e de decodificação e a taxa de recuperação dos símbolos de origem, permitindo uma análise comparativa entre as duas abordagens.
+\section{Preservação das Propriedades do HySAIL}
+
+As garantias do HySAIL foram formuladas para os Online Codes, e a primeira etapa verifica se continuam válidas com o R10. A análise teórica identifica a propriedade de que elas dependem, isto é, que todo bloco armazenado seja o XOR de blocos de mensagem, e mostra que o R10 a satisfaz (Capítulo~4). Dela decorrem o \acrshort{MAC} homomórfico, a Auditoria e a Redistribuição local.
+
+A análise é complementada por testes que simulam falhas e provedores desonestos, como respostas incorretas a desafios e perda ou adulteração de pacotes, para confirmar que a implementação detecta a corrupção e recupera o arquivo (Capítulo~5).
+
+\section{Comparações}
+
+A segunda etapa compara experimentalmente as alternativas, todas na mesma máquina e com os mesmos parâmetros. São feitas três comparações:
+
+\begin{itemize}
+	\item \textit{Entre os códigos:} R10 e Online Codes são comparados quanto ao \emph{overhead} de recepção, à tolerância a perdas de um \emph{chunk}, ao armazenamento e ao tempo de codificação e decodificação. O tempo é medido de duas formas, apenas no código (\emph{codec}) e no fluxo completo (\emph{end-to-end}).
+	\item \textit{Entre os modelos de auditoria:} os modelos limitado e ilimitado do HySAIL são comparados entre si e com a execução sem \acrshort{PoR} quanto ao tempo de codificação, decodificação e auditoria, à memória exigida do usuário e à capacidade de detectar corrupção.
+	\item \textit{Com outros esquemas:} o resultado é comparado qualitativamente com os esquemas de \acrshort{PoR} da literatura, pelas propriedades que oferecem.
+\end{itemize}
+
+As medidas probabilísticas, como o \emph{overhead} e a tolerância a perdas, são estimadas por repetição, com ordens aleatórias de recebimento ou de perda dos pacotes, e comparadas com os valores teóricos. A detecção é medida corrompendo uma fração conhecida dos pacotes de um provedor antes de cada rodada de auditoria. Em todas as execuções, o arquivo decodificado é comparado byte a byte com o original.
+
+\section{Modificações Avaliadas}
+
+Além da troca do código, a metodologia avalia as modificações que a troca exige ou permite, cada uma medida isoladamente:
+
+\begin{itemize}
+	\item \textit{Divisão em chunks:} o arquivo deixa de ser codificado inteiro e passa a ser dividido em partes independentes, cujo tamanho e redundância são variados para medir o efeito sobre a tolerância a perdas e o custo de reparo.
+	\item \textit{Redistribuição por novos símbolos:} um pacote corrompido é substituído por um símbolo de reparo inédito, em vez de ser reproduzido.
+	\item \textit{Modelo de auditoria:} a mesma codificação é avaliada com o modelo limitado e com o ilimitado.
+\end{itemize}
+
+As limitações que essas modificações não resolvem são registradas como trabalhos futuros (Capítulo~7).

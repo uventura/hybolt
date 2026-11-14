@@ -19,46 +19,50 @@
 \contentsline {subsection}{\numberline {2.1.6}Raptor Codes (R10)}{12}{subsection.2.1.6}%
 \contentsline {subsubsection}{Exemplo simplificado de codificação e recuperação}{15}{section*.12}%
 \contentsline {section}{\numberline {2.2}Trabalhos Relacionados}{16}{section.2.2}%
-\contentsline {chapter}{\numberline {3}Metodologia de Pesquisa}{17}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Revisão da Literatura}{17}{section.3.1}%
-\contentsline {section}{\numberline {3.2}Provas de Integridade e Disponibilidade}{17}{section.3.2}%
-\contentsline {section}{\numberline {3.3}Avaliação do Raptor R10}{18}{section.3.3}%
-\contentsline {chapter}{\numberline {4}Proposta}{19}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Arquitetura Geral}{19}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Escolha do Raptor R10}{20}{section.4.2}%
-\contentsline {section}{\numberline {4.3}Substituição dos Online Codes pelo Raptor R10}{20}{section.4.3}%
-\contentsline {section}{\numberline {4.4}Problemas da Substituição Direta}{21}{section.4.4}%
-\contentsline {section}{\numberline {4.5}MAC Homomórfico com o Raptor R10}{22}{section.4.5}%
-\contentsline {section}{\numberline {4.6}Escolha dos Polinômios de Desafio}{22}{section.4.6}%
-\contentsline {section}{\numberline {4.7}Auditoria no Modelo Limitado}{23}{section.4.7}%
-\contentsline {section}{\numberline {4.8}Auditoria no Modelo Ilimitado}{24}{section.4.8}%
-\contentsline {section}{\numberline {4.9}Redundância}{25}{section.4.9}%
-\contentsline {subsection}{\numberline {4.9.1}Tamanho dos \emph {chunks}}{25}{subsection.4.9.1}%
-\contentsline {section}{\numberline {4.10}Redistribuição}{27}{section.4.10}%
-\contentsline {chapter}{\numberline {5}Implementação}{29}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Visão Geral}{29}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Fluxo das Fases}{30}{section.5.2}%
-\contentsline {subsection}{\numberline {5.2.1}Codificação e Distribuição}{30}{subsection.5.2.1}%
-\contentsline {subsection}{\numberline {5.2.2}Auditoria}{30}{subsection.5.2.2}%
-\contentsline {subsection}{\numberline {5.2.3}Redistribuição}{31}{subsection.5.2.3}%
-\contentsline {subsection}{\numberline {5.2.4}Decodificação}{31}{subsection.5.2.4}%
-\contentsline {section}{\numberline {5.3}Componentes}{31}{section.5.3}%
-\contentsline {section}{\numberline {5.4}Metadados do Usuário}{32}{section.5.4}%
-\contentsline {section}{\numberline {5.5}Problemas Observados na Substituição Direta}{33}{section.5.5}%
-\contentsline {section}{\numberline {5.6}Simplificações}{34}{section.5.6}%
-\contentsline {section}{\numberline {5.7}Validação}{34}{section.5.7}%
-\contentsline {chapter}{\numberline {6}Resultados}{36}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Ambiente Experimental}{36}{section.6.1}%
-\contentsline {section}{\numberline {6.2}Recuperação e \emph {Overhead} de Recepção}{37}{section.6.2}%
-\contentsline {section}{\numberline {6.3}Custo do MAC Polinomial}{38}{section.6.3}%
-\contentsline {section}{\numberline {6.4}Codificação e Decodificação}{40}{section.6.4}%
-\contentsline {section}{\numberline {6.5}Auditoria}{42}{section.6.5}%
-\contentsline {section}{\numberline {6.6}Memória do Usuário e Armazenamento}{43}{section.6.6}%
-\contentsline {section}{\numberline {6.7}Comparação entre Online Codes e Raptor R10}{44}{section.6.7}%
-\contentsline {section}{\numberline {6.8}Comparação com Outros Esquemas de PoR}{47}{section.6.8}%
-\contentsline {chapter}{\numberline {7}Conclusão}{48}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Trabalhos Futuros}{48}{section.7.1}%
-\contentsline {chapter}{Refer\^encias}{49}{section*.13}%
+\contentsline {subsection}{\numberline {2.2.1}Provas de recuperabilidade}{16}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}Modelos correlatos}{17}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}Trabalhos posteriores}{17}{subsection.2.2.3}%
+\contentsline {chapter}{\numberline {3}Metodologia de Pesquisa}{18}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Abordagem}{18}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Preservação das Propriedades do HySAIL}{18}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Comparações}{19}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Modificações Avaliadas}{19}{section.3.4}%
+\contentsline {chapter}{\numberline {4}Proposta}{21}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Arquitetura Geral}{21}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Escolha do Raptor R10}{22}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Substituição dos Online Codes pelo Raptor R10}{22}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Problemas da Substituição Direta}{23}{section.4.4}%
+\contentsline {section}{\numberline {4.5}MAC Homomórfico com o Raptor R10}{24}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Escolha dos Polinômios de Desafio}{24}{section.4.6}%
+\contentsline {section}{\numberline {4.7}Auditoria no Modelo Limitado}{25}{section.4.7}%
+\contentsline {section}{\numberline {4.8}Auditoria no Modelo Ilimitado}{26}{section.4.8}%
+\contentsline {section}{\numberline {4.9}Redundância}{27}{section.4.9}%
+\contentsline {subsection}{\numberline {4.9.1}Tamanho dos \emph {chunks}}{27}{subsection.4.9.1}%
+\contentsline {section}{\numberline {4.10}Redistribuição}{29}{section.4.10}%
+\contentsline {chapter}{\numberline {5}Implementação}{31}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Visão Geral}{31}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Fluxo das Fases}{32}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}Codificação e Distribuição}{32}{subsection.5.2.1}%
+\contentsline {subsection}{\numberline {5.2.2}Auditoria}{32}{subsection.5.2.2}%
+\contentsline {subsection}{\numberline {5.2.3}Redistribuição}{33}{subsection.5.2.3}%
+\contentsline {subsection}{\numberline {5.2.4}Decodificação}{33}{subsection.5.2.4}%
+\contentsline {section}{\numberline {5.3}Componentes}{33}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Metadados do Usuário}{34}{section.5.4}%
+\contentsline {section}{\numberline {5.5}Problemas Observados na Substituição Direta}{35}{section.5.5}%
+\contentsline {section}{\numberline {5.6}Simplificações}{36}{section.5.6}%
+\contentsline {section}{\numberline {5.7}Validação}{36}{section.5.7}%
+\contentsline {chapter}{\numberline {6}Resultados}{38}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Ambiente Experimental}{38}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Recuperação e \emph {Overhead} de Recepção}{39}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Custo do MAC Polinomial}{40}{section.6.3}%
+\contentsline {section}{\numberline {6.4}Codificação e Decodificação}{42}{section.6.4}%
+\contentsline {section}{\numberline {6.5}Auditoria}{44}{section.6.5}%
+\contentsline {section}{\numberline {6.6}Memória do Usuário e Armazenamento}{45}{section.6.6}%
+\contentsline {section}{\numberline {6.7}Comparação entre Online Codes e Raptor R10}{46}{section.6.7}%
+\contentsline {section}{\numberline {6.8}Comparação com Outros Esquemas de PoR}{49}{section.6.8}%
+\contentsline {chapter}{\numberline {7}Conclusão}{50}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Trabalhos Futuros}{50}{section.7.1}%
+\contentsline {chapter}{Refer\^encias}{51}{section*.13}%
 \babel@toc {american}{}\relax 
 \babel@toc {portuguese}{}\relax 
 \babel@toc {american}{}\relax 

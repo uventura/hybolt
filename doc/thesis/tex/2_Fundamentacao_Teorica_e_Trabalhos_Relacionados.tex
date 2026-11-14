@@ -256,4 +256,25 @@ Esse exemplo ilustra o papel da pré-codificação e a representação por supor
 
 \section{Trabalhos Relacionados}
 
-Esta seção tem como objetivo analisar os trabalhos desenvolvidos no campo de \acrshort{PoR}. São examinadas as principais abordagens propostas na literatura, incluindo variantes com verificação delegada e auditoria pública \cite{armknecht2021outsourcing,tan2023proof,shen2024public}, bem como os principais algoritmos atualmente empregados na construção desses esquemas, com o intuito de identificar suas contribuições e limitações em relação à proposta deste trabalho.
+Esta seção situa o trabalho no campo de \acrshort{PoR}. Os trabalhos das Seções~\ref{sec:relacionados_por} e~\ref{sec:relacionados_outros} são os já discutidos no artigo do HySAIL \cite{amaral2019hysail}, retomados aqui porque definem os modelos com os quais o protocolo é comparado; a Seção~\ref{sec:relacionados_recentes} acrescenta trabalhos posteriores.
+
+\subsection{Provas de recuperabilidade}
+\label{sec:relacionados_por}
+
+O conceito de \acrshort{PoR} foi definido por Juels e Kaliski \cite{juels2007pors}. Em seu esquema, blocos de verificação, chamados sentinelas, são inseridos em posições aleatórias do arquivo já codificado, e a auditoria consulta algumas dessas posições. O modelo é limitado, pois cada sentinela só pode ser consultada uma vez, e alterações que não atinjam uma sentinela passam despercebidas.
+
+Shacham e Waters \cite{shacham2008compact} propuseram, em seguida, esquemas com definições formais de segurança, nos quais uma etiqueta linear acompanha cada bloco e permite um número ilimitado de verificações com uma chave de tamanho constante. Bowers, Juels e Oprea \cite{bowers2009proofs} reuniram as duas abordagens em um arcabouço teórico, que limita a taxa de erro do adversário.
+
+Esses esquemas consideram um único provedor. O HAIL \cite{bowers2009hail} estende a \acrshort{PoR} a vários servidores, com um adversário capaz de corromper servidores diferentes ao longo do tempo, mas, como o modelo de Juels e Kaliski, guarda uma quantidade limitada de códigos de autenticação. O HySAIL parte desse cenário de múltiplos provedores e acrescenta os modelos limitado e ilimitado de auditoria e a redistribuição local dos blocos corrompidos \cite{amaral2019hysail}.
+
+\subsection{Modelos correlatos}
+\label{sec:relacionados_outros}
+
+O artigo do HySAIL discute ainda dois modelos próximos da \acrshort{PoR}. Na prova de posse de dados (\emph{Provable Data Possession}, PDP), de Ateniese et al. \cite{ateniese2007pdp}, o servidor acessa uma pequena parte do arquivo para produzir uma prova probabilística de que o armazena, com pouco tráfego e pouca informação mantida pelo verificador, mas sem garantir a recuperação do arquivo. Na prova de propriedade (\emph{Proof of Ownership}), de Halevi et al. \cite{halevi2011pow}, os papéis se invertem: é o cliente que prova ao servidor possuir o arquivo.
+
+Por fim, a auditoria pode ser delegada a um terceiro confiável, para não sobrecarregar o usuário, como na auditoria pública de Wang et al. \cite{wang2010privacy}. O HySAIL não oferece verificação pública, limitação que seus autores apontam como trabalho futuro \cite{amaral2019hysail}.
+
+\subsection{Trabalhos posteriores}
+\label{sec:relacionados_recentes}
+
+Trabalhos posteriores ao HySAIL concentram-se justamente na verificação delegada e na auditoria pública \cite{armknecht2021outsourcing,tan2023proof,shen2024public}. Este trabalho segue outra direção: mantém o protocolo do HySAIL e avalia a troca de seu código de apagamento, os Online Codes, pelo Raptor R10.

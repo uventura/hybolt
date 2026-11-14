@@ -5,16 +5,16 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {4.1}{\ignorespaces Diferenças entre Online Codes e Raptor R10 para as fases do HySAIL}}{20}{table.4.1}%
-\contentsline {table}{\numberline {4.2}{\ignorespaces Modelos de auditoria do HySAIL com o Raptor R10}}{25}{table.4.2}%
-\contentsline {table}{\numberline {4.3}{\ignorespaces Efeito do número de símbolos por \emph {chunk}, com símbolos de 6.500 bytes, estimado por simulação}}{26}{table.4.3}%
+\contentsline {table}{\numberline {4.1}{\ignorespaces Diferenças entre Online Codes e Raptor R10 para as fases do HySAIL}}{22}{table.4.1}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces Modelos de auditoria do HySAIL com o Raptor R10}}{27}{table.4.2}%
+\contentsline {table}{\numberline {4.3}{\ignorespaces Efeito do número de símbolos por \emph {chunk}, com símbolos de 6.500 bytes, estimado por simulação}}{28}{table.4.3}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {5.1}{\ignorespaces Conteúdo dos metadados mantidos pelo usuário}}{33}{table.5.1}%
-\contentsline {table}{\numberline {5.2}{\ignorespaces Medidas do HyBolt para um arquivo de 1~MiB nos dois modelos de auditoria}}{33}{table.5.2}%
+\contentsline {table}{\numberline {5.1}{\ignorespaces Conteúdo dos metadados mantidos pelo usuário}}{35}{table.5.1}%
+\contentsline {table}{\numberline {5.2}{\ignorespaces Medidas do HyBolt para um arquivo de 1~MiB nos dois modelos de auditoria}}{35}{table.5.2}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {6.1}{\ignorespaces Símbolos adicionais necessários à recuperação, em porcentagem de $K$}}{38}{table.6.1}%
-\contentsline {table}{\numberline {6.2}{\ignorespaces Tempos de codificação e decodificação, em segundos, do HyBolt com Raptor R10 e com Online Codes na mesma máquina}}{45}{table.6.2}%
-\contentsline {table}{\numberline {6.3}{\ignorespaces Comparação qualitativa entre esquemas de \acrshort {PoR}. $n$ é o número de blocos de mensagem e $l$ o número de desafios do modelo limitado}}{47}{table.6.3}%
+\contentsline {table}{\numberline {6.1}{\ignorespaces Símbolos adicionais necessários à recuperação, em porcentagem de $K$}}{40}{table.6.1}%
+\contentsline {table}{\numberline {6.2}{\ignorespaces Tempos de codificação e decodificação, em segundos, do HyBolt com Raptor R10 e com Online Codes na mesma máquina}}{47}{table.6.2}%
+\contentsline {table}{\numberline {6.3}{\ignorespaces Comparação qualitativa entre esquemas de \acrshort {PoR}. $n$ é o número de blocos de mensagem e $l$ o número de desafios do modelo limitado}}{49}{table.6.3}%
 \addvspace {10\p@ }
 \babel@toc {american}{}\relax 
 \babel@toc {portuguese}{}\relax 
