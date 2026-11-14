@@ -965,8 +965,8 @@ def plot_detection(empirical, fractions, sample_sizes, figure_dir):
 
 CODECS = ((raptor.CODEC, "Raptor R10"), (online_codes.CODEC, "Online Codes"))
 CODEC_CONFIGS = (
-    ("codec", "só o código"),
-    ("none", "sem PoR"),
+    ("codec", "codec"),
+    ("none", "end-to-end"),
 )
 # The codec's own work, under one name for both codes.
 CODEC_STAGES = (

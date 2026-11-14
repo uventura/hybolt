@@ -168,7 +168,7 @@ Como os Online Codes exigem um número aleatório de blocos além de $K$, o codi
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=\textwidth]{resultados/codec_comparison.pdf}
-	\caption{Tempos de codificação e decodificação do HyBolt com Raptor R10 e com Online Codes, medidos na mesma máquina, para arquivos de 50, 100 e 500~MB: tempo do código isolado e tempo total sem \acrshort{PoR}.}
+	\caption{Tempos de codificação e decodificação do HyBolt com Raptor R10 e com Online Codes, medidos na mesma máquina, para arquivos de 50, 100 e 500~MB: tempo do \emph{codec}, isto é, apenas do código \emph{fountain}, e tempo \emph{end-to-end}, do fluxo completo sem \acrshort{PoR}.}
 	\label{fig:hysail_comparison}
 \end{figure}
 
@@ -183,17 +183,17 @@ Como os Online Codes exigem um número aleatório de blocos além de $K$, o codi
 		& & \multicolumn{3}{c}{\textbf{Codificação}} & \multicolumn{3}{c}{\textbf{Decodificação}} \\
 		\textbf{Código} & \textbf{Configuração} & \textbf{50 MB} & \textbf{100 MB} & \textbf{500 MB} & \textbf{50 MB} & \textbf{100 MB} & \textbf{500 MB} \\
 		\hline
-		R10 & código isolado & 0,23 & 0,47 & 3,5 & 0,21 & 0,76 & 2,7 \\
-		Online Codes & código isolado & 0,19 & 0,52 & 3,3 & 0,31 & 0,86 & 3,2 \\
-		R10 & sem \acrshort{PoR} & 1,5 & 3,1 & 24,0 & 0,8 & 3,0 & 9,8 \\
-		Online Codes & sem \acrshort{PoR} & 1,6 & 4,2 & 28,1 & 1,4 & 3,7 & 13,1 \\
+		R10 & \emph{codec} & 0,23 & 0,47 & 3,5 & 0,21 & 0,76 & 2,7 \\
+		Online Codes & \emph{codec} & 0,19 & 0,52 & 3,3 & 0,31 & 0,86 & 3,2 \\
+		R10 & \emph{end-to-end} & 1,5 & 3,1 & 24,0 & 0,8 & 3,0 & 9,8 \\
+		Online Codes & \emph{end-to-end} & 1,6 & 4,2 & 28,1 & 1,4 & 3,7 & 13,1 \\
 		\hline
 	\end{tabular}
 \end{table}
 
-A Figura~\ref{fig:hysail_comparison} e a Tabela~\ref{tab:comparacao_hysail} mostram que o custo dos dois códigos é equivalente: o tempo do código isolado ficou entre 2,7 e 3,5~s para 500~MB com ambos. Como os tempos totais são dominados pela gravação e leitura dos pacotes e variam entre execuções, o custo de cada código foi medido também em memória, com 200 \emph{chunks} padrão. A mediana foi de 2,8~ms para codificar e 3,5~ms para decodificar um \emph{chunk} com o R10, e de 2,6 e 3,2~ms com os Online Codes.
+A Figura~\ref{fig:hysail_comparison} e a Tabela~\ref{tab:comparacao_hysail} mostram que o custo dos dois códigos é equivalente: o tempo do \emph{codec} ficou entre 2,7 e 3,5~s para 500~MB com ambos. Como os tempos \emph{end-to-end} são dominados pela gravação e leitura dos pacotes e variam entre execuções, o custo de cada código foi medido também em memória, com 200 \emph{chunks} padrão. A mediana foi de 2,8~ms para codificar e 3,5~ms para decodificar um \emph{chunk} com o R10, e de 2,6 e 3,2~ms com os Online Codes.
 
-A diferença está na quantidade de pacotes. Para decodificar um \emph{chunk}, o R10 recebeu, em média, 101,5 pacotes, e os Online Codes, 136,3 dos 143 armazenados. Com mais pacotes transferidos e verificados, a decodificação sem \acrshort{PoR} foi de 23\% a 75\% mais lenta com os Online Codes. Na codificação, as diferenças são da ordem da variação entre execuções.
+A diferença está na quantidade de pacotes. Para decodificar um \emph{chunk}, o R10 recebeu, em média, 101,5 pacotes, e os Online Codes, 136,3 dos 143 armazenados. Com mais pacotes transferidos e verificados, a decodificação \emph{end-to-end} foi de 23\% a 75\% mais lenta com os Online Codes. Na codificação, as diferenças são da ordem da variação entre execuções.
 
 \begin{figure}[htbp]
 	\centering
