@@ -53,7 +53,7 @@ A Figura~\ref{fig:componentes} apresenta os componentes da implementação. Do l
 
 \begin{itemize}
 	\item \textit{Códigos fountain:} o R10 e os Online Codes oferecem as mesmas operações: codificar um \emph{chunk}, fornecer o suporte de qualquer \acrshort{ESI} e decidir, pelo posto ou pelo \emph{peeling}, se um conjunto de pacotes basta para decodificar. O código usado em cada \emph{chunk} é registrado nos metadados.
-	\item \textit{Prova de recuperabilidade:} gera os \acrshort{MAC}s dos blocos de mensagem na Codificação, deriva o \acrshort{MAC} de qualquer pacote pela Equação~\eqref{eq:mac_derivado} e verifica cada pacote antes ou depois da transferência. Tem uma variante para cada modelo de auditoria e uma variante nula, que dispensa a prova.
+	\item \textit{Prova de recuperabilidade:} gera os \acrshort{MAC}s dos blocos de mensagem na Codificação, deriva o \acrshort{MAC} de qualquer pacote pela Equação~\eqref{eq:mac_derivado} e verifica cada pacote antes ou depois da transferência. Tem uma variante para cada modelo de auditoria e uma variante nula, sem \acrshort{PoR}.
 	\item \textit{Auditoria:} sorteia a amostra de cada provedor, aplica o desafio do modelo registrado nos metadados, localiza os pacotes corrompidos e avalia os limites $\tau$. No modelo limitado, um registro de desafios garante o uso único de cada polinômio.
 	\item \textit{Redistribuição:} expressa o suporte de um novo símbolo de reparo como combinação de pacotes íntegros e o grava em outro provedor.
 	\item \textit{Decodificação:} transfere e verifica os pacotes de cada \emph{chunk} e os entrega ao decodificador do código registrado nos metadados.

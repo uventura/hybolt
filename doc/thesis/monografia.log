@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.11.4)  14 NOV 2026 14:16
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.11.4)  14 NOV 2026 14:41
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1241,7 +1241,7 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 rfico.tex) [9] [10]
 (./img/tikz/lt_grafo.tex) [11] (./img/tikz/online_codes.tex) [12] [13]
 (./img/tikz/raptor_r10.tex) [14]
-<img/resultados/degree_distributions.pdf, id=623, 392.3847pt x 248.69572pt>
+<img/resultados/degree_distributions.pdf, id=626, 392.3847pt x 248.69572pt>
 File: img/resultados/degree_distributions.pdf Graphic file (type pdf)
 <use img/resultados/degree_distributions.pdf>
 Package pdftex.def Info: img/resultados/degree_distributions.pdf  used on input
@@ -1254,7 +1254,7 @@ Chapter 3.
 ]) [18]
 Chapter 4.
 (./tex/4_Proposta.tex
-<img/Hysail-Architecture.png, id=701, 1087.06125pt x 364.86313pt>
+<img/Hysail-Architecture.png, id=704, 1087.06125pt x 364.86313pt>
 File: img/Hysail-Architecture.png Graphic file (type png)
 <use img/Hysail-Architecture.png>
 Package pdftex.def Info: img/Hysail-Architecture.png  used on input line 4.
@@ -1282,20 +1282,20 @@ Chapter 6.
 (./tex/6_Resultados.tex [36
 
 ]
-<img/resultados/reception_overhead.pdf, id=913, 398.77167pt x 240.33162pt>
+<img/resultados/reception_overhead.pdf, id=917, 398.77167pt x 240.33162pt>
 File: img/resultados/reception_overhead.pdf Graphic file (type pdf)
 <use img/resultados/reception_overhead.pdf>
 Package pdftex.def Info: img/resultados/reception_overhead.pdf  used on input l
 ine 23.
 (pdftex.def)             Requested size: 455.24411pt x 274.3806pt.
  [37 <./img/resultados/reception_overhead.pdf>]
-<img/resultados/loss_tolerance.pdf, id=970, 393.32573pt x 243.33058pt>
+<img/resultados/loss_tolerance.pdf, id=974, 393.32573pt x 243.33058pt>
 File: img/resultados/loss_tolerance.pdf Graphic file (type pdf)
 <use img/resultados/loss_tolerance.pdf>
 Package pdftex.def Info: img/resultados/loss_tolerance.pdf  used on input line 
 59.
 (pdftex.def)             Requested size: 386.96027pt x 239.398pt.
-<img/resultados/mac_runtime.pdf, id=977, 392.667pt x 244.77217pt>
+<img/resultados/mac_runtime.pdf, id=981, 392.667pt x 244.77217pt>
 File: img/resultados/mac_runtime.pdf Graphic file (type pdf)
 <use img/resultados/mac_runtime.pdf>
 Package pdftex.def Info: img/resultados/mac_runtime.pdf  used on input line 75.
@@ -1304,40 +1304,40 @@ Package pdftex.def Info: img/resultados/mac_runtime.pdf  used on input line 75.
 
 [38] [39 <./img/resultados/loss_tolerance.pdf> <./img/resultados/mac_runtime.pd
 f>]
-<img/resultados/encode_runtime.pdf, id=1095, 392.52586pt x 243.33058pt>
+<img/resultados/encode_runtime.pdf, id=1099, 392.52586pt x 243.33058pt>
 File: img/resultados/encode_runtime.pdf Graphic file (type pdf)
 <use img/resultados/encode_runtime.pdf>
 Package pdftex.def Info: img/resultados/encode_runtime.pdf  used on input line 
 89.
 (pdftex.def)             Requested size: 386.96027pt x 239.89552pt.
-<img/resultados/decode_runtime.pdf, id=1096, 392.52586pt x 243.33058pt>
+<img/resultados/decode_runtime.pdf, id=1102, 392.52586pt x 243.33058pt>
 File: img/resultados/decode_runtime.pdf Graphic file (type pdf)
 <use img/resultados/decode_runtime.pdf>
 Package pdftex.def Info: img/resultados/decode_runtime.pdf  used on input line 
 96.
 (pdftex.def)             Requested size: 386.96027pt x 239.89552pt.
-<img/resultados/encode_stages.pdf, id=1097, 413.70656pt x 192.63506pt>
+<img/resultados/encode_stages.pdf, id=1107, 405.3472pt x 192.63506pt>
 File: img/resultados/encode_stages.pdf Graphic file (type pdf)
 <use img/resultados/encode_stages.pdf>
 Package pdftex.def Info: img/resultados/encode_stages.pdf  used on input line 1
 07.
-(pdftex.def)             Requested size: 455.24411pt x 211.98445pt.
+(pdftex.def)             Requested size: 455.24411pt x 216.34648pt.
  [40 <./img/resultados/encode_runtime.pdf>] [41 <./img/resultados/decode_runtim
 e.pdf> <./img/resultados/encode_stages.pdf>]
-<img/resultados/audit_runtime.pdf, id=1230, 392.3847pt x 243.33058pt>
+<img/resultados/audit_runtime.pdf, id=1245, 392.3847pt x 243.33058pt>
 File: img/resultados/audit_runtime.pdf Graphic file (type pdf)
 <use img/resultados/audit_runtime.pdf>
 Package pdftex.def Info: img/resultados/audit_runtime.pdf  used on input line 1
 21.
 (pdftex.def)             Requested size: 386.96027pt x 239.96979pt.
  [42 <./img/resultados/audit_runtime.pdf>]
-<img/resultados/audit_detection.pdf, id=1278, 387.711pt x 244.89894pt>
+<img/resultados/audit_detection.pdf, id=1293, 387.711pt x 244.89894pt>
 File: img/resultados/audit_detection.pdf Graphic file (type pdf)
 <use img/resultados/audit_detection.pdf>
 Package pdftex.def Info: img/resultados/audit_detection.pdf  used on input line
  134.
 (pdftex.def)             Requested size: 386.96027pt x 244.43869pt.
-<img/resultados/metadata_size.pdf, id=1281, 386.72293pt x 243.33058pt>
+<img/resultados/metadata_size.pdf, id=1296, 386.72293pt x 243.33058pt>
 File: img/resultados/metadata_size.pdf Graphic file (type pdf)
 <use img/resultados/metadata_size.pdf>
 Package pdftex.def Info: img/resultados/metadata_size.pdf  used on input line 1
@@ -1345,14 +1345,14 @@ Package pdftex.def Info: img/resultados/metadata_size.pdf  used on input line 1
 (pdftex.def)             Requested size: 386.96027pt x 243.4785pt.
  [43 <./img/resultados/audit_detection.pdf>] [44 <./img/resultados/metadata_siz
 e.pdf>]
-<img/resultados/codec_comparison.pdf, id=1394, 399.02313pt x 252.81639pt>
+<img/resultados/codec_comparison.pdf, id=1412, 399.02313pt x 252.81639pt>
 File: img/resultados/codec_comparison.pdf Graphic file (type pdf)
 <use img/resultados/codec_comparison.pdf>
 Package pdftex.def Info: img/resultados/codec_comparison.pdf  used on input lin
 e 170.
 (pdftex.def)             Requested size: 455.24411pt x 288.45282pt.
  [45 <./img/resultados/codec_comparison.pdf>]
-<img/resultados/codec_loss.pdf, id=1449, 401.82307pt x 283.36777pt>
+<img/resultados/codec_loss.pdf, id=1473, 401.82307pt x 283.36777pt>
 File: img/resultados/codec_loss.pdf Graphic file (type pdf)
 <use img/resultados/codec_loss.pdf>
 Package pdftex.def Info: img/resultados/codec_loss.pdf  used on input line 200.
@@ -1469,10 +1469,10 @@ ublic/lm/lmsy10.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy8.pfb></usr/sha
 re/texmf/fonts/type1/public/lm/lmtt12.pfb></usr/share/texmf/fonts/type1/public/
 cm-super/sfrm1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm2074.pf
 b>
-Output written on monografia.pdf (60 pages, 750795 bytes).
+Output written on monografia.pdf (60 pages, 753064 bytes).
 PDF statistics:
- 1771 PDF objects out of 2073 (max. 8388607)
- 1164 compressed objects within 12 object streams
+ 1795 PDF objects out of 2073 (max. 8388607)
+ 1178 compressed objects within 12 object streams
  213 named destinations out of 1000 (max. 500000)
  523 words of extra memory for PDF output out of 10000 (max. 10000000)
 

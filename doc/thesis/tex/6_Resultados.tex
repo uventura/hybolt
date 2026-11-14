@@ -87,18 +87,18 @@ Com o custo de um \acrshort{MAC} conhecido, as Figuras~\ref{fig:encode_runtime} 
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=0.85\textwidth]{resultados/encode_runtime.pdf}
-	\caption{Tempo de codificação e distribuição em função do tamanho do arquivo, nos modelos limitado e ilimitado e sem prova de recuperabilidade.}
+	\caption{Tempo de codificação e distribuição em função do tamanho do arquivo, nos modelos limitado e ilimitado e sem \acrshort{PoR}.}
 	\label{fig:encode_runtime}
 \end{figure}
 
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=0.85\textwidth]{resultados/decode_runtime.pdf}
-	\caption{Tempo de decodificação em função do tamanho do arquivo. Com a prova, cada pacote transferido é verificado antes de ser entregue ao decodificador.}
+	\caption{Tempo de decodificação em função do tamanho do arquivo. Com a \acrshort{PoR}, cada pacote transferido é verificado antes de ser entregue ao decodificador.}
 	\label{fig:decode_runtime}
 \end{figure}
 
-Sem prova e no modelo ilimitado, os tempos escalam linearmente com o tamanho do arquivo, como esperado da divisão em \emph{chunks} independentes. Para 64~MiB, a codificação levou 1,6~s sem prova e 7,0~s no modelo ilimitado, e a decodificação, 0,9 e 2,9~s.
+Sem \acrshort{PoR} e no modelo ilimitado, os tempos escalam linearmente com o tamanho do arquivo, como esperado da divisão em \emph{chunks} independentes. Para 64~MiB, a codificação levou 1,6~s sem \acrshort{PoR} e 7,0~s no modelo ilimitado, e a decodificação, 0,9 e 2,9~s.
 
 No modelo limitado, a codificação de 1~MiB levou 4,4~s, contra 0,11~s no ilimitado, e a decodificação, 0,20~s, contra 0,03~s. Como esse tempo é dominado pela geração dos 40 polinômios primitivos, ele varia pouco entre 64~KiB e 1~MiB.
 
@@ -109,7 +109,7 @@ No modelo limitado, a codificação de 1~MiB levou 4,4~s, contra 0,11~s no ilimi
 	\label{fig:encode_stages}
 \end{figure}
 
-A Figura~\ref{fig:encode_stages} mostra onde esse tempo é gasto. No modelo limitado, 51\% da codificação corresponde aos $n \cdot l$ \acrshort{MAC}s e quase todo o restante, à geração dos polinômios. No modelo ilimitado, os $n$ \acrshort{MAC}s ainda respondem por 58\% do tempo, mas de um total cerca de 40 vezes menor. Sem a prova, a gravação nos provedores responde por 66\% e a codificação R10, por 13\%. O custo do código de apagamento é, portanto, pequeno em relação às demais etapas.
+A Figura~\ref{fig:encode_stages} mostra onde esse tempo é gasto. No modelo limitado, 51\% da codificação corresponde aos $n \cdot l$ \acrshort{MAC}s e quase todo o restante, à geração dos polinômios. No modelo ilimitado, os $n$ \acrshort{MAC}s ainda respondem por 58\% do tempo, mas de um total cerca de 40 vezes menor. Sem a \acrshort{PoR}, a gravação nos provedores responde por 66\% e a codificação R10, por 13\%. O custo do código de apagamento é, portanto, pequeno em relação às demais etapas.
 
 \section{Auditoria}
 \label{sec:resultados_auditoria}
@@ -154,7 +154,7 @@ Os modelos diferem também na memória exigida do usuário. A Figura~\ref{fig:me
 
 No modelo limitado, os metadados ocupam 154\% de um arquivo de 1~MiB. Mesmo que os \acrshort{MAC}s fossem armazenados em bits, e não com um byte por coeficiente, ocupariam $K l \lambda$ bits por \emph{chunk}, cerca de 9,8\% do arquivo, valor que não diminui com o tamanho do arquivo.
 
-No modelo ilimitado, os metadados convergem para 5,9\% do arquivo. Desse total, 2,7\% correspondem à localização e ao \emph{hash} SHA-256 de cada pacote, como sem prova, e o restante aos $K$ \acrshort{MAC}s por \emph{chunk}, que ocupariam 0,24\% do arquivo empacotados em bits.
+No modelo ilimitado, os metadados convergem para 5,9\% do arquivo. Desse total, 2,7\% correspondem à localização e ao \emph{hash} SHA-256 de cada pacote, como sem \acrshort{PoR}, e o restante aos $K$ \acrshort{MAC}s por \emph{chunk}, que ocupariam 0,24\% do arquivo empacotados em bits.
 
 Nos provedores, o armazenamento corresponde a 1,27 vez o tamanho do arquivo para $\varepsilon = 0{,}25$ nos dois modelos, próximo do fator nominal $125/100$.
 
@@ -168,7 +168,7 @@ Como os Online Codes exigem um número aleatório de blocos além de $K$, o codi
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=\textwidth]{resultados/codec_comparison.pdf}
-	\caption{Tempos de codificação e decodificação do HyBolt com Raptor R10 e com Online Codes, medidos na mesma máquina, para arquivos de 50, 100 e 500~MB: tempo do código isolado e tempo total sem prova de recuperabilidade.}
+	\caption{Tempos de codificação e decodificação do HyBolt com Raptor R10 e com Online Codes, medidos na mesma máquina, para arquivos de 50, 100 e 500~MB: tempo do código isolado e tempo total sem \acrshort{PoR}.}
 	\label{fig:hysail_comparison}
 \end{figure}
 
@@ -185,15 +185,15 @@ Como os Online Codes exigem um número aleatório de blocos além de $K$, o codi
 		\hline
 		R10 & código isolado & 0,23 & 0,47 & 3,5 & 0,21 & 0,76 & 2,7 \\
 		Online Codes & código isolado & 0,19 & 0,52 & 3,3 & 0,31 & 0,86 & 3,2 \\
-		R10 & sem prova & 1,5 & 3,1 & 24,0 & 0,8 & 3,0 & 9,8 \\
-		Online Codes & sem prova & 1,6 & 4,2 & 28,1 & 1,4 & 3,7 & 13,1 \\
+		R10 & sem \acrshort{PoR} & 1,5 & 3,1 & 24,0 & 0,8 & 3,0 & 9,8 \\
+		Online Codes & sem \acrshort{PoR} & 1,6 & 4,2 & 28,1 & 1,4 & 3,7 & 13,1 \\
 		\hline
 	\end{tabular}
 \end{table}
 
 A Figura~\ref{fig:hysail_comparison} e a Tabela~\ref{tab:comparacao_hysail} mostram que o custo dos dois códigos é equivalente: o tempo do código isolado ficou entre 2,7 e 3,5~s para 500~MB com ambos. Como os tempos totais são dominados pela gravação e leitura dos pacotes e variam entre execuções, o custo de cada código foi medido também em memória, com 200 \emph{chunks} padrão. A mediana foi de 2,8~ms para codificar e 3,5~ms para decodificar um \emph{chunk} com o R10, e de 2,6 e 3,2~ms com os Online Codes.
 
-A diferença está na quantidade de pacotes. Para decodificar um \emph{chunk}, o R10 recebeu, em média, 101,5 pacotes, e os Online Codes, 136,3 dos 143 armazenados. Com mais pacotes transferidos e verificados, a decodificação sem prova foi de 23\% a 75\% mais lenta com os Online Codes. Na codificação, as diferenças são da ordem da variação entre execuções.
+A diferença está na quantidade de pacotes. Para decodificar um \emph{chunk}, o R10 recebeu, em média, 101,5 pacotes, e os Online Codes, 136,3 dos 143 armazenados. Com mais pacotes transferidos e verificados, a decodificação sem \acrshort{PoR} foi de 23\% a 75\% mais lenta com os Online Codes. Na codificação, as diferenças são da ordem da variação entre execuções.
 
 \begin{figure}[htbp]
 	\centering

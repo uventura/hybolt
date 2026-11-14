@@ -82,7 +82,7 @@ GRID = "#d9d8d4"
 SCHEME_LABELS = {
     BOUNDED_SCHEME: "limitado",
     UNBOUNDED_SCHEME: "ilimitado",
-    "none": "sem prova",
+    "none": "sem PoR",
 }
 PROOF_SCHEMES = (BOUNDED_SCHEME, UNBOUNDED_SCHEME)
 
@@ -966,7 +966,7 @@ def plot_detection(empirical, fractions, sample_sizes, figure_dir):
 CODECS = ((raptor.CODEC, "Raptor R10"), (online_codes.CODEC, "Online Codes"))
 CODEC_CONFIGS = (
     ("codec", "só o código"),
-    ("none", "sem prova"),
+    ("none", "sem PoR"),
 )
 # The codec's own work, under one name for both codes.
 CODEC_STAGES = (
