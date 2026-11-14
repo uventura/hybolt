@@ -1,4 +1,4 @@
-Este capítulo descreve o HyBolt, implementação do HySAIL com as propostas do Capítulo~4. São apresentados a implementação dos códigos e da aritmética polinomial, o fluxo de cada fase, os componentes da implementação, os metadados mantidos pelo usuário, os problemas observados ao realizar a substituição de forma direta e as simplificações adotadas em relação a um ambiente de nuvem real.
+Este capítulo descreve o HyBolt, implementação do HySAIL com as propostas do Capítulo~4. São apresentados a implementação dos códigos e da aritmética polinomial, o fluxo de cada fase, os componentes da implementação, os metadados mantidos pelo usuário, as medidas dos dois modelos de auditoria para um arquivo de exemplo e as simplificações adotadas em relação a um ambiente de nuvem real.
 
 \section{Visão Geral}
 
@@ -8,13 +8,13 @@ A implementação do R10 representa cada símbolo codificado por seu suporte (Eq
 
 Para validar a implementação, os símbolos gerados foram comparados, byte a byte, com os de uma implementação independente da RFC~5053 \cite{gofountain}, para $K$ entre 4 e 4.097, e verificou-se que a matriz $A$ é invertível para todo $K$ entre 4 e 400.
 
-Para que a comparação com o HySAIL original não dependa de tempos publicados, obtidos em outro equipamento, o HyBolt também implementa os Online Codes \cite{maymounkov2002online} (Seção~\ref{sec:fundamentacao_online}). O código externo acrescenta $\lceil 0{,}55\, q \varepsilon K \rceil$ blocos auxiliares, e cada bloco de mensagem é somado a $q = 3$ deles; o código interno combina, por XOR, um número de blocos da mensagem composta sorteado segundo a distribuição de Maymounkov. Como a distribuição exige grau máximo menor que a mensagem composta, $\varepsilon$ cresce a partir de 0,01 até satisfazer essa condição, o que resulta em $\varepsilon = 0{,}10$ para o \emph{chunk} padrão.
+Para a comparação do Capítulo~6, o HyBolt também implementa os Online Codes \cite{maymounkov2002online} (Seção~\ref{sec:fundamentacao_online}). O código externo acrescenta $\lceil 0{,}55\, q \varepsilon K \rceil$ blocos auxiliares, e cada bloco de mensagem é somado a $q = 3$ deles; o código interno combina, por XOR, um número de blocos da mensagem composta sorteado segundo a distribuição de Maymounkov. Como a distribuição exige grau máximo menor que a mensagem composta, $\varepsilon$ cresce a partir de 0,01 até satisfazer essa condição, o que resulta em $\varepsilon = 0{,}10$ para o \emph{chunk} padrão.
 
 Assim como no R10, o suporte de cada bloco de verificação é derivado de $K$ e de seu índice, e o usuário registra apenas os \acrshort{ESI}s. Os dois códigos oferecem, assim, as mesmas operações às demais fases, o que permite reutilizar sem alteração o \acrshort{MAC} homomórfico, a Auditoria e a Redistribuição.
 
 A decodificação é o algoritmo de \emph{peeling} sobre a mensagem composta. Como os Online Codes não são sistemáticos e exigem um número aleatório de blocos além de $K$, o codificador grava ao menos $K + \lceil \varepsilon K \rceil$ blocos de verificação e acrescenta outros até que o \emph{chunk} íntegro seja decodificável.
 
-Quanto ao desempenho, o código R10 consome cerca de um milissegundo por \emph{chunk} com $K = 100$, e a aritmética em $GF(2)[x]$ domina o custo dos \acrshort{MAC}s e dos desafios. Essa aritmética foi, por isso, implementada também em C: a redução utiliza uma tabela de 256 entradas por módulo e processa um byte do dividendo por iteração.
+Quanto ao desempenho, o código R10 consome cerca de 3~ms por \emph{chunk} com $K = 100$, e a aritmética em $GF(2)[x]$ domina o custo dos \acrshort{MAC}s e dos desafios. Essa aritmética foi, por isso, implementada também em C: a redução utiliza uma tabela de 256 entradas por módulo e processa um byte do dividendo por iteração.
 
 A prova de recuperabilidade utilizada é a do HySAIL, com os \acrshort{MAC}s polinomiais dos blocos de mensagem (Seções~\ref{sec:impacto_mac} a~\ref{sec:redistribuicao}), e os pacotes são armazenados sem cifragem. O modelo limitado ou o ilimitado é escolhido na Codificação e registrado nos metadados.
 
@@ -83,10 +83,10 @@ O usuário mantém um arquivo de metadados por arquivo armazenado, que constitui
 	\end{tabular}
 \end{table}
 
-\section{Problemas Observados na Substituição Direta}
+\section{Medidas dos Modelos de Auditoria}
 \label{sec:problemas_observados}
 
-Para quantificar os problemas descritos na Seção~\ref{sec:problemas_substituicao} e comparar os dois modelos de auditoria, o arquivo de 1~MiB do conjunto de exemplos foi codificado com os parâmetros padrão e três provedores, e em seguida auditado, com 50 pacotes por provedor, e decodificado. O arquivo foi dividido em dois \emph{chunks}, de 650.000 e 398.576 bytes, cada um com $K = 100$ pacotes de origem e $r = 25$ pacotes de reparo, totalizando 250 pacotes. Os resultados, médias de três execuções, são apresentados na Tabela~\ref{tab:problemas_observados} e têm caráter indicativo.
+Para ilustrar os problemas da Seção~\ref{sec:problemas_substituicao} nos dois modelos de auditoria, um arquivo de 1~MiB foi codificado com os parâmetros padrão e três provedores, auditado com 50 pacotes por provedor e decodificado. O arquivo foi dividido em dois \emph{chunks}, cada um com $K = 100$ pacotes de origem e $r = 25$ de reparo, totalizando 250 pacotes. A Tabela~\ref{tab:problemas_observados} resume as medidas, médias de três execuções, analisadas em detalhe no Capítulo~6.
 
 \begin{table}[h]
 	\centering
@@ -108,9 +108,7 @@ Para quantificar os problemas descritos na Seção~\ref{sec:problemas_substituic
 	\end{tabular}
 \end{table}
 
-No modelo limitado, os itens 1 e 2 da Seção~\ref{sec:problemas_substituicao} se confirmam. O usuário armazena $n \cdot l = 2 \cdot 100 \cdot 40 = 8.000$ \acrshort{MAC}s, e os metadados superam o próprio arquivo, pois cada \acrshort{MAC} é armazenado com um byte por coeficiente. Além disso, o arquivo admite apenas 40 auditorias ou decodificações com prova antes de ser recodificado.
-
-No modelo ilimitado, os dois itens deixam de ocorrer: o usuário guarda 40 vezes menos \acrshort{MAC}s, os metadados caem para 7,4\% do arquivo, e o mesmo polinômio serve a qualquer número de rodadas. A codificação fica cerca de 40 vezes mais rápida e a auditoria, 15 vezes. Em contrapartida, a resposta de cada provedor passa de 16 bytes para o tamanho de um pacote.
+No modelo limitado, os itens 1 e 2 da Seção~\ref{sec:problemas_substituicao} se confirmam: o usuário armazena $n \cdot l = 200 \cdot 40 = 8.000$ \acrshort{MAC}s, os metadados superam o próprio arquivo, e apenas 40 auditorias ou decodificações com \acrshort{PoR} são possíveis antes de recodificar. No modelo ilimitado, os dois itens deixam de ocorrer, ao custo de uma resposta do tamanho de um pacote.
 
 O item 3, o ataque dirigido a um \emph{chunk}, vale para os dois modelos. Corromper os sete pacotes que contêm um mesmo símbolo de origem, 2,8\% do total, torna o arquivo irrecuperável. Em um arquivo de 1~GiB, com cerca de 206.500 pacotes, os mesmos sete pacotes representariam 0,0034\% do total, e uma auditoria com 50 pacotes por provedor os detectaria com probabilidade de apenas 0,5\%.
 

@@ -77,7 +77,7 @@ Além do código, o protocolo depende do \acrshort{MAC} polinomial. A Figura~\re
 	\label{fig:mac_runtime}
 \end{figure}
 
-No HySAIL, o tempo cresce de forma quadrática com o tamanho do bloco, de 0,06~s para 1~KiB a 62~s para 40~KiB \cite{amaral2013hysail}. No HyBolt, o crescimento é linear, e um bloco de 40~KiB é reduzido em 0,54~ms. Parte dessa diferença decorre do equipamento, mas a mudança de comportamento decorre do algoritmo, pois a redução por tabela processa cada byte um número constante de vezes. Para o pacote de 6.500 bytes, um \acrshort{MAC} custa cerca de 0,1~ms e deixa de ser um gargalo.
+No HySAIL, o tempo cresce de forma quadrática com o tamanho do bloco, de 0,06~s para 1~KiB a 62~s para 40~KiB \cite{amaral2013hysail}. No HyBolt, o crescimento é linear, e um bloco de 40~KiB é reduzido em 0,54~ms. Parte dessa diferença decorre do equipamento, mas a mudança de comportamento decorre do algoritmo, pois a redução por tabela processa cada byte um número constante de vezes. Para o pacote de 6.500 bytes, um \acrshort{MAC} custa cerca de 0,1~ms. O custo unitário deixa de ser proibitivo, mas, como mostra a seção seguinte, a quantidade de \acrshort{MAC}s ainda domina a codificação.
 
 \section{Codificação e Decodificação}
 \label{sec:resultados_codificacao}
@@ -100,7 +100,7 @@ Com o custo de um \acrshort{MAC} conhecido, as Figuras~\ref{fig:encode_runtime} 
 
 Sem \acrshort{PoR} e no modelo ilimitado, os tempos escalam linearmente com o tamanho do arquivo, como esperado da divisão em \emph{chunks} independentes. Para 64~MiB, a codificação levou 1,6~s sem \acrshort{PoR} e 7,0~s no modelo ilimitado, e a decodificação, 0,9 e 2,9~s.
 
-No modelo limitado, a codificação de 1~MiB levou 4,4~s, contra 0,11~s no ilimitado, e a decodificação, 0,20~s, contra 0,03~s. Como esse tempo é dominado pela geração dos 40 polinômios primitivos, ele varia pouco entre 64~KiB e 1~MiB.
+No modelo limitado, a codificação de 1~MiB levou 4,4~s, contra 0,11~s no ilimitado, e a decodificação, 0,20~s, contra 0,03~s. A geração dos 40 polinômios primitivos impõe um custo fixo de cerca de 2,5~s, visível já em 64~KiB, ao qual se somam os $n \cdot l$ \acrshort{MAC}s.
 
 \begin{figure}[htbp]
 	\centering
@@ -109,7 +109,7 @@ No modelo limitado, a codificação de 1~MiB levou 4,4~s, contra 0,11~s no ilimi
 	\label{fig:encode_stages}
 \end{figure}
 
-A Figura~\ref{fig:encode_stages} mostra onde esse tempo é gasto. No modelo limitado, 51\% da codificação corresponde aos $n \cdot l$ \acrshort{MAC}s e quase todo o restante, à geração dos polinômios. No modelo ilimitado, os $n$ \acrshort{MAC}s ainda respondem por 58\% do tempo, mas de um total cerca de 40 vezes menor. Sem a \acrshort{PoR}, a gravação nos provedores responde por 66\% e a codificação R10, por 13\%. O custo do código de apagamento é, portanto, pequeno em relação às demais etapas.
+A Figura~\ref{fig:encode_stages} mostra onde esse tempo é gasto. No modelo limitado, 51\% da codificação corresponde aos $n \cdot l$ \acrshort{MAC}s e quase todo o restante, a esse custo fixo dos polinômios. No modelo ilimitado, os $n$ \acrshort{MAC}s ainda respondem por 58\% do tempo, mas de um total cerca de 40 vezes menor. Sem a \acrshort{PoR}, a gravação nos provedores responde por 66\% e a codificação R10, por 13\%. O custo do código de apagamento é, portanto, pequeno em relação às demais etapas.
 
 \section{Auditoria}
 \label{sec:resultados_auditoria}
@@ -161,7 +161,7 @@ Nos provedores, o armazenamento corresponde a 1,27 vez o tamanho do arquivo para
 \section{Comparação entre Online Codes e Raptor R10}
 \label{sec:comparacao_hysail}
 
-O artigo do HySAIL reporta tempos de codificação e decodificação de arquivos de 50, 100 e 500~MB, obtidos em outro equipamento \cite{amaral2019hysail}. Como essas diferenças impediriam atribuir ao código as variações observadas, os mesmos tamanhos de arquivo foram codificados e decodificados pelo HyBolt com os dois códigos, na mesma máquina, com os mesmos \emph{chunks} de $K = 100$ símbolos e a mesma redundância $\varepsilon = 0{,}25$, de modo que apenas o código \emph{fountain} varia.
+Para comparar os códigos, arquivos de 50, 100 e 500~MB, os tamanhos avaliados no artigo do HySAIL \cite{amaral2019hysail}, foram codificados e decodificados pelo HyBolt com o R10 e com os Online Codes, com os mesmos \emph{chunks} de $K = 100$ símbolos e a mesma redundância $\varepsilon = 0{,}25$, de modo que apenas o código \emph{fountain} varia.
 
 Como os Online Codes exigem um número aleatório de blocos além de $K$, o codificador grava blocos de verificação até que o \emph{chunk} seja decodificável (Capítulo~5). Para o \emph{chunk} padrão, isso exige 143 blocos, e não os 125 do R10, de modo que os Online Codes armazenaram 1,45 vez o tamanho do arquivo, contra 1,27 vez.
 
@@ -204,9 +204,9 @@ A diferença está na quantidade de pacotes. Para decodificar um \emph{chunk}, o
 
 A consequência mais relevante, porém, é a tolerância a perdas, apresentada na Figura~\ref{fig:codec_loss}. Com $\varepsilon = 0{,}25$, o \emph{chunk} de Online Codes, embora armazene 143 pacotes, não tolera com segurança a perda de nenhum: perder um pacote o torna irrecuperável em 7,4\% dos casos, e cinco pacotes, em 42\%. O R10, por sua vez, tolera a perda de 18 dos 125 pacotes em 99\% dos casos. Com $\varepsilon = 0{,}5$ e 150 pacotes para ambos, os Online Codes toleram duas perdas, e o R10, 43.
 
-Para obter com os Online Codes a tolerância do R10, seria necessária uma redundância muito maior ou blocos de mensagem muito maiores, como no HySAIL original, que codifica o arquivo inteiro e, com isso, perde a Redistribuição limitada a um \emph{chunk}.
+Para obter com os Online Codes a tolerância do R10, seria necessária uma redundância muito maior ou \emph{chunks} com muito mais símbolos, como no HySAIL original, que codifica o arquivo inteiro e, com isso, perde a Redistribuição limitada a um \emph{chunk}.
 
-Quanto às demais propriedades, o HyBolt com R10 mantém a Distribuição entre múltiplos provedores, a Auditoria com localização dos pacotes corrompidos e a Redistribuição local, que transfere, em média, 49 pacotes, cerca de 320~KB. As mesmas fases funcionam sem alteração com os Online Codes, o que confirma que a substituição preserva a estrutura de blocos de verificação do HySAIL.
+Quanto às demais propriedades, a Distribuição, a Auditoria e a Redistribuição funcionam sem alteração com os dois códigos, o que confirma que a substituição preserva a estrutura de blocos de verificação do HySAIL.
 
 \section{Comparação com Outros Esquemas de PoR}
 \label{sec:comparacao_por}
@@ -224,18 +224,18 @@ Por fim, a Tabela~\ref{tab:comparacao_por} compara qualitativamente o HyBolt com
 		\hline
 		Múltiplos provedores & não & não & sim & sim & sim \\
 		Redistribuição & não & não & local & local & local \\
-		Auditorias ilimitadas & não & sim & sim\textsuperscript{a} & não ($l$) & sim \\
-		Memória do usuário & chave & chave & $n \cdot l$ \acrshort{MAC}s & $n \cdot l$ \acrshort{MAC}s & $n$ \acrshort{MAC}s \\
-		Resposta & sentinelas & $\approx$ 1 bloco & $\lambda$ bits & $\lambda$ bits & $\approx$ 1 pacote \\
+		Auditorias ilimitadas & não & sim & não ou sim\textsuperscript{a} & não ($l$) & sim \\
+		Memória do usuário & chave & chave & $n \cdot l$ ou $n$ \acrshort{MAC}s\textsuperscript{a} & $n \cdot l$ \acrshort{MAC}s & $n$ \acrshort{MAC}s \\
+		Resposta & sentinelas & $\approx$ 1 bloco & $\lambda$ bits ou $\approx$ 1 bloco\textsuperscript{a} & $\lambda$ bits & $\approx$ 1 pacote \\
 		Ocultação da estrutura & sim & -- & não & não & não \\
 		\emph{Overhead} de recepção & -- & -- & 9,7\% a 65\%\textsuperscript{b} & 0,27\% a 14\%\textsuperscript{c} & 0,27\% a 14\%\textsuperscript{c} \\
 		\hline
 	\end{tabular}
 
 	\footnotesize\raggedright
-	\textsuperscript{a} No modelo ilimitado do HySAIL (Seção~\ref{sec:auditoria_ilimitada}).\\
+	\textsuperscript{a} Nos modelos limitado e ilimitado do HySAIL, nessa ordem (Seções~\ref{sec:auditoria_limitada} e~\ref{sec:auditoria_ilimitada}).\\
 	\textsuperscript{b} Online Codes implementados no HyBolt, para $K$ entre 1.000 e 10 (Tabela~\ref{tab:overhead}).\\
 	\textsuperscript{c} Raptor R10, para $K$ entre 1.000 e 10 (Tabela~\ref{tab:overhead}).
 \end{table}
 
-O HyBolt mantém as propriedades do HySAIL e reduz o \emph{overhead} de recepção. No modelo ilimitado, assim como no esquema de Shacham e Waters, admite auditorias ilimitadas com uma resposta do tamanho de um pacote, mas o usuário ainda guarda um \acrshort{MAC} por bloco de mensagem, em vez de uma chave de tamanho constante. Nenhum dos esquemas oferece verificação pública, limitação tratada pelas variantes com auditoria delegada \cite{armknecht2021outsourcing,shen2024public}.
+O HyBolt mantém as propriedades do HySAIL e reduz o \emph{overhead} de recepção. No modelo ilimitado, assim como no esquema de Shacham e Waters, admite auditorias ilimitadas com uma resposta do tamanho de um pacote, mas o usuário ainda guarda um \acrshort{MAC} por bloco de mensagem, em vez de uma chave de tamanho constante. Como o HySAIL, o HyBolt não oferece verificação pública, limitação tratada pelas variantes com auditoria delegada \cite{armknecht2021outsourcing,shen2024public}.

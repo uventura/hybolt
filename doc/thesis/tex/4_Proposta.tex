@@ -6,16 +6,9 @@
     \label{fig:hysail-architecture}
 \end{figure}
 
-O funcionamento do HySAIL é dividido nas seguintes fases:
-\begin{itemize}
-\item \textit{Fase de Codificação:} os dados são divididos em blocos e codificados utilizando Online Codes.
-\item \textit{Fase de Distribuição:} os blocos codificados são distribuídos entre os servidores participantes.
-\item \textit{Fase de Armazenamento:} os servidores armazenam os blocos recebidos, garantindo integridade e disponibilidade.
-\item \textit{Fase de Verificação:} mecanismos de prova de recuperabilidade (\acrshort{PoR}) são utilizados para verificar a integridade dos blocos armazenados.
-\item \textit{Fase de Decodificação:} os blocos são recuperados e decodificados para reconstruir os dados originais.
-\end{itemize}
+A Figura~\ref{fig:hysail-architecture} apresenta a arquitetura do HySAIL, cujas fases de Codificação, Distribuição, Decodificação, Auditoria e Redistribuição foram descritas no Capítulo~2.
 
-O presente trabalho realiza uma substituição no processo de Codificação, passando a utilizar o Raptor R10 \cite{luby2007rfc5053} em vez dos Online Codes originalmente empregados no HySAIL. Como os dois códigos produzem blocos de verificação que são o XOR de blocos de mensagem, a substituição preserva o \acrshort{MAC} homomórfico e a Redistribuição local do HySAIL. O restante do protocolo é mantido: o usuário guarda os \acrshort{MAC}s polinomiais dos blocos de mensagem e o \emph{hash} SHA-256 de cada pacote, e a Auditoria segue o HySAIL. As seções a seguir justificam a escolha do R10, identificam as limitações que permanecem e descrevem as adaptações necessárias.
+O presente trabalho substitui, na Codificação, os Online Codes pelo Raptor R10 \cite{luby2007rfc5053}. Como os dois códigos produzem blocos que são o XOR de blocos de mensagem, a substituição preserva o \acrshort{MAC} homomórfico e a Redistribuição local, e o restante do protocolo é mantido. As seções a seguir justificam a escolha do R10, identificam as limitações que permanecem e descrevem as adaptações necessárias.
 
 \section{Escolha do Raptor R10}
 \label{sec:escolha_r10}
@@ -45,15 +38,7 @@ Entre os códigos \emph{fountain} sucessores dos LT Codes, os Raptor Codes \cite
 
 \section{Substituição dos Online Codes pelo Raptor R10}
 
-No HySAIL, os Online Codes são utilizados da seguinte forma:
-\begin{itemize}
-\item Os dados são divididos em blocos de tamanho fixo.
-\item Cada bloco é codificado utilizando Online Codes, gerando blocos codificados adicionais.
-\item Os blocos codificados são distribuídos entre os servidores participantes.
-\item Durante a decodificação, os blocos codificados são recuperados e utilizados para reconstruir os blocos originais.
-\end{itemize}
-
-Na proposta deste trabalho, o arquivo é dividido em \emph{chunks}, e cada \emph{chunk} é dividido em $K$ símbolos de origem e codificado com o R10 \cite{luby2007rfc5053}. O código emite os $K$ símbolos de origem, de forma sistemática, seguidos de $r$ símbolos de reparo. Cada símbolo codificado, aqui denominado pacote, é identificado pelo seu \emph{Encoding Symbol Identifier} (\acrshort{ESI}) e substitui o bloco de verificação do HySAIL nas fases de Distribuição, Auditoria e Redistribuição.
+No HySAIL, o arquivo inteiro é dividido em blocos de mensagem e codificado de uma só vez. Na proposta deste trabalho, o arquivo é dividido em \emph{chunks}, e cada \emph{chunk} é dividido em $K$ símbolos de origem, que fazem o papel dos blocos de mensagem, e codificado com o R10 \cite{luby2007rfc5053}. O código emite os $K$ símbolos de origem, de forma sistemática, seguidos de $r$ símbolos de reparo. Cada símbolo codificado, aqui denominado pacote, é identificado pelo seu \emph{Encoding Symbol Identifier} (\acrshort{ESI}) e substitui o bloco de verificação do HySAIL nas fases de Distribuição, Auditoria e Redistribuição.
 
 Diferentemente dos Online Codes, a composição $\langle i, x_i \rangle$ de cada pacote não precisa ser armazenada: o suporte $X_\eta$ é determinado por $K$ e pelo \acrshort{ESI} $\eta$, que o usuário já registra para localizar o pacote. A Figura~\ref{fig:hybolt_fluxo} resume o fluxo de Codificação e Distribuição, detalhado nas seções seguintes.
 
@@ -94,7 +79,7 @@ A memória do usuário é de $n \cdot l$ \acrshort{MAC}s, independentemente do n
 
 \section{Escolha dos Polinômios de Desafio}
 
-O argumento de integridade do HySAIL, que caracteriza o \acrshort{MAC} como uma função de \emph{hash} 2-universal, pressupõe que os polinômios de desafio $P_j(x)$ sejam primitivos e, portanto, irredutíveis. Um polinômio redutível possui fatores próprios, e restos módulo seus fatores podem colidir com probabilidade maior que $2^{-\lambda}$, de modo que o limite de falsificação deixa de valer. Por esse motivo, a proposta gera cada desafio por amostragem com rejeição: sorteia-se um polinômio de grau $\lambda$ com termo constante e coeficiente líder iguais a 1, que é aceito somente se passar no teste de irredutibilidade de Rabin \cite{rabin1980probabilistic} e se a ordem de $x$ módulo $P_j(x)$ for $2^\lambda - 1$.
+O argumento de integridade do HySAIL, que caracteriza o \acrshort{MAC} como uma função de \emph{hash} universal, pressupõe que os polinômios de desafio $P_j(x)$ sejam primitivos e, portanto, irredutíveis. Um polinômio redutível possui fatores próprios, e restos módulo seus fatores colidem com probabilidade maior, de modo que o limite de falsificação deixa de valer. Por esse motivo, a proposta gera cada desafio por amostragem com rejeição: sorteia-se um polinômio de grau $\lambda$ com termo constante e coeficiente líder iguais a 1, que é aceito somente se passar no teste de irredutibilidade de Rabin \cite{rabin1980probabilistic} e se a ordem de $x$ módulo $P_j(x)$ for $2^\lambda - 1$.
 
 O teste de Rabin estabelece que um polinômio $f(x)$ de grau $\lambda$ sobre $GF(2)$ é irredutível se, e somente se, $x^{2^\lambda} \equiv x \pmod{f(x)}$ e, para todo divisor primo $q$ de $\lambda$, $\gcd\left(x^{2^{\lambda/q}} - x, f(x)\right) = 1$ \cite{rabin1980probabilistic}. A primitividade exige, adicionalmente, que $x^{(2^\lambda - 1)/p} \not\equiv 1 \pmod{f(x)}$ para todo divisor primo $p$ de $2^\lambda - 1$ \cite{menezes1997handbook}.
 
@@ -125,7 +110,7 @@ Cada \emph{chunk} é, além disso, avaliado quanto à recuperabilidade, o que co
 
 O HySAIL também define um modelo ilimitado, em que o polinômio de desafio nunca é revelado ao provedor \cite{amaral2013hysail}. Na Codificação, o usuário sorteia um único polinômio primitivo secreto $P(x)$ de grau $\lambda$ e armazena um \acrshort{MAC} por bloco de mensagem, $h_i = m_i(x) \bmod P(x)$. Como o \acrshort{MAC} continua homomórfico, o \acrshort{MAC} de qualquer pacote do R10 é derivado pela Equação~\eqref{eq:mac_derivado} com $l = 1$.
 
-Em cada rodada, o usuário envia ao provedor apenas os pacotes da amostra $Q$, e o provedor responde com o XOR desses pacotes, sem redução:
+Em cada rodada, o usuário envia ao provedor apenas os identificadores dos pacotes da amostra $Q$, e o provedor responde com o XOR desses pacotes, sem redução:
 
 \begin{equation}
 	A(x) = \bigoplus_{\eta \in Q} c_\eta(x).
@@ -149,7 +134,7 @@ A Tabela~\ref{tab:modelos_auditoria} resume as diferenças entre os dois modelos
 		\hline
 		Polinômios & $l$, revelados um por rodada & 1, secreto \\
 		\acrshort{MAC}s do usuário & $n \cdot l$ & $n$ \\
-		Desafio enviado & $P_j$ e pacotes & pacotes \\
+		Desafio enviado & $P_j$ e identificadores & identificadores \\
 		Resposta & $\left(\bigoplus c_\eta\right) \bmod P_j$, $\lambda$ bits & $\bigoplus c_\eta$, $\approx$ 1 pacote \\
 		Redução módulo $P$ & provedor & usuário \\
 		Auditorias & $l$, incluindo decodificações & ilimitadas \\
@@ -227,5 +212,5 @@ O uso de \acrshort{ESI}s inéditos evita entregar o mesmo conteúdo a um provedo
 	\label{fig:redistribuicao}
 \end{figure}
 
-A divisão do arquivo em \emph{chunks} de, por padrão, no máximo 650.000 bytes limita o volume transferido em cada Redistribuição a uma parte de um único \emph{chunk}, independentemente do tamanho do arquivo: com $K = 100$, cada pacote reparado exige, em média, a transferência de cerca de 49 pacotes, aproximadamente 320~KB.
+A divisão em \emph{chunks} limita o volume transferido em cada Redistribuição a uma parte de um único \emph{chunk}, independentemente do tamanho do arquivo. Em simulações com $K = 100$, cada pacote reparado exigiu, em média, a transferência de 49 pacotes, cerca de 320~KB, pouco abaixo dos $K/2$ pacotes nominais da Tabela~\ref{tab:tamanho_chunk}.
 
