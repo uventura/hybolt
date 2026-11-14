@@ -18,8 +18,9 @@
 		\setentrycounter[]{page}\glsnumberformat{20\delimR 26}\delimN 
 		\setentrycounter[]{page}\glsnumberformat{28}\delimN 
 		\setentrycounter[]{page}\glsnumberformat{30\delimR 36}\delimN 
-		\setentrycounter[]{page}\glsnumberformat{40}\delimN 
-		\setentrycounter[]{page}\glsnumberformat{42\delimR 45}\delimN 
+		\setentrycounter[]{page}\glsnumberformat{40\delimN 41}\delimN 
+		\setentrycounter[]{page}\glsnumberformat{43}\delimN 
+		\setentrycounter[]{page}\glsnumberformat{45\delimN 46}\delimN 
 		\setentrycounter[]{page}\glsnumberformat{49}}}\glsgroupskip
 \glsgroupheading{P}\relax \glsresetentrylist %
 \glossentry{PB}{\glossaryentrynumbers{\relax 

@@ -272,8 +272,8 @@
 \@writefile{toc}{\contentsline {section}{\numberline {5.5}Problemas Observados na Substituição Direta}{33}{section.5.5}\protected@file@percent }
 \newlabel{sec:problemas_observados}{{5.5}{33}{Problemas Observados na Substituição Direta}{section.5.5}{}}
 \citation{amaral2019hysail}
-\@writefile{lot}{\contentsline {table}{\numberline {5.2}{\ignorespaces Medidas do HyBolt para um arquivo de 1~MiB}}{34}{table.5.2}\protected@file@percent }
-\newlabel{tab:problemas_observados}{{5.2}{34}{Medidas do HyBolt para um arquivo de 1~MiB}{table.5.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5.2}{\ignorespaces Medidas do HyBolt para um arquivo de 1~MiB nos dois modelos de auditoria}}{34}{table.5.2}\protected@file@percent }
+\newlabel{tab:problemas_observados}{{5.2}{34}{Medidas do HyBolt para um arquivo de 1~MiB nos dois modelos de auditoria}{table.5.2}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {5.6}Simplificações}{34}{section.5.6}\protected@file@percent }
 \@writefile{brf}{\backcite{amaral2019hysail}{{34}{5.6}{section.5.6}}}
 \@writefile{toc}{\contentsline {section}{\numberline {5.7}Validação}{35}{section.5.7}\protected@file@percent }
@@ -297,10 +297,10 @@
 \newlabel{fig:reception_overhead}{{6.1}{38}{Fração das decodificações concluídas em função do número de símbolos recebidos, normalizado por $K$, para Raptor R10, Online Codes e LT Codes}{figure.6.1}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {6.1}{\ignorespaces Símbolos adicionais necessários à recuperação, em porcentagem de $K$}}{38}{table.6.1}\protected@file@percent }
 \newlabel{tab:overhead}{{6.1}{38}{Símbolos adicionais necessários à recuperação, em porcentagem de $K$}{table.6.1}{}}
-\citation{amaral2013hysail}
 \@writefile{brf}{\backcite{amaral2019hysail}{{39}{6.2}{table.6.1}}}
 \@writefile{lof}{\contentsline {figure}{\numberline {6.2}{\ignorespaces \emph  {Chunks} de $K = 100$ símbolos recuperados em função da fração de pacotes perdidos, para quatro valores de redundância. As linhas verticais indicam $r / (K + r)$, a densidade de corrupção que um código MDS toleraria.}}{39}{figure.6.2}\protected@file@percent }
 \newlabel{fig:loss_tolerance}{{6.2}{39}{\emph {Chunks} de $K = 100$ símbolos recuperados em função da fração de pacotes perdidos, para quatro valores de redundância. As linhas verticais indicam $r / (K + r)$, a densidade de corrupção que um código MDS toleraria}{figure.6.2}{}}
+\citation{amaral2013hysail}
 \citation{amaral2013hysail}
 \citation{amaral2013hysail}
 \citation{amaral2013hysail}
@@ -311,36 +311,35 @@
 \@writefile{brf}{\backcite{amaral2013hysail}{{40}{6.3}{figure.6.3}}}
 \newlabel{fig:mac_runtime}{{6.3}{40}{Tempo de cálculo de $m(x) \bmod P(x)$, com $\deg P = 127$, em função do tamanho do bloco. Os valores do HySAIL foram extraídos da Figura~5.5 de \cite {amaral2013hysail}}{figure.6.3}{}}
 \@writefile{brf}{\backcite{amaral2013hysail}{{40}{6.3}{figure.6.3}}}
-\@writefile{toc}{\contentsline {section}{\numberline {6.4}Codificação e Decodificação}{40}{section.6.4}\protected@file@percent }
-\newlabel{sec:resultados_codificacao}{{6.4}{40}{Codificação e Decodificação}{section.6.4}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6.4}{\ignorespaces Tempo de codificação e distribuição em função do tamanho do arquivo, com e sem prova de recuperabilidade.}}{41}{figure.6.4}\protected@file@percent }
-\newlabel{fig:encode_runtime}{{6.4}{41}{Tempo de codificação e distribuição em função do tamanho do arquivo, com e sem prova de recuperabilidade}{figure.6.4}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6.5}{\ignorespaces Tempo de decodificação em função do tamanho do arquivo. Com a prova, cada pacote transferido é verificado antes de ser entregue ao decodificador.}}{41}{figure.6.5}\protected@file@percent }
-\newlabel{fig:decode_runtime}{{6.5}{41}{Tempo de decodificação em função do tamanho do arquivo. Com a prova, cada pacote transferido é verificado antes de ser entregue ao decodificador}{figure.6.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.4}Codificação e Decodificação}{41}{section.6.4}\protected@file@percent }
+\newlabel{sec:resultados_codificacao}{{6.4}{41}{Codificação e Decodificação}{section.6.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.4}{\ignorespaces Tempo de codificação e distribuição em função do tamanho do arquivo, nos modelos limitado e ilimitado e sem prova de recuperabilidade.}}{41}{figure.6.4}\protected@file@percent }
+\newlabel{fig:encode_runtime}{{6.4}{41}{Tempo de codificação e distribuição em função do tamanho do arquivo, nos modelos limitado e ilimitado e sem prova de recuperabilidade}{figure.6.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.5}{\ignorespaces Tempo de decodificação em função do tamanho do arquivo. Com a prova, cada pacote transferido é verificado antes de ser entregue ao decodificador.}}{42}{figure.6.5}\protected@file@percent }
+\newlabel{fig:decode_runtime}{{6.5}{42}{Tempo de decodificação em função do tamanho do arquivo. Com a prova, cada pacote transferido é verificado antes de ser entregue ao decodificador}{figure.6.5}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {6.6}{\ignorespaces Decomposição do tempo de codificação de um arquivo de 1~MiB por etapa. A etapa ``outros'' reúne a leitura do arquivo, a geração dos polinômios e o cálculo do \emph  {hash} do arquivo.}}{42}{figure.6.6}\protected@file@percent }
 \newlabel{fig:encode_stages}{{6.6}{42}{Decomposição do tempo de codificação de um arquivo de 1~MiB por etapa. A etapa ``outros'' reúne a leitura do arquivo, a geração dos polinômios e o cálculo do \emph {hash} do arquivo}{figure.6.6}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6.5}Auditoria}{42}{section.6.5}\protected@file@percent }
-\newlabel{sec:resultados_auditoria}{{6.5}{42}{Auditoria}{section.6.5}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6.7}{\ignorespaces Tempo de uma rodada de auditoria sobre três provedores, com todos os pacotes ou com $s = 50$ pacotes por provedor.}}{43}{figure.6.7}\protected@file@percent }
-\newlabel{fig:audit_runtime}{{6.7}{43}{Tempo de uma rodada de auditoria sobre três provedores, com todos os pacotes ou com $s = 50$ pacotes por provedor}{figure.6.7}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6.6}Memória do Usuário e Armazenamento}{43}{section.6.6}\protected@file@percent }
-\newlabel{sec:resultados_memoria}{{6.6}{43}{Memória do Usuário e Armazenamento}{section.6.6}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6.8}{\ignorespaces Fração das rodadas de auditoria que detectaram corrupção em função do número de pacotes amostrados por provedor, para 1,0\% (3 pacotes) e 5,1\% (15 pacotes) de pacotes corrompidos.}}{44}{figure.6.8}\protected@file@percent }
-\newlabel{fig:audit_detection}{{6.8}{44}{Fração das rodadas de auditoria que detectaram corrupção em função do número de pacotes amostrados por provedor, para 1,0\% (3 pacotes) e 5,1\% (15 pacotes) de pacotes corrompidos}{figure.6.8}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6.9}{\ignorespaces Metadados mantidos pelo usuário, em porcentagem do tamanho do arquivo. A linha pontilhada indica o valor que os $n \cdot l$ \acrshort {MAC}s ocupariam empacotados em bits.}}{44}{figure.6.9}\protected@file@percent }
-\newlabel{fig:metadata_size}{{6.9}{44}{Metadados mantidos pelo usuário, em porcentagem do tamanho do arquivo. A linha pontilhada indica o valor que os $n \cdot l$ \acrshort {MAC}s ocupariam empacotados em bits}{figure.6.9}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.5}Auditoria}{43}{section.6.5}\protected@file@percent }
+\newlabel{sec:resultados_auditoria}{{6.5}{43}{Auditoria}{section.6.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.7}{\ignorespaces Tempo de uma rodada de auditoria sobre três provedores, nos modelos limitado e ilimitado, com todos os pacotes ou com $s = 50$ pacotes por provedor.}}{43}{figure.6.7}\protected@file@percent }
+\newlabel{fig:audit_runtime}{{6.7}{43}{Tempo de uma rodada de auditoria sobre três provedores, nos modelos limitado e ilimitado, com todos os pacotes ou com $s = 50$ pacotes por provedor}{figure.6.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.8}{\ignorespaces Fração das rodadas de auditoria que detectaram corrupção em função do número de pacotes amostrados por provedor, nos modelos limitado e ilimitado, para 1,0\% (3 pacotes) e 5,1\% (15 pacotes) de pacotes corrompidos com erros independentes.}}{44}{figure.6.8}\protected@file@percent }
+\newlabel{fig:audit_detection}{{6.8}{44}{Fração das rodadas de auditoria que detectaram corrupção em função do número de pacotes amostrados por provedor, nos modelos limitado e ilimitado, para 1,0\% (3 pacotes) e 5,1\% (15 pacotes) de pacotes corrompidos com erros independentes}{figure.6.8}{}}
 \citation{amaral2019hysail}
-\@writefile{toc}{\contentsline {section}{\numberline {6.7}Comparação entre Online Codes e Raptor R10}{45}{section.6.7}\protected@file@percent }
-\newlabel{sec:comparacao_hysail}{{6.7}{45}{Comparação entre Online Codes e Raptor R10}{section.6.7}{}}
-\@writefile{brf}{\backcite{amaral2019hysail}{{45}{6.7}{section.6.7}}}
-\@writefile{lot}{\contentsline {table}{\numberline {6.2}{\ignorespaces Tempos de codificação e decodificação, em segundos, do HyBolt com Raptor R10 e com Online Codes na mesma máquina}}{45}{table.6.2}\protected@file@percent }
-\newlabel{tab:comparacao_hysail}{{6.2}{45}{Tempos de codificação e decodificação, em segundos, do HyBolt com Raptor R10 e com Online Codes na mesma máquina}{table.6.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.6}Memória do Usuário e Armazenamento}{45}{section.6.6}\protected@file@percent }
+\newlabel{sec:resultados_memoria}{{6.6}{45}{Memória do Usuário e Armazenamento}{section.6.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6.9}{\ignorespaces Metadados mantidos pelo usuário, em porcentagem do tamanho do arquivo. As linhas pontilhadas indicam o valor que os \acrshort {MAC}s de cada modelo ocupariam empacotados em bits.}}{45}{figure.6.9}\protected@file@percent }
+\newlabel{fig:metadata_size}{{6.9}{45}{Metadados mantidos pelo usuário, em porcentagem do tamanho do arquivo. As linhas pontilhadas indicam o valor que os \acrshort {MAC}s de cada modelo ocupariam empacotados em bits}{figure.6.9}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6.7}Comparação entre Online Codes e Raptor R10}{46}{section.6.7}\protected@file@percent }
+\newlabel{sec:comparacao_hysail}{{6.7}{46}{Comparação entre Online Codes e Raptor R10}{section.6.7}{}}
+\@writefile{brf}{\backcite{amaral2019hysail}{{46}{6.7}{section.6.7}}}
 \@writefile{lof}{\contentsline {figure}{\numberline {6.10}{\ignorespaces Tempos de codificação e decodificação do HyBolt com Raptor R10 e com Online Codes, medidos na mesma máquina, para arquivos de 50, 100 e 500~MB: tempo do código isolado e tempo total sem prova de recuperabilidade.}}{46}{figure.6.10}\protected@file@percent }
 \newlabel{fig:hysail_comparison}{{6.10}{46}{Tempos de codificação e decodificação do HyBolt com Raptor R10 e com Online Codes, medidos na mesma máquina, para arquivos de 50, 100 e 500~MB: tempo do código isolado e tempo total sem prova de recuperabilidade}{figure.6.10}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {6.2}{\ignorespaces Tempos de codificação e decodificação, em segundos, do HyBolt com Raptor R10 e com Online Codes na mesma máquina}}{47}{table.6.2}\protected@file@percent }
+\newlabel{tab:comparacao_hysail}{{6.2}{47}{Tempos de codificação e decodificação, em segundos, do HyBolt com Raptor R10 e com Online Codes na mesma máquina}{table.6.2}{}}
 \citation{juels2007pors}
 \citation{shacham2008compact}
 \citation{amaral2013hysail}
-\citation{amaral2019hysail}
 \citation{amaral2019hysail}
 \citation{armknecht2021outsourcing}
 \citation{shen2024public}
@@ -351,11 +350,10 @@
 \@writefile{brf}{\backcite{juels2007pors}{{48}{6.8}{section.6.8}}}
 \@writefile{brf}{\backcite{shacham2008compact}{{48}{6.8}{section.6.8}}}
 \@writefile{brf}{\backcite{amaral2013hysail}{{48}{6.8}{section.6.8}}}
-\@writefile{brf}{\backcite{amaral2019hysail}{{48}{6.8}{table.6.3}}}
-\@writefile{brf}{\backcite{armknecht2021outsourcing,shen2024public}{{48}{6.8}{table.6.3}}}
 \@writefile{lot}{\contentsline {table}{\numberline {6.3}{\ignorespaces Comparação qualitativa entre esquemas de \acrshort {PoR}. $n$ é o número de blocos de mensagem e $l$ o número de desafios do modelo limitado}}{49}{table.6.3}\protected@file@percent }
 \newlabel{tab:comparacao_por}{{6.3}{49}{Comparação qualitativa entre esquemas de \acrshort {PoR}. $n$ é o número de blocos de mensagem e $l$ o número de desafios do modelo limitado}{table.6.3}{}}
-\@writefile{brf}{\backcite{amaral2019hysail}{{49}{6.3}{table.6.3}}}
+\@writefile{brf}{\backcite{amaral2019hysail}{{49}{6.8}{table.6.3}}}
+\@writefile{brf}{\backcite{armknecht2021outsourcing,shen2024public}{{49}{6.8}{table.6.3}}}
 \@writefile{toc}{\contentsline {section}{\numberline {6.9}Síntese}{49}{section.6.9}\protected@file@percent }
 \bibstyle{babunsrt}
 \@writefile{toc}{\contentsline {chapter}{\numberline {7}Conclusão}{50}{chapter.7}\protected@file@percent }

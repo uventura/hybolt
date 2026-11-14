@@ -5,7 +5,7 @@ Este capítulo apresenta a avaliação experimental do HyBolt e a compara com a 
 
 Os experimentos foram executados em um computador com processador Intel Core i7-11390H (4 núcleos, 8 \emph{threads}, até 3,4 GHz) e 8 GB de memória, sob o subsistema Linux do Windows (WSL2), com Python~3.13, NumPy~2.2 e GCC~13 para a extensão em C. Os Online Codes foram executados pela implementação do próprio HyBolt, como o R10. Os provedores foram simulados por três diretórios no sistema de arquivos Linux do próprio computador, de modo que os tempos medidos não incluem latência de rede.
 
-Salvo indicação em contrário, foram utilizados os parâmetros padrão do HyBolt: $\lambda = 127$, \emph{chunks} de até 650.000 bytes com $K = 100$ símbolos de origem, redundância $\varepsilon = 0{,}25$, $l = 40$ polinômios de desafio e pacotes armazenados sem cifragem. Com esses parâmetros, cada \emph{chunk} completo gera 125 pacotes de 6.500 bytes, dos quais 25 são pacotes de reparo. Os arquivos de entrada foram gerados com bytes pseudoaleatórios, e, em todas as execuções, o arquivo decodificado foi comparado byte a byte com o original.
+Salvo indicação em contrário, foram utilizados os parâmetros padrão do HyBolt: $\lambda = 127$, \emph{chunks} de até 650.000 bytes com $K = 100$ símbolos de origem, redundância $\varepsilon = 0{,}25$, $l = 40$ polinômios de desafio no modelo limitado e pacotes armazenados sem cifragem. Os dois modelos de auditoria são comparados entre si e com a codificação sem prova de recuperabilidade. Com esses parâmetros, cada \emph{chunk} completo gera 125 pacotes de 6.500 bytes, dos quais 25 são pacotes de reparo. Os arquivos de entrada foram gerados com bytes pseudoaleatórios, e, em todas as execuções, o arquivo decodificado foi comparado byte a byte com o original.
 
 Todas as medidas e figuras deste capítulo são produzidas por experimentos automatizados, que registram os dados brutos de cada execução. O tempo de cada etapa da codificação é medido por cronômetros associados às etapas durante a execução, sem alterar o comportamento da ferramenta. Medidas de arquivos de até 1~MiB correspondem à média de três execuções; as demais, a uma única execução.
 
@@ -74,12 +74,12 @@ No HySAIL, o tempo cresce de forma quadrática com o tamanho do bloco, de 0,06~s
 \section{Codificação e Decodificação}
 \label{sec:resultados_codificacao}
 
-As Figuras~\ref{fig:encode_runtime} e~\ref{fig:decode_runtime} apresentam os tempos de codificação, incluindo a distribuição dos pacotes e a gravação dos metadados, e de decodificação para arquivos de 64~KiB a 64~MiB. A codificação com os \acrshort{MAC}s foi avaliada apenas até 1~MiB, pois seus metadados excedem o próprio arquivo (Seção~\ref{sec:resultados_memoria}).
+As Figuras~\ref{fig:encode_runtime} e~\ref{fig:decode_runtime} apresentam os tempos de codificação, incluindo a distribuição dos pacotes e a gravação dos metadados, e de decodificação para arquivos de 64~KiB a 64~MiB, nos modelos limitado e ilimitado e sem prova de recuperabilidade. O modelo limitado foi avaliado apenas até 1~MiB, pois seus metadados excedem o próprio arquivo (Seção~\ref{sec:resultados_memoria}).
 
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=0.85\textwidth]{resultados/encode_runtime.pdf}
-	\caption{Tempo de codificação e distribuição em função do tamanho do arquivo, com e sem prova de recuperabilidade.}
+	\caption{Tempo de codificação e distribuição em função do tamanho do arquivo, nos modelos limitado e ilimitado e sem prova de recuperabilidade.}
 	\label{fig:encode_runtime}
 \end{figure}
 
@@ -90,7 +90,7 @@ As Figuras~\ref{fig:encode_runtime} e~\ref{fig:decode_runtime} apresentam os tem
 	\label{fig:decode_runtime}
 \end{figure}
 
-Sem prova de recuperabilidade, os tempos escalam linearmente com o tamanho do arquivo, como esperado da divisão em \emph{chunks} independentes: para 64~MiB, a codificação levou 2,4~s, cerca de 27~MiB/s, e a decodificação, 1,8~s. Com os \acrshort{MAC}s, a codificação de 1~MiB levou 6,0~s, contra 0,03~s sem prova, e a decodificação, 0,57~s, contra 0,03~s; como esse tempo é dominado pela geração dos 40 polinômios primitivos, ele varia pouco entre 64~KiB e 1~MiB.
+Sem prova e no modelo ilimitado, os tempos escalam linearmente com o tamanho do arquivo, como esperado da divisão em \emph{chunks} independentes. Para 64~MiB, a codificação levou 1,0~s sem prova e 3,9~s no modelo ilimitado, e a decodificação, 0,9 e 1,5~s. No modelo limitado, a codificação de 1~MiB levou 2,2~s, contra 0,08~s no ilimitado e 0,02~s sem prova, e a decodificação, 0,10~s, contra 0,03 e 0,02~s; como esse tempo é dominado pela geração dos 40 polinômios primitivos, ele varia pouco entre 64~KiB e 1~MiB.
 
 \begin{figure}[htbp]
 	\centering
@@ -99,32 +99,34 @@ Sem prova de recuperabilidade, os tempos escalam linearmente com o tamanho do ar
 	\label{fig:encode_stages}
 \end{figure}
 
-A Figura~\ref{fig:encode_stages} mostra onde esse tempo é gasto. Com a prova, 47\% da codificação corresponde aos $n \cdot l$ \acrshort{MAC}s dos blocos de mensagem, e quase todo o restante, à geração dos polinômios de desafio. Sem a prova, a gravação nos provedores responde por 68\% e a gravação dos metadados por 14\%, enquanto a codificação R10, implementada em Python, ocupa 11\% do total. O custo do código de apagamento é, portanto, pequeno em relação às demais etapas, e otimizações futuras devem concentrar-se na geração dos polinômios, nos \acrshort{MAC}s e na gravação dos pacotes.
+A Figura~\ref{fig:encode_stages} mostra onde esse tempo é gasto. No modelo limitado, 57\% da codificação corresponde aos $n \cdot l$ \acrshort{MAC}s dos blocos de mensagem e quase todo o restante, à geração dos polinômios de desafio. No modelo ilimitado, os $n$ \acrshort{MAC}s ainda respondem por 64\% do tempo, mas sobre um total 28 vezes menor, e a gravação nos provedores, por 14\%. Sem a prova, a gravação nos provedores responde por 67\% e a codificação R10 por 16\%. O custo do código de apagamento é, portanto, pequeno em relação às demais etapas.
 
 \section{Auditoria}
 \label{sec:resultados_auditoria}
 
-A Figura~\ref{fig:audit_runtime} apresenta o tempo de uma rodada de auditoria sobre os três provedores, desafiando todos os pacotes armazenados ou uma amostra de $s = 50$ pacotes por provedor.
+A Figura~\ref{fig:audit_runtime} apresenta o tempo de uma rodada de auditoria sobre os três provedores, desafiando todos os pacotes armazenados ou uma amostra de $s = 50$ pacotes por provedor, nos dois modelos.
 
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=0.85\textwidth]{resultados/audit_runtime.pdf}
-	\caption{Tempo de uma rodada de auditoria sobre três provedores, com todos os pacotes ou com $s = 50$ pacotes por provedor.}
+	\caption{Tempo de uma rodada de auditoria sobre três provedores, nos modelos limitado e ilimitado, com todos os pacotes ou com $s = 50$ pacotes por provedor.}
 	\label{fig:audit_runtime}
 \end{figure}
 
-Para 1~MiB, a rodada amostral levou 0,40~s e a completa, 0,51~s. O tempo é dominado pela leitura e regravação dos metadados, que ocupam 1,6~MB, e pela derivação do \acrshort{MAC} de cada pacote desafiado a partir de cerca de 50 \acrshort{MAC}s de blocos de mensagem.
+No modelo limitado, a rodada amostral de 1~MiB levou 0,10~s e a completa, 0,12~s, tempo dominado pela leitura e regravação dos metadados, que ocupam 1,6~MB, e pela derivação do \acrshort{MAC} de cada pacote desafiado a partir de cerca de 50 \acrshort{MAC}s de blocos de mensagem. No modelo ilimitado, a mesma rodada levou 9~ms e 15~ms. A auditoria completa cresce linearmente com o arquivo, até 0,74~s para os 13.000 pacotes de 64~MiB, enquanto a amostral permanece entre 5 e 63~ms. A redução módulo $P(x)$ feita pelo usuário sobre a resposta de cada provedor custa cerca de uma divisão polinomial de um pacote, pequena diante do restante da rodada.
 
-O tempo de auditoria é útil apenas se a rodada detectar a corrupção. Para avaliar essa capacidade, um arquivo de 4~MiB foi codificado com os \acrshort{MAC}s, e uma fração $\beta$ dos 294 pacotes de um provedor teve um byte alterado antes de cada rodada, com 100 repetições por configuração. Para que as 1.600 rodadas não esgotassem os $l = 40$ polinômios, os metadados foram restaurados antes de cada rodada. A Figura~\ref{fig:audit_detection} compara a fração de rodadas que detectaram a corrupção com a probabilidade teórica de uma amostra sem reposição conter um pacote corrompido, $1 - \binom{N - c}{s} / \binom{N}{s}$, em que $N$ é o número de pacotes do provedor e $c$ o de pacotes corrompidos, que se aproxima de $1 - (1 - \beta)^s$ quando $s \ll N$.
+O tempo de auditoria é útil apenas se a rodada detectar a corrupção. Para avaliar essa capacidade, um arquivo de 4~MiB foi codificado em cada modelo, e uma fração $\beta$ dos 294 pacotes de um provedor teve um byte alterado, em posição e valor aleatórios, antes de cada rodada, com 100 repetições por configuração. No modelo limitado, os metadados foram restaurados antes de cada rodada, para que as 1.600 rodadas não esgotassem os $l = 40$ polinômios. A Figura~\ref{fig:audit_detection} compara a fração de rodadas que detectaram a corrupção com a probabilidade teórica de uma amostra sem reposição conter um pacote corrompido, $1 - \binom{N - c}{s} / \binom{N}{s}$, em que $N$ é o número de pacotes do provedor e $c$ o de pacotes corrompidos, que se aproxima de $1 - (1 - \beta)^s$ quando $s \ll N$.
 
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=0.85\textwidth]{resultados/audit_detection.pdf}
-	\caption{Fração das rodadas de auditoria que detectaram corrupção em função do número de pacotes amostrados por provedor, para 1,0\% (3 pacotes) e 5,1\% (15 pacotes) de pacotes corrompidos.}
+	\caption{Fração das rodadas de auditoria que detectaram corrupção em função do número de pacotes amostrados por provedor, nos modelos limitado e ilimitado, para 1,0\% (3 pacotes) e 5,1\% (15 pacotes) de pacotes corrompidos com erros independentes.}
 	\label{fig:audit_detection}
 \end{figure}
 
-Os valores medidos acompanham a curva teórica dentro da variação esperada para 100 repetições, o que indica que a resposta agregada é rejeitada sempre que a amostra contém um pacote corrompido. Além disso, nenhuma das auditorias realizadas sobre arquivos íntegros nos experimentos da Seção~\ref{sec:resultados_codificacao} acusou corrupção. Com 5,1\% de pacotes corrompidos, uma amostra de 50 pacotes detectou a corrupção em 95\% das rodadas; com 1,0\%, foram necessários 200 pacotes para atingir 98\%.
+Nos dois modelos, os valores medidos acompanham a curva teórica dentro da variação esperada para 100 repetições, o que indica que a resposta agregada é rejeitada sempre que a amostra contém um pacote corrompido. Além disso, nenhuma das auditorias realizadas sobre arquivos íntegros nos experimentos da Seção~\ref{sec:resultados_codificacao} acusou corrupção. Com 5,1\% de pacotes corrompidos, uma amostra de 50 pacotes detectou a corrupção em 94\% das rodadas no modelo limitado e em 95\% no ilimitado; com 1,0\%, foram necessários 200 pacotes para atingir 98\% e 94\%.
+
+Quando todos os pacotes corrompidos recebem o mesmo erro, o XOR simples do modelo ilimitado expõe o cancelamento da Seção~\ref{sec:auditoria_limitada}: só amostras com um número ímpar de pacotes corrompidos são detectadas. Repetindo o experimento com o mesmo byte alterado da mesma forma em todos os pacotes, a detecção com $s = 200$ caiu para 48\% com $\beta = 1{,}0\%$ e para 74\% com $\beta = 5{,}1\%$. A implementação do modelo limitado pondera cada pacote por uma potência secreta de $x$ e não sofreu esse efeito, mas essa ponderação não é aplicável ao modelo ilimitado sem aumentar a resposta, e a proteção contra o cancelamento permanece como trabalho futuro.
 
 \section{Memória do Usuário e Armazenamento}
 \label{sec:resultados_memoria}
@@ -134,11 +136,11 @@ A Figura~\ref{fig:metadata_size} apresenta o tamanho dos metadados mantidos pelo
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=0.85\textwidth]{resultados/metadata_size.pdf}
-	\caption{Metadados mantidos pelo usuário, em porcentagem do tamanho do arquivo. A linha pontilhada indica o valor que os $n \cdot l$ \acrshort{MAC}s ocupariam empacotados em bits.}
+	\caption{Metadados mantidos pelo usuário, em porcentagem do tamanho do arquivo. As linhas pontilhadas indicam o valor que os \acrshort{MAC}s de cada modelo ocupariam empacotados em bits.}
 	\label{fig:metadata_size}
 \end{figure}
 
-Com a prova, os metadados ocupam 154\% de um arquivo de 1~MiB. Esse valor é elevado pelo segundo \emph{chunk}, mais curto, que também tem 100 blocos de mensagem; para arquivos grandes, a memória converge para $K l$ \acrshort{MAC}s por \emph{chunk} completo. Mesmo que os \acrshort{MAC}s fossem armazenados em bits, e não com um byte por coeficiente, ocupariam $K l \lambda$ bits por \emph{chunk}, cerca de 9,8\% do arquivo, valor que não diminui com o tamanho do arquivo e que independe da redundância. Sem a prova, os metadados convergem para 2,7\% do arquivo e correspondem à localização, ao nome e ao \emph{hash} SHA-256 de cada pacote, informação necessária a qualquer esquema que distribua o arquivo entre provedores.
+No modelo limitado, os metadados ocupam 154\% de um arquivo de 1~MiB. Esse valor é elevado pelo segundo \emph{chunk}, mais curto, que também tem 100 blocos de mensagem; para arquivos grandes, a memória converge para $K l$ \acrshort{MAC}s por \emph{chunk} completo. Mesmo que os \acrshort{MAC}s fossem armazenados em bits, e não com um byte por coeficiente, ocupariam $K l \lambda$ bits por \emph{chunk}, cerca de 9,8\% do arquivo, valor que não diminui com o tamanho do arquivo. No modelo ilimitado, os metadados convergem para 5,9\% do arquivo, dos quais 2,7\% correspondem à localização, ao nome e ao \emph{hash} SHA-256 de cada pacote, como sem prova, e o restante aos $K$ \acrshort{MAC}s por \emph{chunk}, que ocupariam 0,24\% do arquivo empacotados em bits.
 
 O armazenamento nos provedores corresponde a 1,27 vez o tamanho do arquivo para $\varepsilon = 0{,}25$, próximo do fator nominal $125/100$, ao qual se somam a serialização de cada pacote e, em arquivos pequenos, o preenchimento do último símbolo.
 
@@ -200,27 +202,27 @@ A Tabela~\ref{tab:comparacao_por} compara qualitativamente o HyBolt com os esque
 	\caption{Comparação qualitativa entre esquemas de \acrshort{PoR}. $n$ é o número de blocos de mensagem e $l$ o número de desafios do modelo limitado}
 	\label{tab:comparacao_por}
 	\footnotesize
-	\begin{tabular}{@{}p{3.6cm}p{2.4cm}p{2.4cm}p{2.4cm}p{2.4cm}@{}}
+	\begin{tabular}{@{}p{3.3cm}p{2.1cm}p{2.1cm}p{2.0cm}p{2.0cm}p{2.1cm}@{}}
 		\hline
-		\textbf{Propriedade} & \textbf{Juels--Kaliski} & \textbf{Shacham--Waters} & \textbf{HySAIL} & \textbf{HyBolt} \\
+		\textbf{Propriedade} & \textbf{Juels--Kaliski} & \textbf{Shacham--Waters} & \textbf{HySAIL} & \textbf{HyBolt limitado} & \textbf{HyBolt ilimitado} \\
 		\hline
-		Múltiplos provedores & não & não & sim & sim \\
-		Redistribuição & não & não & local & local \\
-		Auditorias ilimitadas & não & sim & sim\textsuperscript{a} & não ($l$) \\
-		Memória do usuário & chave & chave & $n \cdot l$ \acrshort{MAC}s & $n \cdot l$ \acrshort{MAC}s \\
-		Resposta & sentinelas & $\approx$ 1 bloco & $\lambda$ bits & $\lambda$ bits \\
-		Ocultação da estrutura & sim & -- & não & não \\
-		\emph{Overhead} de recepção & -- & -- & 9,7\% a 65\%\textsuperscript{b} & 0,27\% a 14\%\textsuperscript{c} \\
+		Múltiplos provedores & não & não & sim & sim & sim \\
+		Redistribuição & não & não & local & local & local \\
+		Auditorias ilimitadas & não & sim & sim\textsuperscript{a} & não ($l$) & sim \\
+		Memória do usuário & chave & chave & $n \cdot l$ \acrshort{MAC}s & $n \cdot l$ \acrshort{MAC}s & $n$ \acrshort{MAC}s \\
+		Resposta & sentinelas & $\approx$ 1 bloco & $\lambda$ bits & $\lambda$ bits & $\approx$ 1 pacote \\
+		Ocultação da estrutura & sim & -- & não & não & não \\
+		\emph{Overhead} de recepção & -- & -- & 9,7\% a 65\%\textsuperscript{b} & 0,27\% a 14\%\textsuperscript{c} & 0,27\% a 14\%\textsuperscript{c} \\
 		\hline
 	\end{tabular}
 
 	\footnotesize\raggedright
-	\textsuperscript{a} No modelo ilimitado de \cite{amaral2019hysail}; a Seção~\ref{sec:auditoria_limitada} discute a reutilização de polinômios revelados.\\
+	\textsuperscript{a} No modelo ilimitado do HySAIL (Seção~\ref{sec:auditoria_ilimitada}).\\
 	\textsuperscript{b} Online Codes implementados no HyBolt, para $K$ entre 1.000 e 10 (Tabela~\ref{tab:overhead}).\\
 	\textsuperscript{c} Raptor R10, para $K$ entre 1.000 e 10 (Tabela~\ref{tab:overhead}).
 \end{table}
 
-O HyBolt mantém as propriedades do HySAIL, a distribuição entre provedores e a Redistribuição local, e reduz o \emph{overhead} de recepção. Em relação aos esquemas de Juels e Kaliski e de Shacham e Waters, mantém as limitações do modelo limitado: o número de auditorias é fixado na codificação, a memória do usuário cresce com o arquivo e a estrutura do código fica exposta aos provedores. Nenhum dos esquemas oferece verificação pública, limitação já apontada para o HySAIL \cite{amaral2019hysail} e tratada pelas variantes com auditoria delegada \cite{armknecht2021outsourcing,shen2024public}.
+O HyBolt mantém as propriedades do HySAIL, a distribuição entre provedores e a Redistribuição local, e reduz o \emph{overhead} de recepção. No modelo ilimitado, assim como no esquema de Shacham e Waters, admite auditorias ilimitadas com uma resposta do tamanho de um pacote, mas o usuário ainda guarda um \acrshort{MAC} por bloco de mensagem, em vez de uma chave de tamanho constante. Nos dois modelos, a estrutura do código fica exposta aos provedores. Nenhum dos esquemas oferece verificação pública, limitação já apontada para o HySAIL \cite{amaral2019hysail} e tratada pelas variantes com auditoria delegada \cite{armknecht2021outsourcing,shen2024public}.
 
 \section{Síntese}
 

@@ -11,9 +11,10 @@ or a subset, e.g. ``python scripts/thesis_benchmarks.py overhead loss``.
 ``replot`` redraws the pipeline, detection, overhead and codec figures from the
 saved data without measuring again.
 
-The figures follow the architecture of the article: the bounded scheme of
-Hy-SAIL (polynomial MACs of the source blocks and a SHA-256 hash per packet),
-without server tags or packet encryption.
+The figures follow the architecture of the article: Hy-SAIL's polynomial MACs
+of the source blocks and a SHA-256 hash per packet, without server tags or
+packet encryption, in its bounded (l single-use polynomials) and unbounded
+(one secret polynomial) models.
 """
 
 import argparse
@@ -50,6 +51,7 @@ from hybolt.encryption import encode as encode_module
 from hybolt.encryption import online_codes, raptor
 from hybolt.encryption.retrievability import (
     BOUNDED_SCHEME,
+    UNBOUNDED_SCHEME,
     PolynomialRetrievabilityProof,
 )
 from hybolt.hybolt_decode import HyboltDecode
@@ -78,9 +80,11 @@ TEXT_SECONDARY = "#52514e"
 GRID = "#d9d8d4"
 # Heading of this file's figures, also the legend label of HyBolt's own runs.
 SCHEME_LABELS = {
-    BOUNDED_SCHEME: "com MACs",
+    BOUNDED_SCHEME: "limitado",
+    UNBOUNDED_SCHEME: "ilimitado",
     "none": "sem prova",
 }
+PROOF_SCHEMES = (BOUNDED_SCHEME, UNBOUNDED_SCHEME)
 
 # Hy-SAIL's thesis (2013), Figure 5.5: m(x) mod P(x) time by message block size.
 HYSAIL_MAC_SECONDS = {
@@ -255,7 +259,7 @@ def encode_file(
         str(metadata_dir),
         retrievability_proof=scheme != "none",
         redundancy=redundancy,
-        proof_scheme=BOUNDED_SCHEME,
+        proof_scheme=scheme if scheme in PROOF_SCHEMES else BOUNDED_SCHEME,
         seal_packets=seal,
         codec=codec,
     )
@@ -316,6 +320,7 @@ def save_figure(figure, figure_dir, name):
 def experiment_pipeline(args):
     sizes = {
         "none": [64 * KIB, 256 * KIB, MIB, 4 * MIB, 16 * MIB, 64 * MIB],
+        UNBOUNDED_SCHEME: [64 * KIB, 256 * KIB, MIB, 4 * MIB, 16 * MIB, 64 * MIB],
         BOUNDED_SCHEME: [64 * KIB, 256 * KIB, MIB],
     }
     if args.quick:
@@ -377,7 +382,7 @@ def _aggregate(results, scheme, key):
 
 
 def plot_pipeline(results, figure_dir):
-    schemes = [BOUNDED_SCHEME, "none"]
+    schemes = [BOUNDED_SCHEME, UNBOUNDED_SCHEME, "none"]
     all_sizes = [record["file_size"] for record in results]
     for key, name, ylabel in (
         ("encode_seconds", "encode_runtime", "tempo de codificação (s)"),
@@ -402,20 +407,20 @@ def plot_pipeline(results, figure_dir):
         save_figure(figure, figure_dir, name)
 
     figure, axis = plt.subplots()
-    for slot, (scheme, key, label) in enumerate(
-        (
-            (BOUNDED_SCHEME, "audit_all_seconds", "todos os pacotes"),
-            (BOUNDED_SCHEME, "audit_sample50_seconds", "s = 50"),
-        )
-    ):
-        sizes, values = _aggregate(results, scheme, key)
-        if sizes:
-            axis.plot(
-                [size / MIB for size in sizes],
-                values,
-                label=label,
-                **series_style(slot),
-            )
+    for slot, scheme in enumerate(PROOF_SCHEMES):
+        for style, (key, sample) in enumerate(
+            (("audit_all_seconds", "todos os pacotes"), ("audit_sample50_seconds", "s = 50"))
+        ):
+            sizes, values = _aggregate(results, scheme, key)
+            if sizes:
+                axis.plot(
+                    [size / MIB for size in sizes],
+                    values,
+                    label=f"{SCHEME_LABELS[scheme]}, {sample}",
+                    color=COLORS[slot],
+                    marker=MARKERS[slot],
+                    linestyle=LINESTYLES[style],
+                )
     axis.set_xscale("log", base=2)
     axis.set_yscale("log")
     format_mib_axis(axis, all_sizes)
@@ -434,18 +439,24 @@ def plot_pipeline(results, figure_dir):
                 label=f"{SCHEME_LABELS[scheme]} (medido)",
                 **series_style(slot),
             )
-    # n * l MACs: K source blocks per full chunk.
-    axis.axhline(
-        100
-        * default_chunk_code()[0]
-        * POLYNOMIAL_SET_SIZE
-        * POLYNOMIAL_LAMBDA
-        / (8 * DEFAULT_CHUNK_SIZE),
-        color=COLORS[2],
-        linestyle=":",
-        linewidth=1.5,
-        label=r"MACs em bits ($K l \lambda$ por chunk)",
-    )
+    # K MACs of lambda bits per polynomial and full chunk.
+    for slot, (polynomials, label) in enumerate(
+        (
+            (POLYNOMIAL_SET_SIZE, r"limitado, MACs em bits ($K l \lambda$ por chunk)"),
+            (1, r"ilimitado, MACs em bits ($K \lambda$ por chunk)"),
+        )
+    ):
+        axis.axhline(
+            100
+            * default_chunk_code()[0]
+            * polynomials
+            * POLYNOMIAL_LAMBDA
+            / (8 * DEFAULT_CHUNK_SIZE),
+            color=COLORS[slot],
+            linestyle=":",
+            linewidth=1.2,
+            label=label,
+        )
     axis.set_xscale("log", base=2)
     axis.set_yscale("log")
     format_mib_axis(axis, all_sizes)
@@ -465,7 +476,7 @@ def plot_pipeline(results, figure_dir):
 
 def plot_stages(records, figure_dir):
     stages = ["R10", "MACs", "distribuição", "metadados", "outros"]
-    figure, axis = plt.subplots(figsize=(6.0, 2.2))
+    figure, axis = plt.subplots(figsize=(6.0, 0.6 + 0.6 * len(records)))
     labels = [SCHEME_LABELS[record["scheme"]] for record in records]
     for row, record in enumerate(records):
         left = 0.0
@@ -804,13 +815,22 @@ def experiment_loss(args):
 # ---------------------------------------------------------------------------
 
 
-def corrupt_packets(paths):
+def corrupt_packets(paths, rng=None):
+    """Flip one byte of each packet.
+
+    With `rng`, each packet gets an independent error (random position and
+    value); without it, every packet gets the same error, whose copies cancel
+    in a plain XOR answer.
+    """
     originals = {}
     for path in paths:
         originals[path] = path.read_bytes()
         stored = pickle.loads(originals[path])
         data = bytearray(stored.data)
-        data[len(data) // 2] ^= 0xFF
+        if rng is None:
+            data[len(data) // 2] ^= 0xFF
+        else:
+            data[rng.randrange(len(data))] ^= rng.randrange(1, 256)
         stored.data = bytes(data)
         path.write_bytes(pickle.dumps(stored))
     return originals
@@ -822,49 +842,70 @@ def restore_packets(originals):
 
 
 def experiment_detection(args):
+    """Audit rounds against random corruption, for each proof model.
+
+    Measurements of models not run now are kept from the saved data, so one
+    model can be measured again without repeating the others.
+    """
     size = MIB if args.quick else 4 * MIB
     trials = 5 if args.quick else 100
     fractions = [0.01, 0.05]
     sample_sizes = [1, 2, 5, 10, 20, 50, 100, 200]
-    deployment = Deployment(Path(args.work_dir) / "detection")
     input_file = Path(args.work_dir) / "inputs" / f"detection_{size}.bin"
     input_file.parent.mkdir(parents=True, exist_ok=True)
     write_input(input_file, size, seed=4)
-    encoded = encode_file(deployment, input_file, BOUNDED_SCHEME)
-    # Each bounded round reveals one polynomial; restoring the metadata before
-    # every round reuses the l polynomials across the repeated measurements.
-    metadata = encoded["metadata_file"].read_bytes()
-    paths = deployment.packet_paths(0)
-    server = deployment.servers[0]["storage_location"]
     rng = random.Random(5)
 
-    empirical = []
-    for fraction in fractions:
-        corrupted_count = max(1, round(fraction * len(paths)))
-        for sample_size in sample_sizes:
-            if sample_size > len(paths):
-                continue
-            detected = 0
-            for _ in range(trials):
-                originals = corrupt_packets(rng.sample(paths, corrupted_count))
-                encoded["metadata_file"].write_bytes(metadata)
-                try:
-                    _, report = audit_file(
-                        deployment, encoded["metadata_file"], sample_size
+    saved = Path(args.data_dir) / "detection.json"
+    empirical = [
+        row
+        for row in (
+            json.loads(saved.read_text())["empirical"] if saved.exists() else []
+        )
+        if row.get("scheme", BOUNDED_SCHEME) not in args.detection_schemes
+    ]
+    for scheme in args.detection_schemes:
+        deployment = Deployment(Path(args.work_dir) / f"detection_{scheme}")
+        encoded = encode_file(deployment, input_file, scheme)
+        # Each bounded round reveals one polynomial; restoring the metadata
+        # before every round reuses the l polynomials across the measurements.
+        metadata = encoded["metadata_file"].read_bytes()
+        paths = deployment.packet_paths(0)
+        server = deployment.servers[0]["storage_location"]
+        for fraction in fractions:
+            corrupted_count = max(1, round(fraction * len(paths)))
+            for sample_size in sample_sizes:
+                if sample_size > len(paths):
+                    continue
+                detected = 0
+                for _ in range(trials):
+                    originals = corrupt_packets(
+                        rng.sample(paths, corrupted_count), rng
                     )
-                finally:
-                    restore_packets(originals)
-                audit = next(item for item in report.servers if item.server == server)
-                detected += audit.tau_provider > 0
-            empirical.append(
-                {
-                    "fraction": corrupted_count / len(paths),
-                    "sample_size": sample_size,
-                    "detection_rate": detected / trials,
-                    "server_packets": len(paths),
-                }
-            )
-            print(f"  detection beta={fraction} s={sample_size}: {detected}/{trials}")
+                    encoded["metadata_file"].write_bytes(metadata)
+                    try:
+                        _, report = audit_file(
+                            deployment, encoded["metadata_file"], sample_size
+                        )
+                    finally:
+                        restore_packets(originals)
+                    audit = next(
+                        item for item in report.servers if item.server == server
+                    )
+                    detected += audit.tau_provider > 0
+                empirical.append(
+                    {
+                        "scheme": scheme,
+                        "fraction": corrupted_count / len(paths),
+                        "sample_size": sample_size,
+                        "detection_rate": detected / trials,
+                        "server_packets": len(paths),
+                    }
+                )
+                print(
+                    f"  detection {scheme} beta={fraction} s={sample_size}: "
+                    f"{detected}/{trials}"
+                )
 
     save_json(args.data_dir, "detection", {"empirical": empirical})
     plot_detection(empirical, fractions, sample_sizes, args.figure_dir)
@@ -879,6 +920,7 @@ def detection_probability(packets, corrupted, sample_size):
 
 def plot_detection(empirical, fractions, sample_sizes, figure_dir):
     figure, axis = plt.subplots()
+    markers = {BOUNDED_SCHEME: ("o", None), UNBOUNDED_SCHEME: ("s", "white")}
     for slot, fraction in enumerate(fractions):
         rows = [row for row in empirical if abs(row["fraction"] - fraction) < 0.01]
         beta = rows[0]["fraction"]
@@ -893,16 +935,23 @@ def plot_detection(empirical, fractions, sample_sizes, figure_dir):
             linewidth=1.5,
             label=rf"teórica, $\beta$ = {100 * beta:.1f}%",
         )
-        axis.plot(
-            [row["sample_size"] for row in rows],
-            [100 * row["detection_rate"] for row in rows],
-            linestyle="none",
-            marker=MARKERS[slot],
-            markersize=6,
-            color=COLORS[slot],
-            markeredgecolor="white",
-            label=rf"auditoria medida, $\beta$ = {100 * beta:.1f}%",
-        )
+        for scheme, (marker, face) in markers.items():
+            measured = [
+                row for row in rows if row.get("scheme", BOUNDED_SCHEME) == scheme
+            ]
+            if not measured:
+                continue
+            axis.plot(
+                [row["sample_size"] for row in measured],
+                [100 * row["detection_rate"] for row in measured],
+                linestyle="none",
+                marker=marker,
+                markersize=6,
+                color=COLORS[slot],
+                markerfacecolor=face or COLORS[slot],
+                markeredgewidth=1.2,
+                label=rf"{SCHEME_LABELS[scheme]}, $\beta$ = {100 * beta:.1f}%",
+            )
     axis.set_xscale("log")
     axis.set_xlabel("pacotes amostrados por provedor ($s$)")
     axis.set_ylabel("rodadas que detectam corrupção (%)")
@@ -1151,6 +1200,7 @@ def _codec_value(timings, size_mb, codec, config, key):
 # Degrees: degree distributions of the fountain codes
 # ---------------------------------------------------------------------------
 
+
 def r10_degree_distribution():
     """RFC 5053, Section 5.4.4.2, Table 1."""
     distribution = np.zeros(max(raptor.tables.DEGREES))
@@ -1243,6 +1293,12 @@ def main() -> int:
         type=Path,
         default=None,
         help="Scratch directory for inputs and storage (a temporary one by default)",
+    )
+    parser.add_argument(
+        "--detection-schemes",
+        type=lambda value: value.split(","),
+        default=list(PROOF_SCHEMES),
+        help="Proof models measured by the detection experiment, comma separated",
     )
     parser.add_argument("--data-dir", type=Path, default=Path("logs/thesis"))
     parser.add_argument(

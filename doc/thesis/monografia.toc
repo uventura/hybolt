@@ -51,10 +51,10 @@
 \contentsline {section}{\numberline {6.1}Ambiente Experimental}{36}{section.6.1}%
 \contentsline {section}{\numberline {6.2}Recuperação e \emph {Overhead} de Recepção}{37}{section.6.2}%
 \contentsline {section}{\numberline {6.3}Custo do MAC Polinomial}{40}{section.6.3}%
-\contentsline {section}{\numberline {6.4}Codificação e Decodificação}{40}{section.6.4}%
-\contentsline {section}{\numberline {6.5}Auditoria}{42}{section.6.5}%
-\contentsline {section}{\numberline {6.6}Memória do Usuário e Armazenamento}{43}{section.6.6}%
-\contentsline {section}{\numberline {6.7}Comparação entre Online Codes e Raptor R10}{45}{section.6.7}%
+\contentsline {section}{\numberline {6.4}Codificação e Decodificação}{41}{section.6.4}%
+\contentsline {section}{\numberline {6.5}Auditoria}{43}{section.6.5}%
+\contentsline {section}{\numberline {6.6}Memória do Usuário e Armazenamento}{45}{section.6.6}%
+\contentsline {section}{\numberline {6.7}Comparação entre Online Codes e Raptor R10}{46}{section.6.7}%
 \contentsline {section}{\numberline {6.8}Comparação com Outros Esquemas de PoR}{48}{section.6.8}%
 \contentsline {section}{\numberline {6.9}Síntese}{49}{section.6.9}%
 \contentsline {chapter}{\numberline {7}Conclusão}{50}{chapter.7}%

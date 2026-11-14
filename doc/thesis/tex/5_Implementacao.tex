@@ -76,29 +76,29 @@ O usuário mantém um arquivo de metadados por arquivo armazenado, que constitui
 \section{Problemas Observados na Substituição Direta}
 \label{sec:problemas_observados}
 
-Para quantificar os problemas descritos na Seção~\ref{sec:problemas_substituicao}, o arquivo de 1~MiB do conjunto de exemplos foi codificado com os parâmetros padrão e três provedores, e em seguida auditado, com 50 pacotes por provedor, e decodificado. O arquivo foi dividido em dois \emph{chunks}, de 650.000 e 398.576 bytes, cada um com $K = 100$ pacotes de origem e $r = 25$ pacotes de reparo, totalizando 250 pacotes. Os resultados, médias de três execuções com Python~3.13 e a extensão em C, são apresentados na Tabela~\ref{tab:problemas_observados} e têm caráter indicativo.
+Para quantificar os problemas descritos na Seção~\ref{sec:problemas_substituicao} e comparar os dois modelos de auditoria, o arquivo de 1~MiB do conjunto de exemplos foi codificado com os parâmetros padrão e três provedores, e em seguida auditado, com 50 pacotes por provedor, e decodificado. O arquivo foi dividido em dois \emph{chunks}, de 650.000 e 398.576 bytes, cada um com $K = 100$ pacotes de origem e $r = 25$ pacotes de reparo, totalizando 250 pacotes. Os resultados, médias de três execuções, são apresentados na Tabela~\ref{tab:problemas_observados} e têm caráter indicativo.
 
 \begin{table}[h]
 	\centering
-	\caption{Medidas do HyBolt para um arquivo de 1~MiB}
+	\caption{Medidas do HyBolt para um arquivo de 1~MiB nos dois modelos de auditoria}
 	\label{tab:problemas_observados}
-	\begin{tabular}{lr}
+	\begin{tabular}{lrr}
 		\hline
-		\textbf{Medida} & \textbf{Valor} \\
+		\textbf{Medida} & \textbf{Limitado} & \textbf{Ilimitado} \\
 		\hline
-		Tempo de codificação (s) & 5,95 \\
-		\acrshort{MAC}s mantidos pelo usuário & 8.000 \\
-		Metadados do usuário (bytes) & 1.619.842 \\
-		Metadados em relação ao arquivo & 154,5\% \\
-		Auditorias disponíveis & 40 \\
-		Rodada de auditoria (s) & 0,40 \\
-		Resposta por provedor (bytes) & 16 \\
-		Tempo de decodificação (s) & 0,57 \\
+		Tempo de codificação (s) & 2,24 & 0,08 \\
+		\acrshort{MAC}s mantidos pelo usuário & 8.000 & 200 \\
+		Metadados do usuário (bytes) & 1.619.845 & 77.798 \\
+		Metadados em relação ao arquivo & 154,5\% & 7,4\% \\
+		Auditorias disponíveis & 40 & ilimitadas \\
+		Rodada de auditoria com $s = 50$ (s) & 0,10 & 0,01 \\
+		Resposta por provedor (bytes) & 16 & $\approx$ 6.500 \\
+		Tempo de decodificação (s) & 0,10 & 0,03 \\
 		\hline
 	\end{tabular}
 \end{table}
 
-Com o R10, o usuário armazena os $n \cdot l = 2 \cdot 100 \cdot 40 = 8.000$ \acrshort{MAC}s do HySAIL, em vez dos $250 \cdot 40 = 10.000$ que um \acrshort{MAC} por pacote exigiria, e nenhum \acrshort{MAC} é acrescentado pela Redistribuição. Ainda assim, os itens 1 e 2 da Seção~\ref{sec:problemas_substituicao} se confirmam: os metadados superaram o próprio arquivo, pois cada \acrshort{MAC} é armazenado com um byte por coeficiente; mesmo com o empacotamento em bits, ocupariam 127~KB, ou 12\% do arquivo, acima da estimativa $l\lambda/B \approx 9{,}8\%$ porque o segundo \emph{chunk}, mais curto, também tem 100 blocos de mensagem. A codificação é dominada pelas $l = 40$ divisões polinomiais por bloco de mensagem e pela geração de 40 polinômios primitivos, e o arquivo admite apenas 40 auditorias ou decodificações com prova antes de ser recodificado.
+No modelo limitado, o usuário armazena os $n \cdot l = 2 \cdot 100 \cdot 40 = 8.000$ \acrshort{MAC}s do HySAIL, em vez dos $250 \cdot 40 = 10.000$ que um \acrshort{MAC} por pacote exigiria, e nenhum \acrshort{MAC} é acrescentado pela Redistribuição. Ainda assim, os itens 1 e 2 da Seção~\ref{sec:problemas_substituicao} se confirmam: os metadados superaram o próprio arquivo, pois cada \acrshort{MAC} é armazenado com um byte por coeficiente, e o arquivo admite apenas 40 auditorias ou decodificações com prova antes de ser recodificado. A codificação é dominada pelas $l = 40$ divisões polinomiais por bloco de mensagem e pela geração de 40 polinômios primitivos. No modelo ilimitado, os dois itens deixam de ocorrer: o usuário guarda 40 vezes menos \acrshort{MAC}s, os metadados caem para 7,4\% do arquivo, a codificação e a auditoria ficam cerca de dez vezes mais rápidas, e o mesmo polinômio serve a qualquer número de rodadas. Em contrapartida, a resposta de cada provedor passa de 16 bytes para o tamanho de um pacote.
 
 O item 3, o ataque dirigido a um \emph{chunk}, também se confirma. Corromper os sete pacotes que contêm um mesmo símbolo de origem, 2,8\% do total, torna o arquivo irrecuperável. Para um arquivo de 1~GiB codificado com os mesmos parâmetros, com aproximadamente 206.500 pacotes, os mesmos sete pacotes representariam 0,0034\% do total, e uma auditoria com 50 pacotes por provedor em três provedores os detectaria com probabilidade de apenas 0,5\%.
 
