@@ -1,0 +1,37 @@
+\begin{tikzpicture}[
+		fase/.style={caixa=serieB, minimum width=26mm, minimum height=9mm},
+		componente/.style={caixa=serieA, minimum width=42mm, text width=40mm, align=center},
+		variante/.style={font=\footnotesize, text=tintaSec},
+		node distance=5mm and 4mm]
+
+	% Fases executadas pelo usuário
+	\node[fase] (cod) {Codificação\\e Distribuição};
+	\node[fase, right=of cod] (aud) {Auditoria};
+	\node[fase, right=of aud] (red) {Redistribuição};
+	\node[fase, right=of red] (dec) {Decodificação};
+
+	% Componentes compartilhados pelas fases
+	\node[componente, below=16mm of $(cod)!0.5!(aud)$] (prova) {\textbf{Prova de recuperabilidade}\\[1mm]
+		{\footnotesize modelo limitado\\modelo ilimitado\\sem prova}};
+	\node[componente, right=6mm of prova] (codigos) {\textbf{Códigos \emph{fountain}}\\[1mm]
+		{\footnotesize Raptor R10\\Online Codes}};
+	\node[componente, right=6mm of codigos] (meta) {\textbf{Metadados}\\[1mm]
+		{\footnotesize MACs e polinômios\\ESI, provedor e SHA-256}};
+
+	\node[grupo, fit=(cod) (dec) (prova) (meta), inner sep=4mm] (usuario) {};
+	\node[rotulo, anchor=south west] at (usuario.north west) {usuário};
+
+	% Barramento entre fases e componentes
+	\coordinate (bus) at ($(cod.south)!0.5!(prova.north)$);
+	\foreach \f in {cod,aud,red,dec} \draw[aresta] (\f.south) -- (\f.south |- bus);
+	\draw[aresta] (cod.south |- bus) -- (dec.south |- bus);
+	\foreach \c in {prova,codigos,meta} \draw[seta] (\c.north |- bus) -- (\c.north);
+
+	% Provedores
+	\node[servidor, right=14mm of usuario.east, yshift=6mm] (s1) {$S_1$};
+	\node[servidor, below=2mm of s1] (s2) {$S_2$};
+	\node[below=0mm of s2, text=tintaSec] {$\vdots$};
+	\node[rotulo, above=1mm of s1] {provedores:\\armazenamento e\\respostas a desafios};
+	\draw[seta, <->] (usuario.east |- s1) -- (s1.west);
+	\draw[seta, <->] (usuario.east |- s2) -- (s2.west);
+\end{tikzpicture}

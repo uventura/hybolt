@@ -76,7 +76,7 @@ Substituir os Online Codes pelo R10 mantendo o restante do HySAIL inalterado pre
 	\item \textit{Cancelamento de erros na resposta agregada:} a resposta da Auditoria original, o XOR dos pacotes desafiados, permite que dois pacotes corrompidos com o mesmo padrão de erro se anulem, como detalhado na Seção~\ref{sec:auditoria_limitada}.
 \end{enumerate}
 
-Além desses aspectos, herdados do HySAIL, a substituição introduz uma diferença no dimensionamento da redundância e do tamanho dos \emph{chunks}: os $r$ símbolos de reparo de um \emph{chunk} não toleram, em geral, a perda de quaisquer $r$ pacotes (Seção~\ref{sec:redundancia}). Para manter um modelo simples, as quatro limitações não são tratadas nesta proposta e ficam como trabalhos futuros; as seções seguintes descrevem como o R10 mantém o modelo limitado do HySAIL.
+Além desses aspectos, herdados do HySAIL, a substituição introduz uma diferença no dimensionamento da redundância e do tamanho dos \emph{chunks}: os $r$ símbolos de reparo de um \emph{chunk} não toleram, em geral, a perda de quaisquer $r$ pacotes (Seção~\ref{sec:redundancia}). Os itens 1 e 2 decorrem do modelo limitado e não ocorrem no modelo ilimitado do HySAIL, que a proposta também adota (Seção~\ref{sec:auditoria_ilimitada}). Para manter um modelo simples, os itens 3 e 4 não são tratados e ficam como trabalhos futuros.
 
 \section{MAC Homomórfico com o Raptor R10}
 \label{sec:impacto_mac}
@@ -110,9 +110,44 @@ Em cada rodada, o usuário sorteia um polinômio ainda não revelado e, para cad
 	\label{eq:desafio_xor}
 \end{equation}
 
-\noindent que o usuário compara com $\bigoplus_{\eta \in Q} h_{\eta,j}(x)$, calculado a partir dos \acrshort{MAC}s derivados pela Equação~\eqref{eq:mac_derivado}. Essa agregação permite que corrupções se cancelem: se dois pacotes de uma mesma amostra forem alterados pelo mesmo padrão de erro $e(x)$, então $c'_a \oplus c'_b = c_a \oplus c_b$ e a resposta coincide com a esperada para qualquer $P_j$. Essa é a quarta limitação da Seção~\ref{sec:problemas_substituicao}.
+\noindent que o usuário compara com $\bigoplus_{\eta \in Q} h_{\eta,j}(x)$, calculado a partir dos \acrshort{MAC}s derivados pela Equação~\eqref{eq:mac_derivado}. Essa agregação permite que corrupções se cancelem: se dois pacotes de uma mesma amostra forem alterados pelo mesmo padrão de erro $e(x)$, então $c'_a \oplus c'_b = c_a \oplus c_b$ e a resposta coincide com a esperada para qualquer $P_j$. Essa é a quarta limitação da Seção~\ref{sec:problemas_substituicao}, que vale também para o modelo ilimitado.
 
 Quando a resposta agregada de um provedor diverge da esperada, os pacotes da amostra são verificados individualmente com o mesmo polinômio, já revelado naquela rodada, para localizar os pacotes corrompidos. O número de pacotes corrompidos encontrados em $S_i$ define $\tau_{provider}$, e o provedor é considerado aprovado se $\tau_{provider} \le \tau_{maximum}$, em que $\tau_{maximum}$ é um parâmetro da auditoria. Adicionalmente, cada \emph{chunk} é avaliado quanto à recuperabilidade, o que corresponde ao limite global $\tau_{global}$ do HySAIL. Como o R10 não é MDS, essa avaliação não compara o número de pacotes corrompidos com $r$, mas verifica se os suportes dos pacotes restantes ainda têm posto $K$, o que decide exatamente se o \emph{chunk} pode ser decodificado. Se uma fração $\beta$ dos pacotes de um provedor estiver corrompida, uma amostra de $s$ pacotes detecta ao menos uma corrupção com probabilidade de, no mínimo, $1 - (1 - \beta)^s$, o que orienta a escolha de $s$ em função do custo aceitável por rodada.
+
+\section{Auditoria no Modelo Ilimitado}
+\label{sec:auditoria_ilimitada}
+
+O HySAIL também define um modelo ilimitado, em que o polinômio de desafio nunca é revelado ao provedor \cite{amaral2013hysail}. Na Codificação, o usuário sorteia um único polinômio primitivo secreto $P(x)$ de grau $\lambda$ e armazena um \acrshort{MAC} por bloco de mensagem, $h_i = m_i(x) \bmod P(x)$. Como o \acrshort{MAC} continua homomórfico, o \acrshort{MAC} de qualquer pacote do R10 é derivado pela Equação~\eqref{eq:mac_derivado} com $l = 1$.
+
+Em cada rodada, o usuário envia ao provedor apenas os pacotes da amostra $Q$, e o provedor responde com o XOR desses pacotes, sem redução:
+
+\begin{equation}
+	A(x) = \bigoplus_{\eta \in Q} c_\eta(x).
+	\label{eq:desafio_ilimitado}
+\end{equation}
+
+\noindent O próprio usuário calcula $A(x) \bmod P(x)$ e o compara com $\bigoplus_{\eta \in Q} h_\eta(x)$. Como $P(x)$ não é conhecido pelo provedor, ele não pode substituir os pacotes por seus restos, e uma resposta $A' \neq A$ só é aceita se $P(x)$ dividir $A' \oplus A$. Um polinômio não nulo de grau $d$ tem no máximo $d/\lambda$ fatores irredutíveis de grau $\lambda$, entre os cerca de $2^\lambda/\lambda$ possíveis, de modo que essa probabilidade é da ordem de $B/2^\lambda$ para pacotes de $B$ bits, desprezível para $\lambda = 127$. O mesmo $P(x)$ pode, portanto, ser usado em um número ilimitado de rodadas. Na Decodificação, nenhum desafio é enviado: cada pacote transferido é reduzido módulo $P(x)$ pelo usuário e comparado com seu \acrshort{MAC} derivado. A localização dos pacotes corrompidos e a avaliação dos limites $\tau$ seguem a Seção~\ref{sec:auditoria_limitada}.
+
+A Tabela~\ref{tab:modelos_auditoria} resume as diferenças entre os dois modelos, escolhidos na Codificação. O modelo ilimitado reduz a memória do usuário em $l$ vezes e elimina o limite de auditorias, ao custo de uma resposta do tamanho de um pacote, em vez de $\lambda$ bits, e de uma divisão polinomial pelo usuário a cada rodada. O cancelamento de erros na resposta agregada permanece, pois a agregação continua sendo o XOR simples.
+
+\begin{table}[htbp]
+	\centering
+	\caption{Modelos de auditoria do HySAIL com o Raptor R10}
+	\label{tab:modelos_auditoria}
+	\footnotesize
+	\begin{tabular}{@{}lll@{}}
+		\hline
+		\textbf{Aspecto} & \textbf{Limitado} & \textbf{Ilimitado} \\
+		\hline
+		Polinômios & $l$, revelados um por rodada & 1, secreto \\
+		\acrshort{MAC}s do usuário & $n \cdot l$ & $n$ \\
+		Desafio enviado & $P_j$ e pacotes & pacotes \\
+		Resposta & $\left(\bigoplus c_\eta\right) \bmod P_j$, $\lambda$ bits & $\bigoplus c_\eta$, $\approx$ 1 pacote \\
+		Redução módulo $P$ & provedor & usuário \\
+		Auditorias & $l$, incluindo decodificações & ilimitadas \\
+		\hline
+	\end{tabular}
+\end{table}
 
 \section{Redundância}
 \label{sec:redundancia}

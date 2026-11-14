@@ -3,11 +3,11 @@ Este capítulo apresenta a avaliação experimental do HyBolt e a compara com a 
 \section{Ambiente Experimental}
 \label{sec:ambiente_experimental}
 
-Os experimentos foram executados em um computador com processador Intel Core i7-11390H (4 núcleos, 8 \emph{threads}, até 3,4 GHz) e 8 GB de memória, sob o subsistema Linux do Windows (WSL2), com Python~3.13, NumPy~2.2 e GCC~13 para a extensão em C. Os Online Codes foram executados pela implementação em Python do próprio HyBolt, como o R10. Os provedores foram simulados por três diretórios no sistema de arquivos Linux do próprio computador, de modo que os tempos medidos não incluem latência de rede.
+Os experimentos foram executados em um computador com processador Intel Core i7-11390H (4 núcleos, 8 \emph{threads}, até 3,4 GHz) e 8 GB de memória, sob o subsistema Linux do Windows (WSL2), com Python~3.13, NumPy~2.2 e GCC~13 para a extensão em C. Os Online Codes foram executados pela implementação do próprio HyBolt, como o R10. Os provedores foram simulados por três diretórios no sistema de arquivos Linux do próprio computador, de modo que os tempos medidos não incluem latência de rede.
 
 Salvo indicação em contrário, foram utilizados os parâmetros padrão do HyBolt: $\lambda = 127$, \emph{chunks} de até 650.000 bytes com $K = 100$ símbolos de origem, redundância $\varepsilon = 0{,}25$, $l = 40$ polinômios de desafio e pacotes armazenados sem cifragem. Com esses parâmetros, cada \emph{chunk} completo gera 125 pacotes de 6.500 bytes, dos quais 25 são pacotes de reparo. Os arquivos de entrada foram gerados com bytes pseudoaleatórios, e, em todas as execuções, o arquivo decodificado foi comparado byte a byte com o original.
 
-Todas as medidas e figuras deste capítulo são reproduzidas pelo comando \texttt{python scripts/thesis\_benchmarks.py all}, que grava os dados brutos em \texttt{logs/thesis/} e as figuras em \texttt{doc/thesis/img/resultados/}. O tempo de cada etapa da codificação é obtido envolvendo, durante a medição, os métodos correspondentes do HyBolt com um cronômetro, de modo que as etapas são medidas sem alterar o código da ferramenta. Medidas de arquivos de até 1~MiB correspondem à média de três execuções; as demais, a uma única execução.
+Todas as medidas e figuras deste capítulo são produzidas por experimentos automatizados, que registram os dados brutos de cada execução. O tempo de cada etapa da codificação é medido por cronômetros associados às etapas durante a execução, sem alterar o comportamento da ferramenta. Medidas de arquivos de até 1~MiB correspondem à média de três execuções; as demais, a uma única execução.
 
 \section{Recuperação e \emph{Overhead} de Recepção}
 \label{sec:resultados_overhead}
