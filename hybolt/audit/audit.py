@@ -22,10 +22,6 @@ from hybolt.encryption.retrievability import (
 from hybolt.logger.logger import execution_logger
 from hybolt.server.server import Server
 
-# Exponents stay far below 2^lambda - 1, the order of x modulo a primitive P_j,
-# so distinct exponents give distinct weights.
-_MAX_SHIFT = 1 << 32
-
 
 @dataclass(frozen=True)
 class PacketLocation:
@@ -97,29 +93,23 @@ class AuditChallenge(ABC):
 class BoundedAuditChallenge(AuditChallenge):
     """Hy-SAIL Algorithm 2 with a single-use public polynomial P_j.
 
-    The server answers (sum of x^k_eta * c_eta) mod P_j and the client compares it
-    with the same combination of the packet MACs, which it derives from its
-    source block MACs. The secret x^k_eta weights stop equal corruptions from
-    cancelling in the XOR (see galois.aggregate_remainders).
+    The server answers (XOR of the sampled c_eta) mod P_j and the client compares
+    it with the XOR of the packet MACs, which it derives from its source block
+    MACs. As in Hy-SAIL, packets corrupted with the same error cancel out in
+    the XOR; the thesis keeps that limitation as future work.
     """
 
-    def __init__(self, metadata, metadata_file, random):
+    def __init__(self, metadata, metadata_file):
         ledger = ChallengeLedger(metadata, metadata_file, len(metadata.polynomials))
         self.polynomial_index = ledger.draw()
         self.remaining_challenges = len(ledger.remaining)
         self._polynomial = metadata.polynomials[self.polynomial_index]
-        self._random = random
         self._source_macs = {
             chunk.chunk_index: SourceMacs(chunk, metadata.sealing_keys)
             for chunk in metadata.chunks
         }
 
     def check(self, server, sample):
-        shifts = (
-            self._random.sample(range(1, _MAX_SHIFT), len(sample))
-            if len(sample) > 1
-            else None
-        )
         expected = ga.aggregate_remainders(
             [
                 self._source_macs[chunk_index].packet_mac(
@@ -128,10 +118,9 @@ class BoundedAuditChallenge(AuditChallenge):
                 for chunk_index, packet in sample
             ],
             self._polynomial,
-            shifts,
         )
         answer = server.receive_aggregate_challenge(
-            self._polynomial, [packet.packet_file for _, packet in sample], shifts
+            self._polynomial, [packet.packet_file for _, packet in sample]
         )
         return np.array_equal(expected, answer)
 
@@ -243,7 +232,7 @@ class Audit:
             return CompactAuditChallenge(self._metadata.compact_keys)
         if self._metadata.proof_scheme == UNBOUNDED_SCHEME:
             return UnboundedAuditChallenge(self._metadata)
-        return BoundedAuditChallenge(self._metadata, self._metadata_file, self._random)
+        return BoundedAuditChallenge(self._metadata, self._metadata_file)
 
     def _audit_server(self, storage_location, packets, challenge):
         sample_size = min(self._sample_size or len(packets), len(packets))

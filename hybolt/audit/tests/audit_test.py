@@ -45,13 +45,28 @@ def _first_packet(metadata_file):
     return _metadata(metadata_file).chunks[0].packets[0]
 
 
-def _corrupt(packet_metadata):
+def _rewrite(packet_metadata, change):
     path = Path(packet_metadata.server) / packet_metadata.packet_file
     with open(path, "rb") as file:
         packet = pickle.load(file)
-    packet.data = bytes(byte ^ 0xFF for byte in packet.data)
+    packet.data = change(packet.data)
     with open(path, "wb") as file:
         pickle.dump(packet, file)
+
+
+def _corrupt(packet_metadata):
+    """Flip one byte whose position depends on the packet, so errors never cancel."""
+
+    def flip(data):
+        data = bytearray(data)
+        data[packet_metadata.packet_index % len(data)] ^= 0xFF
+        return bytes(data)
+
+    _rewrite(packet_metadata, flip)
+
+
+def _corrupt_identically(packet_metadata):
+    _rewrite(packet_metadata, lambda data: bytes(byte ^ 0xFF for byte in data))
 
 
 def test_given_honest_servers_when_auditing_then_passes_and_checks_every_packet(
@@ -185,21 +200,48 @@ def test_given_invalid_parameters_when_creating_audit_then_raises(
         Audit(metadata_file, server_file, **kwargs)
 
 
-def test_given_two_packets_with_identical_corruption_when_auditing_then_detects_both(
+def _two_packets_on_one_server(metadata_file):
+    """Two (chunk index, packet) pairs stored on the same server."""
+    by_server = {}
+    for chunk in _metadata(metadata_file).chunks:
+        for packet in chunk.packets:
+            by_server.setdefault(packet.server, []).append((chunk.chunk_index, packet))
+    return next(packets for packets in by_server.values() if len(packets) > 1)[:2]
+
+
+def _audit_only(metadata_file, server_file, packets):
+    audit = Audit(metadata_file, server_file)
+    audit._packets_by_server = lambda: {packets[0][1].server: list(packets)}
+    return audit.run()
+
+
+def test_given_two_packets_with_identical_corruption_when_auditing_together_then_they_cancel(
+    encoded,
+):
+    """Hy-SAIL's plain XOR answer: equal errors cancel, a limitation kept as future work."""
+    metadata_file, server_file = encoded
+    pair = _two_packets_on_one_server(metadata_file)
+    for _, packet in pair:
+        _corrupt_identically(packet)
+
+    report = _audit_only(metadata_file, server_file, pair)
+
+    assert report.corrupted_packets == []
+
+
+def test_given_two_packets_with_identical_corruption_when_auditing_alone_then_detects_each(
     encoded,
 ):
     metadata_file, server_file = encoded
-    metadata = _metadata(metadata_file)
-    by_server = {}
-    for chunk in metadata.chunks:
-        for packet in chunk.packets:
-            by_server.setdefault(packet.server, []).append(packet)
-    same_server = next(packets for packets in by_server.values() if len(packets) > 1)
-    for packet in same_server[:2]:
-        _corrupt(packet)
+    pair = _two_packets_on_one_server(metadata_file)
+    for _, packet in pair:
+        _corrupt_identically(packet)
 
-    report = Audit(metadata_file, server_file).run()
+    found = [
+        _audit_only(metadata_file, server_file, [item]).corrupted_packets
+        for item in pair
+    ]
 
-    assert {p.packet_file for p in report.corrupted_packets} == {
-        packet.packet_file for packet in same_server[:2]
-    }
+    assert [[p.packet_file for p in report] for report in found] == [
+        [packet.packet_file] for _, packet in pair
+    ]
