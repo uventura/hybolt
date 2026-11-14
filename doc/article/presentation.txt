@@ -1,0 +1,328 @@
+HySAIL-R: substituição dos Online Codes pelo Raptor R10 na camada de armazenamento HySAIL
+Roteiro de apresentação (5 a 7 minutos, 9 slides)
+=====================================================================
+
+Formato de cada slide:
+  TÍTULO      -> título do slide
+  CONTEÚDO    -> o que vai no slide (tópicos curtos, figuras, tabelas)
+  FALA        -> o que dizer (notas do apresentador)
+  TEMPO       -> duração aproximada
+
+Tempo total estimado: ~6:25 (com folga para chegar a 7).
+
+
+---------------------------------------------------------------------
+SLIDE 1 - Capa                                              TEMPO: 0:15
+---------------------------------------------------------------------
+TÍTULO:
+  HySAIL-R: substituição dos Online Codes pelo Raptor R10
+  na camada de armazenamento HySAIL
+
+CONTEÚDO:
+  - Ualiton V. Silva, Dino Macedo Amaral, João J. C. Gondim
+  - Universidade de Brasília
+  - SOL Preprints, 2026
+
+FALA:
+  "Vou apresentar o HySAIL-R, uma evolução do protocolo HySAIL em que
+  trocamos o código de apagamento usado, os Online Codes, pelo Raptor R10."
+
+
+---------------------------------------------------------------------
+SLIDE 2 - Motivação                                         TEMPO: 0:50
+---------------------------------------------------------------------
+TÍTULO:
+  Integridade e recuperabilidade de dados em nuvem
+
+IDEIA DO SLIDE (narrativa em 2 passos, da esquerda para a direita):
+  serviços do dia a dia guardam e movimentam volumes enormes de dados
+    -> esses dados ficam sob custódia de terceiros, que precisam ser
+       verificados
+
+CONTEÚDO:
+
+  Esquerda - figura figures/commercial_data_volumes.png (barras em escala
+  logarítmica; cada cor é um tipo de medida, para não misturar métricas):
+      armazenado (acumulado):  Amazon S3 até 2021 ............ 500 EB
+      tráfego por ano:         Netflix, streaming 2021 ......... 51,1 EB
+                               E-mails e spam 2021 ............. 5,7 EB
+      novos dados por ano:     Dropbox, novos usuários 2020 .... 768 PB
+                               YouTube, vídeos enviados ........ 263 PB
+                               Facebook, fotos ................. 252 PB
+                               Instagram, fotos ................ 68 PB
+
+  A figura é gerada por scripts/presentation_figures.py (PNG para o
+  PowerPoint, PDF para LaTeX).
+
+  Direita - problema e solução (duas frases):
+      Problema: na nuvem, os dados podem ser corrompidos, adulterados ou
+                perdidos sem que o usuário perceba.
+      Solução:  Provas de Recuperabilidade (PoR) verificam que o arquivo
+                está íntegro e recuperável sem baixá-lo por completo.
+
+  Rodapé (fontes, fonte pequena):
+      Clissa, Lassnig e Rinaldi (2023), Frontiers in Big Data;
+      Zhao, Zhang e Guan (2023), Cluster Computing.
+
+FALA:
+  "Serviços que usamos todos os dias lidam com volumes enormes de dados.
+  Até 2021, o Amazon S3 já armazenava cerca de 500 exabytes. Só o
+  streaming da Netflix movimentou cerca de 51 exabytes em 2021, e os
+  novos usuários do Dropbox exigiram, em 2020, cerca de 768 petabytes de
+  armazenamento. Repare que são medidas diferentes, armazenamento
+  acumulado, tráfego e dados novos, mas todas mostram a mesma coisa: os
+  nossos dados estão com terceiros. E lá eles podem ser corrompidos,
+  adulterados ou perdidos sem que o dono perceba. Baixar tudo para
+  conferir é inviável. As provas de recuperabilidade, ou PoR, resolvem
+  isso com pequenas verificações por amostragem."
+
+OBSERVAÇÕES:
+  - Todos os valores são de Clissa et al. (2023), que o artigo já cita
+    (frontiersbigdata). O S3 assume ~5 MB por objeto; Dropbox, YouTube,
+    Facebook, Instagram, Netflix e e-mail também são estimativas do
+    survey a partir de contagens públicas e tamanhos médios.
+  - A frase sobre ameaças vem de Zhao et al. (2023), que o artigo não
+    cita. Se os slides devem seguir só o artigo, usar: "Problema: na
+    nuvem, o usuário perde o controle físico dos dados."
+
+
+---------------------------------------------------------------------
+SLIDE 3 - O HySAIL e seu limite                             TEMPO: 0:50
+---------------------------------------------------------------------
+TÍTULO:
+  HySAIL: PoR em múltiplas nuvens
+
+CONTEÚDO:
+  - Codifica o arquivo com Online Codes (código fountain)
+  - Distribui os blocos codificados entre vários provedores
+  - Verifica com MAC polinomial homomórfico ao XOR:
+        h_{i,j} = m_i(x) mod P_j(x)
+        MAC(m_a XOR m_b) = MAC(m_a) XOR MAC(m_b)
+  - Problema: Online Codes exigem muitos blocos excedentes quando
+    K é pequeno -> HySAIL codifica o arquivo inteiro de uma vez
+
+FALA:
+  "O HySAIL divide o arquivo, codifica com Online Codes e espalha os
+  blocos entre provedores. A integridade é verificada por um MAC que é
+  homomórfico em relação ao XOR: o MAC de um XOR de blocos é o XOR dos
+  MACs. Assim o usuário guarda só os MACs dos blocos originais. O
+  problema é que os Online Codes têm overhead alto para poucos blocos,
+  o que obriga a codificar o arquivo todo de uma vez."
+
+
+---------------------------------------------------------------------
+SLIDE 4 - Por que Raptor R10                                TEMPO: 1:00
+---------------------------------------------------------------------
+TÍTULO:
+  Online Codes x Raptor R10
+
+CONTEÚDO (tabela resumida - Tabela 1 do artigo; pronta como imagem em
+figures/codes_comparison_table.png, gerada por
+scripts/presentation_figures.py):
+  Aspecto            | Online Codes        | Raptor R10
+  -------------------+---------------------+---------------------
+  Sistemático        | não                 | sim
+  Decodificação      | peeling             | eliminação gaussiana
+  Overhead esperado  | ≈ 3·ε_o·K  -> O(K)  | constante c -> O(1)
+                     | (cresce com K)      | (não depende de K)
+  Recuperação        | ≈ (1 + 3ε_o)·K      | K + c, com c ≈ 2
+  Codificação*       | O(K·T)              | O(K²·T) pior caso;
+                     |                     | ≈ O(K·T) na prática
+  Decodificação*     | O(K·T)              | O(K²·T) pior caso;
+                     |                     | ≈ O(K·T) na prática
+  Medido (K = 100)   | 2,6 ms / 3,2 ms     | 2,8 ms / 3,5 ms
+    (cod. / dec.)    |                     |
+  Padronização       | não                 | RFC 5053
+
+  * por chunk de K símbolos de T bytes, em operações de XOR
+
+  - Overhead = nº de símbolos recebidos além de K para decodificar
+  - Medido (K = 10 / 100 / 1.000): R10 precisa de 1,4 / 1,8 / 2,7
+    símbolos extras em média
+  - Ponto-chave: o R10 opera só sobre GF(2)
+    -> cada bloco é XOR de símbolos de origem -> MAC homomórfico preservado
+
+FALA:
+  "O R10, padronizado na RFC 5053, é sistemático e decodifica resolvendo
+  o sistema linear completo. Chamamos de overhead o número de símbolos
+  que é preciso receber além de K. Nos Online Codes, ele é cerca de
+  3 épsilon vezes K, ou seja, cresce junto com K. No R10, ele é uma
+  constante pequena: nos nossos testes, entre 1,4 e 2,7 símbolos em
+  média, seja K igual a 10 ou a 1.000. Em complexidade, os Online Codes
+  são lineares em K. O R10 resolve um sistema linear, que no pior caso
+  é quadrático em K, mas a decodificação por inativação da norma fica
+  próxima do linear. Na prática, os tempos medidos por chunk são
+  equivalentes, cerca de 3 ms. E, como todas as operações
+  são em GF(2), cada bloco continua sendo um XOR de símbolos de origem,
+  o que mantém o MAC homomórfico do HySAIL funcionando."
+
+OBSERVAÇÕES:
+  - Online Codes: grau máximo constante, então cada bloco é o XOR de um
+    número constante de símbolos, e o peeling também é linear em K.
+  - R10: para ser sistemático, a codificação também resolve o pré-código
+    (mesmo custo da decodificação). A eliminação gaussiana na matriz de
+    rótulos custa O(K³) operações em bits, mas não depende de T e, na
+    implementação, é feita uma única vez para cada K. O termo que pesa
+    é o XOR dos símbolos: O(K²·T) no pior caso, ≈ O(K·T) com a
+    decodificação por inativação da RFC 5053.
+
+
+---------------------------------------------------------------------
+SLIDE 5 - Proposta: HySAIL-R                                TEMPO: 1:00
+---------------------------------------------------------------------
+TÍTULO:
+  HySAIL-R: codificação, auditoria e redistribuição
+
+CONTEÚDO:
+  - Figura: fluxo de Codificação e Distribuição (Figura 1 do artigo),
+    pronta em figures/hybolt_fluxo.png
+  - Arquivo dividido em chunks de K = 100 símbolos (6.500 bytes)
+  - Cada chunk: 100 blocos de origem + 25 de reparo (ε = 0,25)
+  - Usuário guarda só: polinômios P_j, MACs dos símbolos de origem,
+    hash SHA-256 de cada bloco
+  - MAC de qualquer bloco: h_{η,j} = XOR dos h_{i,j}, i ∈ x_η
+    (rótulos dependem só de K e η -> nem precisa guardar <i, x_i>)
+  - Auditoria: idêntica ao Algoritmo 2 do HySAIL
+
+FALA:
+  "No HySAIL-R o arquivo é dividido em chunks independentes de 100
+  símbolos. Cada chunk gera 125 blocos, enviados aos provedores. O
+  usuário guarda apenas metadados. Como os rótulos de cada bloco são
+  determinados só por K e pelo identificador, o MAC esperado de qualquer
+  bloco, mesmo um gerado no futuro, é calculado a partir dos MACs de
+  origem. A auditoria é a mesma do HySAIL: o provedor devolve o XOR de
+  uma amostra de blocos reduzido módulo P_j e o usuário compara com o
+  XOR dos MACs."
+
+
+---------------------------------------------------------------------
+SLIDE 6 - Redistribuição local                              TEMPO: 0:45
+---------------------------------------------------------------------
+TÍTULO:
+  Reparo sem decodificar o chunk
+
+CONTEÚDO (exemplo com K = 4; pronto como imagem em
+figures/local_repair.png, gerada por scripts/presentation_figures.py):
+  c0 = d1   c1 = d2 (corrompido)   c2 = d3   c3 = d4
+  c4 = d1⊕d2⊕d4                     c5 = d2⊕d3
+  Novo bloco t = 6, rótulos x6 = {2, 4}
+  -> eliminação gaussiana nos metadados: x6 = x5 ⊕ x2 ⊕ x3
+  -> c6 = c5 ⊕ c2 ⊕ c3   (sem usar c1, sem decodificar)
+
+  - Comparação (destacar lado a lado):
+      Códigos de apagamento clássicos: reparar 1 bloco exige reconstruir
+        o original -> custo = tamanho do arquivo
+      HySAIL-R (K = 100): ~49 blocos transferidos por reparo (~320 KB),
+        sem decodificar e sem baixar o arquivo
+  - Rodapé (fonte): Chakani, Mirrezaei e Hodtani (2022), EURASIP J.
+    Wireless Commun. Netw.
+
+FALA:
+  "Quando a auditoria encontra um bloco corrompido, não reconstruímos o
+  mesmo bloco: geramos um novo bloco de reparo. Usando só os metadados,
+  encontramos por eliminação gaussiana quais blocos íntegros, somados
+  por XOR, produzem o novo bloco. No exemplo, c6 sai de c5, c2 e c3, sem
+  tocar no bloco corrompido. Isso importa porque, em códigos de
+  apagamento clássicos, reparar um único bloco costuma exigir
+  reconstruir o original, ou seja, transferir o arquivo inteiro. Com o
+  chunk padrão do HySAIL-R, o reparo transfere em média 49 blocos,
+  cerca de 320 KB, independentemente do tamanho do arquivo."
+
+
+---------------------------------------------------------------------
+SLIDE 7 - Resultados: overhead e tolerância a perdas        TEMPO: 1:00
+---------------------------------------------------------------------
+TÍTULO:
+  R10 recupera com menos blocos e tolera mais perdas
+
+CONTEÚDO:
+  - Figuras 2 e 3 do artigo (lado a lado):
+      reception_overhead.pdf e codec_loss.pdf
+      (PNG prontos: figures/reception_overhead.png e figures/codec_loss.png)
+  - Overhead de recepção (K = 10 / 100 / 1.000):
+      R10:    14% / 1,8% / 0,27%   (1,4 a 2,7 símbolos extras)
+      Online: 65% / 34%  / 9,7%
+      -> 5 a 36 vezes menor
+  - Tolerância a perdas (K = 100, ε = 0,25):
+      R10: perde 18 de 125 blocos (14,4%) e recupera em ≥ 99% dos casos
+      Online: 1 bloco perdido já falha em 7,4%; 5 perdidos -> 42%
+
+FALA:
+  "Comparamos os dois códigos dentro da mesma implementação, variando só
+  o código fountain. O R10 precisou de 1,4 a 2,7 símbolos extras,
+  praticamente constante, enquanto os Online Codes precisaram de 10% a
+  65% a mais. Na tolerância a perdas, com a mesma redundância, o R10
+  aguenta perder 14% dos blocos de cada chunk, perto do limite teórico
+  de 20%. Já com os Online Codes, perder um único bloco pode tornar o
+  chunk irrecuperável."
+
+
+---------------------------------------------------------------------
+SLIDE 8 - Resultados: desempenho e auditoria                TEMPO: 0:45
+---------------------------------------------------------------------
+TÍTULO:
+  Mesmo custo, menos blocos
+
+CONTEÚDO (Tabela 2 do artigo, K = 100, ε = 0,25; pronta como imagem em
+figures/performance_table.png, gerada por scripts/presentation_figures.py):
+  Métrica                         | Online  | R10
+  --------------------------------+---------+--------
+  Código: codificação de 1 chunk  | 2,6 ms  | 2,8 ms
+  Código: decodificação de 1 chunk| 3,2 ms  | 3,5 ms
+  Fluxo: codificação de 500 MB    | 28,1 s  | 24,0 s
+  Fluxo: decodificação de 500 MB  | 13,1 s  | 9,8 s
+  Blocos armazenados por chunk    | 143     | 125
+  Blocos lidos na decodif. (média)| 136,3   | 101,5
+  Armazenamento / arquivo         | 1,45x   | 1,27x
+
+  - Auditoria: 5,1% de blocos corrompidos, amostra de 50
+    -> detecção com 94% de probabilidade
+
+FALA:
+  "No código em si, o custo é equivalente. A diferença aparece no fluxo
+  completo: os Online Codes armazenam e leem mais blocos, então a
+  decodificação ficou de 23% a 75% mais lenta e o armazenamento 14%
+  maior. A auditoria funciona sem alterações e detecta, com 94% de
+  probabilidade, uma corrupção de cerca de 5% dos blocos com uma amostra
+  de 50. Uma ressalva: se todos os blocos tiverem o mesmo erro, eles
+  podem se anular no XOR e a detecção cai para cerca de 50%."
+
+
+---------------------------------------------------------------------
+SLIDE 9 - Conclusão e trabalhos futuros                     TEMPO: 0:40
+---------------------------------------------------------------------
+TÍTULO:
+  Conclusão
+
+CONTEÚDO:
+  - R10 preserva o MAC homomórfico, a Auditoria e a Redistribuição local
+  - Mesmo custo computacional
+  - Overhead de recepção 5 a 36x menor
+  - Tolera perder 14% dos blocos de cada chunk (Online Codes: nenhum
+    com segurança)
+  - Trabalhos futuros:
+      * códigos MDS compatíveis com o MAC homomórfico
+      * proteger a Auditoria contra cancelamento de erros no XOR
+      * verificação pública por auditores delegados
+      * avaliação em provedores de nuvem reais
+  - Código aberto disponível no repositório do projeto
+
+FALA:
+  "Em resumo, trocar os Online Codes pelo R10 mantém tudo o que o HySAIL
+  oferecia, com o mesmo custo, e melhora muito a eficiência e a
+  tolerância a perdas. Como próximos passos, queremos explorar códigos
+  MDS, proteger a auditoria contra cancelamento de erros e testar em
+  nuvens reais. Obrigado!"
+
+
+=====================================================================
+DICAS PARA O POWERPOINT
+=====================================================================
+- Reaproveitar as figuras do artigo (doc/article/figures/):
+    * Slide 5: figures/tikz/hybolt_fluxo (compilar e exportar como imagem)
+    * Slide 7: figures/reception_overhead.pdf e figures/codec_loss.pdf
+    * Slide 8 (opcional): figures/codec_times.pdf
+- No slide 7, destacar visualmente "5 a 36x" e "14% x 0 blocos".
+- Se o tempo estiver curto (5 min): juntar os slides 3 e 4 e reduzir o
+  slide 6 a uma frase ("reparo local, ~49 blocos, sem decodificar").
+- Manter fórmulas mínimas; a ideia central é "tudo é XOR em GF(2)".
