@@ -7,10 +7,10 @@
 	\foreach \s in {1,2,3} \node[above=0mm of s\s, font=\small] {$S_\s$};
 	\node[pacote=serieA] at ($(s1.center)+(0,4mm)$) {0};
 	\node[pacote=serieB] at ($(s1.center)+(0,-4mm)$) {12};
-	\node[pacote=serieA, fill=red!25, draw=red!70!black] (corr) at ($(s2.center)+(0,4mm)$) {4};
+	\node[pacote=serieA, fill=serieB!35, draw=serieB] (corr) at ($(s2.center)+(0,4mm)$) {4};
 	\node[pacote=serieA] at ($(s2.center)+(0,-4mm)$) {7};
 	\node[pacote=serieA] at ($(s3.center)+(0,4mm)$) {9};
-	\draw[red!70!black, thick] (corr.north west) -- (corr.south east) (corr.north east) -- (corr.south west);
+	\draw[serieB, very thick] (corr.north west) -- (corr.south east) (corr.north east) -- (corr.south west);
 
 	% Passos
 	\node[caixa=serieB, right=14mm of s3, yshift=12mm, minimum width=52mm, align=left] (p1) {1. auditoria detecta o pacote 4 corrompido};
