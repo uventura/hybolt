@@ -1,0 +1,11 @@
+Este trabalho avaliou a substituição dos Online Codes pelo Raptor R10 no HySAIL. Os experimentos confirmam que a substituição preserva as propriedades estruturais do protocolo: o usuário mantém apenas os \acrshort{MAC}s dos blocos de mensagem, o \acrshort{MAC} de qualquer pacote, inclusive dos gerados na Redistribuição, é derivado por XOR, e a Redistribuição transfere cerca de 320~KB por pacote reparado.
+
+Medidos na mesma máquina e no mesmo fluxo, os dois códigos têm custo computacional equivalente, de cerca de 3~ms por \emph{chunk}, mas o \emph{overhead} de recepção do R10 é de 5 a 36 vezes menor. Com \emph{chunks} de 100 símbolos e $\varepsilon = 0{,}25$, os Online Codes armazenam 1,45 vez o arquivo, contra 1,27, e não toleram com segurança a perda de nenhum pacote, enquanto o R10 tolera 14\%. A concessão do R10 é não ser MDS, o que torna inadequados os \emph{chunks} pequenos.
+
+Quanto à prova de recuperabilidade, os dois modelos de auditoria do HySAIL funcionam com o R10 e detectam a corrupção conforme a análise teórica. O modelo ilimitado reduz os metadados de 154\% para 7,4\% de um arquivo de 1~MiB e elimina o limite de 40 auditorias, ao custo de uma resposta do tamanho de um pacote.
+
+\section{Trabalhos Futuros}
+
+Duas limitações do HySAIL permanecem nos dois modelos. A primeira é o cancelamento de erros idênticos na resposta agregada, que pode ser tratado ponderando os pacotes por coeficientes secretos. A segunda é a exposição da estrutura do código aos provedores, que permite o ataque dirigido a um \emph{chunk} e pode ser tratada por cifragem e permutação dos pacotes \cite{juels2007pors,bowers2009proofs}.
+
+Destacam-se, ainda, o uso de códigos MDS que preservem o \acrshort{MAC} homomórfico, a verificação pública por auditores delegados \cite{armknecht2021outsourcing,shen2024public} e a avaliação em provedores de nuvem reais.

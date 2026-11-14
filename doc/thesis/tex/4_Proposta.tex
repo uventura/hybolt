@@ -6,7 +6,7 @@
     \label{fig:hysail-architecture}
 \end{figure}
 
-HySAIL é dividido em diferentes fases para o seu processo funcionamento, são elas:
+O funcionamento do HySAIL é dividido nas seguintes fases:
 \begin{itemize}
 \item \textit{Fase de Codificação:} os dados são divididos em blocos e codificados utilizando Online Codes.
 \item \textit{Fase de Distribuição:} os blocos codificados são distribuídos entre os servidores participantes.
@@ -45,7 +45,7 @@ Entre os códigos \emph{fountain} sucessores dos LT Codes, os Raptor Codes \cite
 
 \section{Substituição dos Online Codes pelo Raptor R10}
 
-Online Codes em HySAIL é utilizado em HySAIL da seguinte forma:
+No HySAIL, os Online Codes são utilizados da seguinte forma:
 \begin{itemize}
 \item Os dados são divididos em blocos de tamanho fixo.
 \item Cada bloco é codificado utilizando Online Codes, gerando blocos codificados adicionais.
@@ -53,7 +53,9 @@ Online Codes em HySAIL é utilizado em HySAIL da seguinte forma:
 \item Durante a decodificação, os blocos codificados são recuperados e utilizados para reconstruir os blocos originais.
 \end{itemize}
 
-Na proposta deste trabalho, cada bloco de tamanho limitado do arquivo (\emph{chunk}) é dividido em $K$ símbolos de origem e codificado com o R10 \cite{luby2007rfc5053}, que produz os $K$ símbolos de origem, emitidos de forma sistemática, seguidos de $r$ símbolos de reparo. Como o R10 admite entre 4 e 8.192 símbolos de origem por bloco, \emph{chunks} com menos de quatro símbolos são completados com símbolos nulos. Cada símbolo codificado, aqui denominado pacote, é identificado pelo seu \emph{Encoding Symbol Identifier} (\acrshort{ESI}) e substitui o bloco de verificação do HySAIL original nas fases de Distribuição, Auditoria e Redistribuição. Diferentemente dos Online Codes, a composição $\langle i, x_i \rangle$ de cada pacote não precisa ser armazenada pelo usuário: o suporte $X_\eta$ é determinado por $K$ e pelo \acrshort{ESI} $\eta$, que o usuário já registra para localizar o pacote. Pelo mesmo motivo, os pacotes são armazenados sem o cabeçalho com o número do bloco de origem e o \acrshort{ESI} previsto pela norma. A Figura~\ref{fig:hybolt_fluxo} resume o fluxo proposto para a Codificação e a Distribuição, detalhado nas seções seguintes.
+Na proposta deste trabalho, o arquivo é dividido em \emph{chunks}, e cada \emph{chunk} é dividido em $K$ símbolos de origem e codificado com o R10 \cite{luby2007rfc5053}. O código emite os $K$ símbolos de origem, de forma sistemática, seguidos de $r$ símbolos de reparo. Cada símbolo codificado, aqui denominado pacote, é identificado pelo seu \emph{Encoding Symbol Identifier} (\acrshort{ESI}) e substitui o bloco de verificação do HySAIL nas fases de Distribuição, Auditoria e Redistribuição.
+
+Diferentemente dos Online Codes, a composição $\langle i, x_i \rangle$ de cada pacote não precisa ser armazenada: o suporte $X_\eta$ é determinado por $K$ e pelo \acrshort{ESI} $\eta$, que o usuário já registra para localizar o pacote. A Figura~\ref{fig:hybolt_fluxo} resume o fluxo de Codificação e Distribuição, detalhado nas seções seguintes.
 
 \begin{figure}[htbp]
 	\centering
@@ -67,16 +69,16 @@ Na proposta deste trabalho, cada bloco de tamanho limitado do arquivo (\emph{chu
 \section{Problemas da Substituição Direta}
 \label{sec:problemas_substituicao}
 
-Substituir os Online Codes pelo R10 mantendo o restante do HySAIL inalterado preserva o \acrshort{MAC} homomórfico e a Redistribuição local, mas mantém quatro limitações do HySAIL, quantificadas nos Capítulos~5 e~6.
+A substituição preserva o \acrshort{MAC} homomórfico e a Redistribuição local, mas mantém quatro limitações do HySAIL, quantificadas nos Capítulos~5 e~6.
 
 \begin{enumerate}
-	\item \textit{Memória do usuário no modelo limitado:} o usuário armazena $n \cdot l$ \acrshort{MAC}s de $\lambda$ bits, como no HySAIL, o que corresponde a uma fração $l \lambda / B$ do arquivo para blocos de mensagem de $B$ bits. Com $l = 40$, $\lambda = 127$ e blocos de 6.500 bytes, o usuário armazena cerca de 10\% do volume terceirizado, o que contraria o objetivo de uma \acrshort{PoR}, que é manter junto ao usuário apenas uma quantidade pequena de informação \cite{juels2007pors}.
-	\item \textit{Número limitado de auditorias:} como cada desafio $P_j$ é revelado ao provedor, ele só pode ser usado uma vez (Seção~\ref{sec:auditoria_limitada}). Um arquivo admite, portanto, $l$ auditorias, incluindo os desafios realizados durante a decodificação, após as quais precisa ser recodificado.
-	\item \textit{Ataque dirigido a um único \emph{chunk}:} a redundância é calculada por \emph{chunk}, e a estrutura do código fica exposta aos provedores, pois o nome dos arquivos e os próprios símbolos de origem, emitidos de forma sistemática, são armazenados em claro. Um adversário pode, assim, corromper alguns pacotes de um mesmo \emph{chunk} e tornar o arquivo irrecuperável; como o R10 não é MDS, o menor desses conjuntos pode ter menos que $r + 1$ pacotes, e, com os parâmetros padrão, bastam os sete pacotes que contêm um mesmo símbolo de origem, contra os $r + 1 = 26$ que um código MDS exigiria. Essa corrupção atinge apenas uma fração mínima dos $T$ pacotes do arquivo, e uma auditoria que amostra $s$ pacotes a detecta com probabilidade desprezível para arquivos grandes. As \acrshort{PoR}s clássicas evitam esse ataque ocultando, por cifragem e permutação, quais símbolos pertencem a uma mesma palavra-código \cite{juels2007pors,bowers2009proofs}.
-	\item \textit{Cancelamento de erros na resposta agregada:} a resposta da Auditoria original, o XOR dos pacotes desafiados, permite que dois pacotes corrompidos com o mesmo padrão de erro se anulem, como detalhado na Seção~\ref{sec:auditoria_limitada}.
+	\item \textit{Memória do usuário no modelo limitado:} o usuário armazena $n \cdot l$ \acrshort{MAC}s de $\lambda$ bits, uma fração $l \lambda / B$ do arquivo para blocos de $B$ bits. Com $l = 40$, $\lambda = 127$ e blocos de 6.500 bytes, isso corresponde a cerca de 10\% do volume terceirizado, o que contraria o objetivo de uma \acrshort{PoR} \cite{juels2007pors}.
+	\item \textit{Número limitado de auditorias:} cada desafio $P_j$ é revelado ao provedor e só pode ser usado uma vez (Seção~\ref{sec:auditoria_limitada}). Um arquivo admite, portanto, $l$ auditorias, após as quais precisa ser recodificado.
+	\item \textit{Ataque dirigido a um único \emph{chunk}:} a estrutura do código fica exposta aos provedores, pois os pacotes são armazenados em claro. Um adversário pode corromper poucos pacotes de um mesmo \emph{chunk} e tornar o arquivo irrecuperável: com os parâmetros padrão, bastam os sete pacotes que contêm um mesmo símbolo de origem. Essa corrupção atinge uma fração mínima do arquivo e dificilmente é detectada por amostragem. As \acrshort{PoR}s clássicas evitam esse ataque ocultando, por cifragem e permutação, quais símbolos pertencem a uma mesma palavra-código \cite{juels2007pors,bowers2009proofs}.
+	\item \textit{Cancelamento de erros na resposta agregada:} o XOR dos pacotes desafiados permite que dois pacotes corrompidos com o mesmo padrão de erro se anulem (Seção~\ref{sec:auditoria_limitada}).
 \end{enumerate}
 
-Além desses aspectos, herdados do HySAIL, a substituição introduz uma diferença no dimensionamento da redundância e do tamanho dos \emph{chunks}: os $r$ símbolos de reparo de um \emph{chunk} não toleram, em geral, a perda de quaisquer $r$ pacotes (Seção~\ref{sec:redundancia}). Os itens 1 e 2 decorrem do modelo limitado e não ocorrem no modelo ilimitado do HySAIL, que a proposta também adota (Seção~\ref{sec:auditoria_ilimitada}). Para manter um modelo simples, os itens 3 e 4 não são tratados e ficam como trabalhos futuros.
+Os itens 1 e 2 decorrem do modelo limitado e não ocorrem no modelo ilimitado do HySAIL, que a proposta também adota (Seção~\ref{sec:auditoria_ilimitada}). Para manter um modelo simples, os itens 3 e 4 não são tratados e ficam como trabalhos futuros. Além desses aspectos herdados, a substituição altera o dimensionamento da redundância: os $r$ símbolos de reparo de um \emph{chunk} não toleram, em geral, a perda de quaisquer $r$ pacotes (Seção~\ref{sec:redundancia}).
 
 \section{MAC Homomórfico com o Raptor R10}
 \label{sec:impacto_mac}
@@ -94,14 +96,16 @@ A memória do usuário é de $n \cdot l$ \acrshort{MAC}s, independentemente do n
 
 O argumento de integridade do HySAIL, que caracteriza o \acrshort{MAC} como uma função de \emph{hash} 2-universal, pressupõe que os polinômios de desafio $P_j(x)$ sejam primitivos e, portanto, irredutíveis. Um polinômio redutível possui fatores próprios, e restos módulo seus fatores podem colidir com probabilidade maior que $2^{-\lambda}$, de modo que o limite de falsificação deixa de valer. Por esse motivo, a proposta gera cada desafio por amostragem com rejeição: sorteia-se um polinômio de grau $\lambda$ com termo constante e coeficiente líder iguais a 1, que é aceito somente se passar no teste de irredutibilidade de Rabin \cite{rabin1980probabilistic} e se a ordem de $x$ módulo $P_j(x)$ for $2^\lambda - 1$.
 
-O teste de Rabin estabelece que um polinômio $f(x)$ de grau $\lambda$ sobre $GF(2)$ é irredutível se, e somente se, $x^{2^\lambda} \equiv x \pmod{f(x)}$ e, para todo divisor primo $q$ de $\lambda$, $\gcd\left(x^{2^{\lambda/q}} - x, f(x)\right) = 1$ \cite{rabin1980probabilistic}. A primitividade exige, adicionalmente, que $x^{(2^\lambda - 1)/p} \not\equiv 1 \pmod{f(x)}$ para todo divisor primo $p$ de $2^\lambda - 1$ \cite{menezes1997handbook}. Para o parâmetro adotado pelo HySAIL, $\lambda = 127$, o número $2^{127} - 1$ é um primo de Mersenne; como a ordem de $x$ divide $2^{127} - 1$ e é diferente de 1, todo polinômio irredutível de grau 127 é primitivo, e a verificação reduz-se ao teste de Rabin. Como a densidade de polinômios irredutíveis entre os candidatos com termo constante não nulo é de aproximadamente $2/\lambda$, são necessários, em média, cerca de 64 sorteios por polinômio aceito.
+O teste de Rabin estabelece que um polinômio $f(x)$ de grau $\lambda$ sobre $GF(2)$ é irredutível se, e somente se, $x^{2^\lambda} \equiv x \pmod{f(x)}$ e, para todo divisor primo $q$ de $\lambda$, $\gcd\left(x^{2^{\lambda/q}} - x, f(x)\right) = 1$ \cite{rabin1980probabilistic}. A primitividade exige, adicionalmente, que $x^{(2^\lambda - 1)/p} \not\equiv 1 \pmod{f(x)}$ para todo divisor primo $p$ de $2^\lambda - 1$ \cite{menezes1997handbook}.
+
+Para $\lambda = 127$, parâmetro adotado pelo HySAIL, $2^{127} - 1$ é um primo de Mersenne, de modo que todo polinômio irredutível de grau 127 é primitivo e a verificação reduz-se ao teste de Rabin. Como a densidade de polinômios irredutíveis entre os candidatos é de aproximadamente $2/\lambda$, são necessários, em média, cerca de 64 sorteios por polinômio aceito.
 
 Por fim, um único conjunto de $l$ polinômios é gerado para todo o arquivo e compartilhado por seus \emph{chunks}, como no HySAIL original, o que evita repetir o custo da geração em cada \emph{chunk} e permite controlar, para o arquivo como um todo, quais desafios já foram revelados.
 
 \section{Auditoria no Modelo Limitado}
 \label{sec:auditoria_limitada}
 
-No modelo limitado, cada polinômio de desafio pode ser utilizado em uma única rodada de auditoria. Uma vez que $P_j$ é revelado, um provedor desonesto pode armazenar apenas os restos $c_\eta(x) \bmod P_j(x)$ e descartar os pacotes, respondendo corretamente a desafios futuros com o mesmo polinômio sem possuir os dados. A proposta registra, nos metadados mantidos pelo usuário, os índices dos polinômios já revelados, e o registro é persistido antes de o polinômio ser enviado ao provedor, de modo que nem uma interrupção do processo leve à sua reutilização. Assim, um arquivo codificado com $l$ polinômios admite $l$ rodadas de auditoria, após as quais deve ser recodificado. O mesmo princípio aplica-se ao desafio realizado antes de cada transferência durante a decodificação, que consome um único polinômio por sessão.
+No modelo limitado, cada polinômio de desafio é utilizado em uma única rodada. Uma vez que $P_j$ é revelado, um provedor desonesto pode armazenar apenas os restos $c_\eta(x) \bmod P_j(x)$, descartar os pacotes e ainda responder corretamente a desafios com o mesmo polinômio. Por isso, o usuário registra nos metadados os polinômios já revelados, antes de enviá-los, e um arquivo codificado com $l$ polinômios admite $l$ rodadas, incluindo o desafio que precede as transferências de cada decodificação.
 
 Em cada rodada, o usuário sorteia um polinômio ainda não revelado e, para cada provedor $S_i$, uma amostra aleatória $Q$ de $s$ pacotes por ele armazenados. Como no Algoritmo~2 do HySAIL \cite{amaral2019hysail}, o provedor responde com o XOR dos pacotes da amostra reduzido módulo $P_j(x)$,
 
@@ -112,7 +116,9 @@ Em cada rodada, o usuário sorteia um polinômio ainda não revelado e, para cad
 
 \noindent que o usuário compara com $\bigoplus_{\eta \in Q} h_{\eta,j}(x)$, calculado a partir dos \acrshort{MAC}s derivados pela Equação~\eqref{eq:mac_derivado}. Essa agregação permite que corrupções se cancelem: se dois pacotes de uma mesma amostra forem alterados pelo mesmo padrão de erro $e(x)$, então $c'_a \oplus c'_b = c_a \oplus c_b$ e a resposta coincide com a esperada para qualquer $P_j$. Essa é a quarta limitação da Seção~\ref{sec:problemas_substituicao}, que vale também para o modelo ilimitado.
 
-Quando a resposta agregada de um provedor diverge da esperada, os pacotes da amostra são verificados individualmente com o mesmo polinômio, já revelado naquela rodada, para localizar os pacotes corrompidos. O número de pacotes corrompidos encontrados em $S_i$ define $\tau_{provider}$, e o provedor é considerado aprovado se $\tau_{provider} \le \tau_{maximum}$, em que $\tau_{maximum}$ é um parâmetro da auditoria. Adicionalmente, cada \emph{chunk} é avaliado quanto à recuperabilidade, o que corresponde ao limite global $\tau_{global}$ do HySAIL. Como o R10 não é MDS, essa avaliação não compara o número de pacotes corrompidos com $r$, mas verifica se os suportes dos pacotes restantes ainda têm posto $K$, o que decide exatamente se o \emph{chunk} pode ser decodificado. Se uma fração $\beta$ dos pacotes de um provedor estiver corrompida, uma amostra de $s$ pacotes detecta ao menos uma corrupção com probabilidade de, no mínimo, $1 - (1 - \beta)^s$, o que orienta a escolha de $s$ em função do custo aceitável por rodada.
+Quando a resposta agregada de um provedor diverge da esperada, os pacotes da amostra são verificados individualmente com o mesmo polinômio, para localizar os corrompidos. O número de pacotes corrompidos em $S_i$ define $\tau_{provider}$, e o provedor é aprovado se $\tau_{provider} \le \tau_{maximum}$, parâmetro da auditoria.
+
+Cada \emph{chunk} é, além disso, avaliado quanto à recuperabilidade, o que corresponde ao limite global $\tau_{global}$ do HySAIL. Como o R10 não é MDS, essa avaliação verifica se os suportes dos pacotes restantes ainda têm posto $K$, em vez de comparar o número de pacotes corrompidos com $r$. Por fim, se uma fração $\beta$ dos pacotes de um provedor estiver corrompida, uma amostra de $s$ pacotes contém ao menos um deles com probabilidade de, no mínimo, $1 - (1 - \beta)^s$, o que orienta a escolha de $s$.
 
 \section{Auditoria no Modelo Ilimitado}
 \label{sec:auditoria_ilimitada}
@@ -126,7 +132,9 @@ Em cada rodada, o usuário envia ao provedor apenas os pacotes da amostra $Q$, e
 	\label{eq:desafio_ilimitado}
 \end{equation}
 
-\noindent O próprio usuário calcula $A(x) \bmod P(x)$ e o compara com $\bigoplus_{\eta \in Q} h_\eta(x)$. Como $P(x)$ não é conhecido pelo provedor, ele não pode substituir os pacotes por seus restos, e uma resposta $A' \neq A$ só é aceita se $P(x)$ dividir $A' \oplus A$. Um polinômio não nulo de grau $d$ tem no máximo $d/\lambda$ fatores irredutíveis de grau $\lambda$, entre os cerca de $2^\lambda/\lambda$ possíveis, de modo que essa probabilidade é da ordem de $B/2^\lambda$ para pacotes de $B$ bits, desprezível para $\lambda = 127$. O mesmo $P(x)$ pode, portanto, ser usado em um número ilimitado de rodadas. Na Decodificação, nenhum desafio é enviado: cada pacote transferido é reduzido módulo $P(x)$ pelo usuário e comparado com seu \acrshort{MAC} derivado. A localização dos pacotes corrompidos e a avaliação dos limites $\tau$ seguem a Seção~\ref{sec:auditoria_limitada}.
+\noindent O próprio usuário calcula $A(x) \bmod P(x)$ e o compara com $\bigoplus_{\eta \in Q} h_\eta(x)$. Como o provedor não conhece $P(x)$, ele não pode substituir os pacotes por seus restos, e uma resposta $A' \neq A$ só é aceita se $P(x)$ dividir $A' \oplus A$. Um polinômio não nulo de grau $d$ tem no máximo $d/\lambda$ fatores irredutíveis de grau $\lambda$, entre os cerca de $2^\lambda/\lambda$ possíveis, de modo que essa probabilidade é da ordem de $B/2^\lambda$ para pacotes de $B$ bits.
+
+O mesmo $P(x)$ pode, portanto, ser usado em um número ilimitado de rodadas. Na Decodificação, nenhum desafio é enviado: cada pacote transferido é reduzido módulo $P(x)$ pelo usuário e comparado com seu \acrshort{MAC} derivado. A localização dos pacotes corrompidos e a avaliação dos limites $\tau$ seguem a Seção~\ref{sec:auditoria_limitada}.
 
 A Tabela~\ref{tab:modelos_auditoria} resume as diferenças entre os dois modelos, escolhidos na Codificação. O modelo ilimitado reduz a memória do usuário em $l$ vezes e elimina o limite de auditorias, ao custo de uma resposta do tamanho de um pacote, em vez de $\lambda$ bits, e de uma divisão polinomial pelo usuário a cada rodada. O cancelamento de erros na resposta agregada permanece, pois a agregação continua sendo o XOR simples.
 
@@ -154,14 +162,16 @@ A Tabela~\ref{tab:modelos_auditoria} resume as diferenças entre os dois modelos
 
 No HySAIL original, a redundância decorre dos parâmetros dos Online Codes, que produzem $(1 + k\delta)n$ blocos compostos e um fluxo de blocos de verificação dimensionado para tolerar a densidade de corrupção $\alpha$ do modelo de corrupção limitada \cite{amaral2019hysail}. Com o R10, a proposta define $r = \lceil \varepsilon K \rceil$ pacotes de reparo por \emph{chunk}, em que $\varepsilon > 0$ é um parâmetro de projeto, de modo que cada \emph{chunk} possui $K + r$ pacotes.
 
-Diferentemente de um código MDS, em que quaisquer $K$ pacotes recuperam o \emph{chunk}, a recuperação com o R10 depende de quais pacotes restam: o \emph{chunk} é recuperável se, e somente se, os suportes dos pacotes restantes têm posto $K$ (Seção~\ref{sec:raptor_r10}). Perder $r$ pacotes, deixando exatamente $K$, frequentemente impede a recuperação, e a probabilidade de sucesso cresce a cada pacote excedente. A densidade de corrupção tolerada por \emph{chunk} é, portanto, inferior a $r / (K + r) \approx \varepsilon / (1 + \varepsilon)$, e deve ser estimada a partir da probabilidade de falha do R10, medida no Capítulo~6. Como o número de símbolos excedentes necessário é aproximadamente independente de $K$, a fração tolerada aproxima-se de $\varepsilon / (1 + \varepsilon)$ à medida que $K$ cresce, o que favorece símbolos menores ou \emph{chunks} maiores.
+Diferentemente de um código MDS, em que quaisquer $K$ pacotes recuperam o \emph{chunk}, a recuperação com o R10 depende de quais pacotes restam: seus suportes precisam ter posto $K$ (Seção~\ref{sec:raptor_r10}). Perder $r$ pacotes, deixando exatamente $K$, frequentemente impede a recuperação. A densidade de corrupção tolerada por \emph{chunk} é, portanto, inferior a $r / (K + r) \approx \varepsilon / (1 + \varepsilon)$, e é medida no Capítulo~6. Como o número de símbolos excedentes necessário é aproximadamente independente de $K$, a fração tolerada aproxima-se desse limite à medida que $K$ cresce.
 
 \subsection{Tamanho dos \emph{chunks}}
 \label{sec:tamanho_chunk}
 
 O HySAIL original codifica o arquivo inteiro \cite{amaral2019hysail}. Com o R10, a divisão em \emph{chunks} é necessária por três motivos. Primeiro, a norma limita cada bloco de origem a 8.192 símbolos e particiona objetos maiores em vários blocos \cite{luby2007rfc5053}. Segundo, como os suportes dos símbolos de reparo do R10 são densos, com cerca de $K/2$ símbolos de origem, a Redistribuição transfere cerca de $K/2$ pacotes (Seção~\ref{sec:redistribuicao}); com um único bloco, reparar um pacote exigiria transferir metade do arquivo. Terceiro, cada \emph{chunk} é codificado e decodificado independentemente, sem manter o arquivo inteiro em memória.
 
-O tamanho do \emph{chunk}, por outro lado, é uma escolha de projeto que o \acrshort{MAC} não restringe, e o \emph{overhead} aproximadamente constante do R10 favorece \emph{chunks} com mais símbolos. Para $K$ pequeno, o efeito é determinístico e pode ser calculado exatamente, pois os suportes dependem apenas de $K$ e dos \acrshort{ESI}s: com $K = 10$ e $\varepsilon = 0{,}25$, os três símbolos de reparo, de \acrshort{ESI}s 10 a 12, não contêm dois dos dez símbolos de origem em seus suportes, e a perda de qualquer um desses dois pacotes torna o \emph{chunk} irrecuperável, o que ocorre em 15,4\% das perdas de um único pacote. A Tabela~\ref{tab:tamanho_chunk} compara, para símbolos de 6.500 bytes, a fração de pacotes de um \emph{chunk} cuja perda aleatória é tolerada em 99\% dos casos, a fração de pacotes de um arquivo de 1~GiB que, corrompida uniformemente, torna a perda do arquivo mais provável que sua recuperação, e o volume transferido por pacote reparado.
+O tamanho do \emph{chunk}, por outro lado, é uma escolha de projeto, e o \emph{overhead} aproximadamente constante do R10 favorece \emph{chunks} com mais símbolos. Para $K$ pequeno, o efeito pode ser calculado exatamente: com $K = 10$ e $\varepsilon = 0{,}25$, dois dos dez símbolos de origem não aparecem no suporte de nenhum símbolo de reparo, e a perda de qualquer um desses dois pacotes torna o \emph{chunk} irrecuperável.
+
+A Tabela~\ref{tab:tamanho_chunk} compara, para símbolos de 6.500 bytes, a fração de pacotes de um \emph{chunk} cuja perda aleatória é tolerada em 99\% dos casos, a fração de pacotes de um arquivo de 1~GiB que, corrompida uniformemente, torna a perda do arquivo mais provável que sua recuperação, e o volume transferido por pacote reparado.
 
 \begin{table}[htbp]
 	\centering
@@ -197,14 +207,16 @@ O parâmetro $\varepsilon$ também determina quantos provedores podem deixar o s
 
 Nos Online Codes, um bloco de verificação corrompido pode ser reconstruído pelo XOR de outros blocos de verificação, sem transferir o arquivo, graças à codificação local \cite{maymounkov2003rateless,amaral2019hysail}. O R10 preserva essa propriedade: como todo pacote é o XOR dos blocos de mensagem de seu suporte, qualquer pacote cujo suporte pertença ao espaço gerado pelos suportes dos pacotes íntegros pode ser escrito como o XOR de alguns desses pacotes, exatamente como na Figura~3 de \cite{amaral2019hysail}.
 
-Em vez de reproduzir o pacote corrompido, a proposta explora a propriedade \emph{fountain} do R10, que permite gerar um número ilimitado de símbolos de reparo distintos a partir do mesmo bloco de origem \cite{luby2007rfc5053}. Cada pacote perdido é substituído por um novo símbolo de reparo, cujo \acrshort{ESI} $t$ nunca foi utilizado no \emph{chunk}, controlado por um contador mantido nos metadados. O usuário calcula, sem transferir dados, o suporte $X_t$ e o expressa como a diferença simétrica dos suportes de um subconjunto $Q$ dos pacotes íntegros, por eliminação gaussiana em $GF(2)$ que privilegia pacotes de grau baixo, como os símbolos de origem sistemáticos. Apenas os pacotes de $Q$ são transferidos e conferidos com o \emph{hash} SHA-256 armazenado, e o novo pacote é obtido por
+Em vez de reproduzir o pacote corrompido, a proposta explora a propriedade \emph{fountain} do R10: cada pacote perdido é substituído por um novo símbolo de reparo, cujo \acrshort{ESI} $t$ nunca foi utilizado no \emph{chunk} \cite{luby2007rfc5053}. O usuário calcula, sem transferir dados, o suporte $X_t$ e o expressa como a diferença simétrica dos suportes de um subconjunto $Q$ dos pacotes íntegros, por eliminação gaussiana em $GF(2)$ que privilegia pacotes de grau baixo. Apenas os pacotes de $Q$ são transferidos e conferidos com o \emph{hash} SHA-256 armazenado, e o novo pacote é obtido por
 
 \begin{equation}
 	c_t = \bigoplus_{q \in Q} c_q.
 	\label{eq:redistribuicao_xor}
 \end{equation}
 
-\noindent Se algum pacote de $Q$ não conferir com seu \emph{hash}, ele é excluído e a combinação é recalculada com os demais. O \emph{chunk} nunca é decodificado, e o número de pacotes transferidos é no máximo $K$. O novo pacote não exige novos \acrshort{MAC}s, pois o \acrshort{MAC} esperado é derivado pela Equação~\eqref{eq:mac_derivado}. O pacote é então armazenado no provedor que menos pacotes do \emph{chunk} possui, excluído aquele em que a perda foi detectada. O uso de \acrshort{ESI}s inéditos evita que o mesmo conteúdo seja entregue novamente a um provedor que possa ter retido a cópia anterior, e permite, na mesma operação, gerar símbolos de reparo adicionais que ampliam a margem de um \emph{chunk} que perdeu pacotes, por exemplo, quando um provedor deixa o sistema. A Figura~\ref{fig:redistribuicao} ilustra o procedimento.
+\noindent Se algum pacote de $Q$ não conferir com seu \emph{hash}, ele é excluído e a combinação é recalculada. O \emph{chunk} nunca é decodificado, e o novo pacote não exige novos \acrshort{MAC}s, pois seu \acrshort{MAC} é derivado pela Equação~\eqref{eq:mac_derivado}. O pacote é armazenado no provedor que menos pacotes do \emph{chunk} possui, excluído aquele em que a perda foi detectada.
+
+O uso de \acrshort{ESI}s inéditos evita entregar o mesmo conteúdo a um provedor que possa ter retido a cópia anterior. Permite também gerar, na mesma operação, símbolos de reparo adicionais para um \emph{chunk} que perdeu pacotes, por exemplo, quando um provedor deixa o sistema. A Figura~\ref{fig:redistribuicao} ilustra o procedimento.
 
 \begin{figure}[htbp]
 	\centering
