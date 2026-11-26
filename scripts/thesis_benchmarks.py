@@ -87,6 +87,10 @@ SCHEME_LABELS = {
 PROOF_SCHEMES = (BOUNDED_SCHEME, UNBOUNDED_SCHEME)
 
 # Hy-SAIL's thesis (2013), Figure 5.5: m(x) mod P(x) time by message block size.
+# Word for a stored encoding symbol in figure labels: the thesis says "pacotes";
+# scripts/presentation_plots.py switches it to "blocos" for the slides.
+PACKETS_LABEL = "pacotes"
+
 HYSAIL_MAC_SECONDS = {
     0.25: 0.0075,
     0.5: 0.02,
@@ -409,7 +413,7 @@ def plot_pipeline(results, figure_dir):
     figure, axis = plt.subplots()
     for slot, scheme in enumerate(PROOF_SCHEMES):
         for style, (key, sample) in enumerate(
-            (("audit_all_seconds", "todos os pacotes"), ("audit_sample50_seconds", "s = 50"))
+            (("audit_all_seconds", f"todos os {PACKETS_LABEL}"), ("audit_sample50_seconds", "s = 50"))
         ):
             sizes, values = _aggregate(results, scheme, key)
             if sizes:
@@ -786,7 +790,12 @@ def experiment_loss(args):
                 }
             )
     save_json(args.data_dir, "loss", results)
+    plot_loss(results, args.figure_dir)
+    return results
 
+
+def plot_loss(results, figure_dir):
+    redundancies = sorted({row["redundancy"] for row in results})
     figure, axis = plt.subplots()
     for slot, redundancy in enumerate(redundancies):
         rows = [row for row in results if row["redundancy"] == redundancy]
@@ -802,12 +811,11 @@ def experiment_loss(args):
         )
         alpha = rows[0]["repair"] / rows[0]["total"]
         axis.axvline(100 * alpha, color=COLORS[slot], linewidth=0.8, linestyle=":")
-    axis.set_xlabel("pacotes perdidos no chunk (%)")
+    axis.set_xlabel(f"{PACKETS_LABEL} perdidos no chunk (%)")
     axis.set_ylabel("chunks recuperados (%)")
     axis.set_xlim(0, 60)
     axis.legend(loc="lower left")
-    save_figure(figure, args.figure_dir, "loss_tolerance")
-    return results
+    save_figure(figure, figure_dir, "loss_tolerance")
 
 
 # ---------------------------------------------------------------------------
@@ -953,7 +961,7 @@ def plot_detection(empirical, fractions, sample_sizes, figure_dir):
                 label=rf"{SCHEME_LABELS[scheme]}, $\beta$ = {100 * beta:.1f}%",
             )
     axis.set_xscale("log")
-    axis.set_xlabel("pacotes amostrados por provedor ($s$)")
+    axis.set_xlabel(f"{PACKETS_LABEL} amostrados por provedor ($s$)")
     axis.set_ylabel("rodadas que detectam corrupção (%)")
     axis.legend(loc="upper left")
     save_figure(figure, figure_dir, "audit_detection")
@@ -1172,10 +1180,10 @@ def plot_codecs(results, figure_dir):
             linewidth=1.8,
             label=(
                 f"{dict(CODECS)[row['codec']]}, "
-                rf"$\varepsilon$ = {row['redundancy']:g} ({total} pacotes)"
+                rf"$\varepsilon$ = {row['redundancy']:g} ({total} {PACKETS_LABEL})"
             ),
         )
-    axis.set_xlabel("pacotes perdidos no chunk (%)")
+    axis.set_xlabel(f"{PACKETS_LABEL} perdidos no chunk (%)")
     axis.set_ylabel("chunks recuperados (%)")
     axis.set_xlim(0, 40)
     axis.legend(ncol=2, loc="upper center", bbox_to_anchor=(0.5, -0.18))

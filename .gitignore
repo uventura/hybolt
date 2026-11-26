@@ -23,3 +23,7 @@ build/
 *.egg-info/
 hybolt/utils/_gf2*.so
 hybolt/utils/_gf2*.pyd
+
+# Presentation build outputs (scripts/build_presentation.sh)
+doc/presentation/apresentacao.*
+!doc/presentation/apresentacao.tex

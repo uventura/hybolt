@@ -1,0 +1,67 @@
+% Divisão do arquivo em chunks de K símbolos e paralelismo da Codificação.
+% Usa os estilos de doc/thesis/img/tikz/estilo.tex.
+% Fiel ao HyBolt: os chunks são independentes entre si (logo, paralelizáveis), e
+% os MACs dos símbolos de origem são calculados por um pool de 8 threads
+% (MAX_MAC_THREADS em hybolt/constant.py).
+\begin{tikzpicture}[x=1mm, y=1mm,
+		sym/.style={draw=#1!80!black, fill=#1!22, minimum size=3.6mm, inner sep=0pt},
+		sym/.default=serieA,
+		pontos/.style={text=tintaSec, font=\footnotesize},
+		chave/.style={decorate, decoration={brace, amplitude=3pt}, draw=tintaSec},
+	]
+
+	% Arquivo e número de chunks
+	\node[caixa=serieA, minimum width=15mm, minimum height=34mm] (arquivo) at (0,-12) {Arquivo\\$F$};
+	\node[rotulo, above=1mm of arquivo] {$n = \left\lceil \dfrac{|F|}{650\,\mathrm{KB}} \right\rceil$\\\emph{chunks}};
+
+	% Uma linha por chunk
+	\foreach \y/\nome/\id in {0/{\emph{chunk} 0}/a, -11/{\emph{chunk} 1}/b, -24/{\emph{chunk} $n{-}1$}/c} {
+		\draw[seta] (arquivo.east |- 0,\y) -- (22,\y);
+		\node[rotulo, anchor=east] at (38.5,\y) {\nome};
+		% K símbolos de origem
+		\foreach \x in {41,45,49} \node[sym] at (\x,\y) {};
+		\node[pontos] at (53.5,\y) {$\cdots$};
+		\node[sym] at (58,\y) {};
+		% Codificador R10 do chunk
+		\draw[seta] (61,\y) -- (66.5,\y);
+		\node[caixa=serieD, minimum width=12mm, minimum height=7mm] at (73,\y) {R10};
+		\draw[seta] (79.5,\y) -- (85,\y);
+		% K blocos de origem + r de reparo
+		\foreach \x in {88,92} \node[sym] at (\x,\y) {};
+		\node[pontos] at (96.5,\y) {$\cdots$};
+		\node[sym] at (101,\y) {};
+		\foreach \x in {107,111} \node[sym=serieB] at (\x,\y) {};
+		\node[pontos] at (115.5,\y) {$\cdots$};
+		\draw[seta] (119,\y) -- (129,\y);
+	}
+	\foreach \x in {49,73,101} \node[pontos] at (\x,-17.5) {$\vdots$};
+
+	% Chaves com K e r (sobre o chunk 0)
+	\draw[chave] (39.2,3) -- node[rotulo, above=3pt] {$K = 100$ símbolos\\de 6.500 B} (59.8,3);
+	\draw[chave] (86.2,3) -- node[rotulo, above=3pt] {$K$\\origem} (102.8,3);
+	\draw[chave] (105.2,3) -- node[rotulo, above=3pt] {$r = 25$\\reparo} (117.5,3);
+
+	% Chunks independentes
+	\node[grupo, fit={(20,13) (118,-27)}] (chunks) {};
+	\node[rotulo, below=1mm of chunks.south]
+		{\emph{chunks} independentes: codificação, auditoria, reparo e decodificação paralelizáveis};
+
+	% Pool de threads dos MACs
+	\node[rotulo, anchor=west, align=left, text=tinta] (mac) at (21,-43)
+		{MACs $h_{i,j} = d_i(x) \bmod P_j(x)$\\dos $K$ símbolos de origem de cada \emph{chunk}};
+	\foreach \t in {1,...,8} {
+		\node[draw=serieC!80!black, fill=white, rounded corners=1pt, minimum width=4.4mm, minimum height=5mm,
+			inner sep=0pt, font=\scriptsize] (t\t) at (75+5.2*\t,-43) {T\t};
+	}
+	\node[rotulo, above=0.5mm of $(t1.north)!0.5!(t8.north)$] {pool de 8 \emph{threads}};
+	\begin{scope}[on background layer]
+		\node[draw=serieC!80!black, fill=serieC!12, rounded corners=2pt, inner sep=2mm,
+			fit={(20,-37) (118,-48)}] {};
+	\end{scope}
+
+	% Provedores
+	\node[servidor, minimum width=12mm, minimum height=9mm] at (137,0) {$S_1$};
+	\node[servidor, minimum width=12mm, minimum height=9mm] at (137,-11) {$S_2$};
+	\node[servidor, minimum width=12mm, minimum height=9mm] (s3) at (137,-24) {$S_3$};
+	\node[rotulo, below=1mm of s3] {blocos\\embaralhados};
+\end{tikzpicture}
