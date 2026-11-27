@@ -243,6 +243,10 @@ class Audit:
             checked_packets=len(sample),
             tau_maximum=self._tau_maximum,
         )
+        execution_logger.debug(
+            f"Auditing server {storage_location}: "
+            f"{len(sample)}/{len(packets)} packets sampled"
+        )
 
         server = self._servers.get(storage_location)
         if server is None:

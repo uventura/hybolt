@@ -1,15 +1,29 @@
+import importlib.util
 import json
 import time
 from pathlib import Path
 
+from hybolt.audit.audit import Audit
+from hybolt.audit.redistribution import Redistribution
 from hybolt.constant import DEFAULT_CHUNK_SIZE
 from hybolt.encryption.encoding_metadata import EncodingMetadata
+from hybolt.encryption.retrievability import COMPACT_SCHEME
 from hybolt.hybolt_decode import HyboltDecode
 from hybolt.hybolt_encode import HyboltEncode
 from hybolt.logger.progress import set_progress
 
 
 EXAMPLES_DIRECTORY = Path(__file__).parents[2] / "examples"
+SCRIPTS_DIRECTORY = Path(__file__).parents[2] / "scripts"
+
+
+def _load_script(name):
+    spec = importlib.util.spec_from_file_location(
+        name, SCRIPTS_DIRECTORY / f"{name}.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def test_given_hello_example_when_encoding_then_uses_example_server_list(tmp_path):
@@ -161,3 +175,51 @@ def test_given_one_mebib_lorem_when_round_tripping_then_uses_chunked_metadata_wi
     assert output_file.read_bytes() == input_file.read_bytes()
     assert reconstructed == output_file
     assert elapsed < 120
+
+
+def test_given_por_example_when_corrupting_a_server_then_audit_detects_and_redistribution_repairs(
+    tmp_path,
+):
+    """Same flow as `make por_example`, on the 1 MiB lorem ipsum."""
+    input_file = EXAMPLES_DIRECTORY / "lorem_ipsum" / "1024kib.txt"
+    servers = [
+        {"id": index, "storage_location": str(tmp_path / f"server_{index}")}
+        for index in range(1, 4)
+    ]
+    server_file = tmp_path / "servers.json"
+    server_file.write_text(json.dumps({"servers": servers}), encoding="utf-8")
+    metadata_directory = tmp_path / "metadata"
+    metadata_file = metadata_directory / "1024kib_metadata.pkl"
+
+    HyboltEncode(
+        str(input_file),
+        server_list=servers,
+        metadata_output=str(metadata_directory),
+        proof_scheme=COMPACT_SCHEME,
+    ).encode()
+    clean = Audit(metadata_file, server_file).run()
+
+    corrupted_files = _load_script("corrupt_packets").corrupt_packets(
+        Path(servers[1]["storage_location"])
+    )
+    detected = Audit(metadata_file, server_file).run()
+
+    redistribution = Redistribution(
+        metadata_file, server_file, detected.corrupted_packets
+    ).run()
+    repaired = Audit(metadata_file, server_file).run()
+    output_file = tmp_path / "decoded.txt"
+    HyboltDecode(str(metadata_file), str(server_file), str(output_file)).decode()
+
+    assert clean.scheme == COMPACT_SCHEME
+    assert clean.passed and not clean.corrupted_packets
+    assert not detected.passed
+    assert [packet.packet_file for packet in detected.corrupted_packets] == [
+        corrupted_files[0].name
+    ]
+    assert detected.corrupted_packets[0].server == servers[1]["storage_location"]
+    assert all(chunk.retrievable for chunk in detected.chunks)
+    assert redistribution.succeeded
+    assert len(redistribution.replaced) == 1
+    assert repaired.passed and not repaired.corrupted_packets
+    assert output_file.read_bytes() == input_file.read_bytes()

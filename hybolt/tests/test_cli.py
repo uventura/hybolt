@@ -427,6 +427,19 @@ def test_given_redistribute_flag_when_audit_finds_corruption_then_redistributes(
     assert result.exit_code == (0 if succeeded else 1)
 
 
+@pytest.mark.parametrize(("flag", "expected"), [([], False), (["--debug"], True)])
+def test_given_debug_flag_when_auditing_then_enables_debug_mode(
+    tmp_path, monkeypatch, flag, expected
+):
+    debug_modes = []
+    monkeypatch.setattr("hybolt.hybolt._enable_debug_mode", debug_modes.append)
+
+    result, _ = _invoke_audit(tmp_path, monkeypatch, _audit_report(True), flag)
+
+    assert result.exit_code == 0, result.output
+    assert debug_modes == [expected]
+
+
 def test_given_compact_audit_when_auditing_then_reports_unbounded_challenges(
     tmp_path, monkeypatch
 ):

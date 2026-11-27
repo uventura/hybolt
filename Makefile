@@ -1,4 +1,4 @@
-.PHONY: environment build format test clean server_storage lorem_example lorem_example_debug big_lorem_example big_lorem_example_debug all_lorem_ipsum_sizes binary_example
+.PHONY: environment build format test clean server_storage lorem_example lorem_example_debug big_lorem_example big_lorem_example_debug por_example por_example_debug all_lorem_ipsum_sizes binary_example
 
 environment:
 	. ./scripts/start.sh && ./scripts/build.sh
@@ -63,6 +63,40 @@ big_lorem_example_debug:
 	mkdir -p output/server_storage/server_2
 	mkdir -p output/server_storage/server_3
 	hybolt encode --debug --server-list examples/server_list_example.json --metadata-output output/ examples/lorem_ipsum/1024kib.txt
+	hybolt decode --debug --server-file examples/server_list_example.json --output-file output/1024kib_decoded.txt output/1024kib_metadata.pkl
+	python scripts/compare_files.py examples/lorem_ipsum/1024kib.txt output/1024kib_decoded.txt
+
+# Proof of retrievability: clean audit, corruption on server 2 detected by the
+# audit, redistribution of the corrupted packet, clean audit again and decode.
+por_example:
+	rm -rf output/*
+	rm -rf logs/*
+	./scripts/build.sh
+	mkdir -p output/server_storage/server_1
+	mkdir -p output/server_storage/server_2
+	mkdir -p output/server_storage/server_3
+	hybolt encode --proof-scheme compact --server-list examples/server_list_example.json --metadata-output output/ examples/lorem_ipsum/1024kib.txt
+	hybolt audit --server-file examples/server_list_example.json output/1024kib_metadata.pkl
+	python scripts/corrupt_packets.py output/server_storage/server_2
+	! hybolt audit --server-file examples/server_list_example.json output/1024kib_metadata.pkl
+	hybolt audit --redistribute --server-file examples/server_list_example.json output/1024kib_metadata.pkl
+	hybolt audit --server-file examples/server_list_example.json output/1024kib_metadata.pkl
+	hybolt decode --server-file examples/server_list_example.json --output-file output/1024kib_decoded.txt output/1024kib_metadata.pkl
+	python scripts/compare_files.py examples/lorem_ipsum/1024kib.txt output/1024kib_decoded.txt
+
+por_example_debug:
+	rm -rf output/*
+	rm -rf logs/*
+	./scripts/build.sh
+	mkdir -p output/server_storage/server_1
+	mkdir -p output/server_storage/server_2
+	mkdir -p output/server_storage/server_3
+	hybolt encode --debug --proof-scheme compact --server-list examples/server_list_example.json --metadata-output output/ examples/lorem_ipsum/1024kib.txt
+	hybolt audit --debug --server-file examples/server_list_example.json output/1024kib_metadata.pkl
+	python scripts/corrupt_packets.py output/server_storage/server_2
+	! hybolt audit --debug --server-file examples/server_list_example.json output/1024kib_metadata.pkl
+	hybolt audit --debug --redistribute --server-file examples/server_list_example.json output/1024kib_metadata.pkl
+	hybolt audit --debug --server-file examples/server_list_example.json output/1024kib_metadata.pkl
 	hybolt decode --debug --server-file examples/server_list_example.json --output-file output/1024kib_decoded.txt output/1024kib_metadata.pkl
 	python scripts/compare_files.py examples/lorem_ipsum/1024kib.txt output/1024kib_decoded.txt
 

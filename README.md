@@ -228,6 +228,7 @@ make format
 make test
 make lorem_example
 make big_lorem_example
+make por_example
 make all_lorem_ipsum_sizes
 make binary_example
 ```
@@ -244,6 +245,16 @@ a failure status if the files differ.
 `make big_lorem_example` and `make big_lorem_example_debug` run the same
 round-trip verification for the 1 MiB
 [`examples/lorem_ipsum/1024kib.txt`](examples/lorem_ipsum/1024kib.txt) fixture.
+
+`make por_example` and `make por_example_debug` exercise the proof of
+retrievability on the same 1 MiB fixture, encoded with the `compact` scheme:
+a clean audit passes,
+[`scripts/corrupt_packets.py`](scripts/corrupt_packets.py) flips one byte of a
+packet on server 2 (its tag is kept), the next audit must fail and point at that
+packet, `audit --redistribute` replaces it with a fresh repair packet, a final
+audit passes and the decoded file must match the original. The debug variant
+passes `--debug` to every command; its detailed logs go to `logs/execution.log`.
+
 `make all_lorem_ipsum_sizes` encodes each lorem ipsum fixture smaller than
 1,024 KiB in [`examples/lorem_ipsum/`](examples/lorem_ipsum/), then writes the
 file-size/runtime and block-size/polynomial-division plots under `logs/`.

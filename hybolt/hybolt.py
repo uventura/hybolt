@@ -286,6 +286,11 @@ def decode_command(
     help="Additional repair packets added to each redistributed chunk",
 )
 @click.option(
+    "--debug",
+    is_flag=True,
+    help="Enable debug mode with detailed execution logs and timing instrumentation",
+)
+@click.option(
     "--log-dir",
     type=click.Path(file_okay=False, dir_okay=True),
     default="logs",
@@ -299,9 +304,11 @@ def audit_command(
     tau_maximum,
     redistribute,
     extra_repair,
+    debug,
     log_dir,
 ):
     execution_logger.set_log_directory(log_dir)
+    _enable_debug_mode(debug)
     try:
         report = Audit(metadata_file, server_file, sample_size, tau_maximum).run()
     except ValueError as error:
